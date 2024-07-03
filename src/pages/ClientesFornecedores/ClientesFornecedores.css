@@ -1,0 +1,186 @@
+.page-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+@media (max-width: 700px) {
+  .page-header {
+    height: 200px;
+    .add-button {
+      top: 0;
+      right: inherit;
+    }
+  }
+}
+
+
+.add-button {
+  position: absolute;
+  right: 0;
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.rightIcon {
+  margin-left: 10px;
+}
+
+.add-button:last-child svg {
+  margin-right: 15px;
+}
+
+.add-options {
+  position: absolute;
+  right: 20px;
+  top: 60px;
+  background: var(--white);
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.add-options ul li {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.add-options ul li:hover {
+  background-color: var(--thead-background);
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  width: 350px;
+  border-radius: 20px;
+  background-color: var(--white);
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 20px;
+  background-color: var(--white);
+  color: #B7B1B6;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.tab.active {
+  background-color: var(--highlight-color);
+  color: var(--white);
+}
+
+
+
+/* Formularios de cadastrode cliente e fornecedores */
+
+.step {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.step button[type="button"] {
+  background-color: #ddd;
+  color: #333;
+}
+
+.btn-sttep-1 {
+  color: var(--white) !important;
+  background-color: var(--primary-color) !important;
+}
+
+.step button[type="submit"] {
+  background-color: var(--primary-color);
+  color: var(--white);
+  margin-left: 10px;
+}
+
+/* Indicator */
+.steps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-indicator {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.step-indicator>div {
+  width: 30%;
+}
+
+.line-indicator {
+  position: absolute;
+  border: 1px solid blue;
+  width: 309px !important;
+  top: 16px;
+  left: 18%;
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--highlight-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+  border: 2px solid var(--highlight-color);
+}
+
+.steps.active .step-number {
+ color: var(--white);
+  background-color: var(--highlight-color);
+}
+
+.steps-title {
+  font-size: 14px;
+  color: var(--highlight-color);
+}
+
+.steps.active .step-title {
+  color: var(--highlight-color);
+}
+
+.form-group-static {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.static-info {
+  display: flex;
+  align-items: center;
+}
+
+.circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  margin-right: 10px;
+}

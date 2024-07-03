@@ -9,6 +9,7 @@
   flex-direction: column;
   justify-content: space-between;
   overflow-y: auto;
+  z-index: 999;
 }
 
 .logo-container {
@@ -115,4 +116,13 @@ nav ul li a:hover,
 .divider {
   border-top: 1px solid #ddd;
   margin: 10px 0;
+}
+
+.logout-button {
+  background: none;
+  color: var(--highlight-color);
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 100;
 }

@@ -1,0 +1,160 @@
+import React, { useState } from 'react';
+import { useData } from '../../context/DataContext';
+import './ClientesFornecedores.css';
+import { ThumbsUp, AlertTriangle } from 'react-feather';
+import Notification from '../../components/Notification/Notification';
+import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
+
+const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
+  const { addFornecedor, updateFornecedor } = useData();
+
+  const [formData, setFormData] = useState({
+    nome: initialData.nome || '',
+    cpfCnpj: initialData.cpfCnpj || '',
+    razaoSocial: initialData.razaoSocial || '',
+    email: initialData.email || '',
+    telefone: initialData.telefone || '',
+  });
+
+  const [notification, setNotification] = useState(null);
+  const [errors, setErrors] = useState({}); // Gerenciar erros de validação
+
+  const handleNotificationClose = () => {
+    setNotification(null);
+    onClose();
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: '' }); // Limpar erros ao alterar o campo
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.nome) newErrors.nome = 'Nome é obrigatório';
+    if (!formData.cpfCnpj) {
+      newErrors.cpfCnpj = 'CNPJ/CPFC é obrigatório';
+    } else {
+      const cleanValue = formData.cpfCnpj.replace(/\D/g, '');
+      if (cleanValue.length !== 11 && cleanValue.length !== 14) {
+        newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
+      }
+    }
+    if (!formData.razaoSocial) newErrors.razaoSocial = 'Razão Social é obrigatória';
+    if (!formData.email) newErrors.email = 'E-mail é obrigatório';
+    if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    try {
+      if (initialData.id) {
+        await updateFornecedor(initialData.id, formData);
+        setNotification({
+          title: 'Tudo certo!',
+          message: 'As informações do fornecedor foram atualizadas.',
+          type: 'success',
+          icon: ThumbsUp,
+          buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+        });
+      } else {
+        await addFornecedor(formData);
+        setNotification({
+          title: 'Fornecedor cadastrado com sucesso!',
+          message: 'Oba! Seu cadastro foi bem-sucedido!',
+          type: 'success',
+          icon: ThumbsUp,
+          buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+        });
+      }
+      fetchData(); // Atualiza os dados após adicionar ou editar
+    } catch (error) {
+      setNotification({
+        title: 'Erro ao salvar fornecedor',
+        message: 'Houve um problema ao salvar as informações do fornecedor.',
+        type: 'error',
+        icon: AlertTriangle,
+        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+      });
+    }
+  };
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="nome">Nome (Obrigatório)</label>
+          <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleChange} />
+          {errors.nome ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.nome}</span>
+          ) : (
+            <span>Este campo é obrigatório.</span>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="cpfCnpj">CNPJ ou CPF (Obrigatório)</label>
+          <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj" value={formData.cpfCnpj} onChange={handleChange} />
+          {errors.cpfCnpj ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
+          ) : (
+            <span>Digite um CNPJ ou CPF válido.</span>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="razaoSocial">Nome ou Razão Social (Obrigatório)</label>
+          <input type="text" id="razaoSocial" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
+          {errors.razaoSocial ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.razaoSocial}</span>
+          ) : (
+            <span>O nome da Empresa deve ter entre 2 e 100 caracteres.</span>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="email">E-mail (Obrigatório)</label>
+          <FormattedInput type="email" id="email" name="email" value={formData.email} onChange={handleChange} />
+          {errors.email ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.email}</span>
+          ) : (
+            <span>Digite um endereço de e-mail válido.</span>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="telefone">Telefone (Obrigatório)</label>
+          <FormattedInput type="telefone" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} />
+          {errors.telefone ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.telefone}</span>
+          ) : (
+            <span>Digite um telefone válido.</span>
+          )}
+        </div>
+
+        <div className="form-actions">
+          <button type="button" className="cancel" onClick={onClose}>Cancelar</button>
+          <button type="submit" className="save">Salvar</button>
+        </div>
+      </form>
+
+      {notification && (
+        <Notification
+          title={notification.title}
+          message={notification.message}
+          secondaryMessage={notification.secondaryMessage}
+          type={notification.type}
+          icon={notification.icon}
+          buttons={notification.buttons}
+          onClose={handleNotificationClose}
+        />
+      )}
+    </>
+  );
+};
+
+export default FornecedorForm;
