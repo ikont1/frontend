@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
@@ -17,11 +17,10 @@ export const DataProvider = ({ children }) => {
   const [contasAPagar, setContasAPagar] = useState([]);
 
   // Função para buscar clientes
-  const fetchClientes = async (params = {}) => {
-    if (!token) return; // Se não há token, não faz a requisição
+  const fetchClientes = useCallback(async (params = {}) => {
+    if (!token) return;
 
     try {
-      console.log(`Fetching clients with token: Bearer ${token}`);
       const response = await api.get('/cliente', {
         headers: {
           Authorization: `Bearer ${token}`
@@ -34,18 +33,18 @@ export const DataProvider = ({ children }) => {
           filtro: params.filtro || ''
         }
       });
-      setClientes(response.data);
+      setClientes(response.data.data.clientes);
     } catch (error) {
       console.error('Erro ao buscar clientes', error);
     }
-  };
+  }, [token]);
 
   // Função para buscar fornecedores
-  const fetchFornecedores = async () => {
-    if (!token) return; // Se não há token, não faz a requisição
+  const fetchFornecedores = useCallback(async () => {
+    if (!token) return;
 
     try {
-      const response = await axios.get('/fornecedores', {
+      const response = await api.get('/fornecedores', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -54,7 +53,7 @@ export const DataProvider = ({ children }) => {
     } catch (error) {
       console.error('Erro ao buscar fornecedores', error);
     }
-  };
+  }, [token]);
 
   // Função para buscar contas a pagar
   const fetchContasAPagar = async () => {
@@ -74,7 +73,7 @@ export const DataProvider = ({ children }) => {
 
   // Função para adicionar um cliente
   const addCliente = async (cliente) => {
-    if (!token) return; // Se não há token, não faz a requisição
+    if (!token) return;
 
     try {
       const response = await api.post('/cliente', cliente, {
@@ -82,9 +81,10 @@ export const DataProvider = ({ children }) => {
           Authorization: `Bearer ${token}`
         }
       });
-      setClientes([...clientes, response.data]);
+      setClientes([...clientes, response.data.data]);
     } catch (error) {
       console.error('Erro ao adicionar cliente', error);
+      throw error;
     }
   };
 
@@ -122,10 +122,10 @@ export const DataProvider = ({ children }) => {
 
   // Função para deletar um cliente
   const deleteCliente = async (id) => {
-    if (!token) return; // Se não há token, não faz a requisição
+    if (!token) return;
 
     try {
-      await axios.delete(`/cliente/${id}`, {
+      await api.delete(`/cliente/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -133,6 +133,7 @@ export const DataProvider = ({ children }) => {
       setClientes(clientes.filter(cliente => cliente.id !== id));
     } catch (error) {
       console.error('Erro ao deletar cliente', error);
+      throw error;
     }
   };
 
@@ -171,18 +172,30 @@ export const DataProvider = ({ children }) => {
   // Função para atualizar um cliente
   const updateCliente = async (id, updatedData) => {
     if (!token) return; // Se não há token, não faz a requisição
-
+   // Remove dados enviados
+    const dataToSend = { ...updatedData };
+    delete dataToSend.id;
+    delete dataToSend.criadoEm;
+    delete dataToSend.atualizadoEm;
+    delete dataToSend.deletadoEm;
+    delete dataToSend.cpfCnpj;
+  
     try {
-      const response = await axios.put(`/cliente/${id}`, updatedData, {
+      const response = await api.patch(`/cliente/${id}`, dataToSend, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      setClientes(clientes.map(cliente => (cliente.id === id ? response.data : cliente)));
+      const updatedCliente = response.data;
+  
+      // Atualize a lista de clientes corretamente
+      setClientes(clientes.map(cliente => cliente.id === id ? updatedCliente : cliente));
     } catch (error) {
       console.error('Erro ao atualizar cliente', error);
+      throw error;
     }
   };
+  
 
   // Função para atualizar um fornecedor
   const updateFornecedor = async (id, updatedData) => {

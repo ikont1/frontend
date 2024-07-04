@@ -17,7 +17,7 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
   });
 
   const [notification, setNotification] = useState(null);
-  const [errors, setErrors] = useState({}); // Gerenciar erros de validação
+  const [errors, setErrors] = useState({}); 
 
   const handleNotificationClose = () => {
     setNotification(null);

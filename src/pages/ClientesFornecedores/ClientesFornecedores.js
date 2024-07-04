@@ -45,7 +45,7 @@ const ClientesFornecedores = () => {
   useEffect(() => {
     fetchClientes({ itensPorPagina: 10, pagina: 1, ordem: 'ASC', ordenarPor: 'id' });
     fetchFornecedores();
-  }, [fetchClientes, fetchFornecedores]);  // Adicionado fetchClientes e fetchFornecedores como dependências
+  }, [fetchClientes, fetchFornecedores]);
 
   const handleAddOptionClick = (option) => {
     setShowAddOptions(false);
@@ -99,15 +99,17 @@ const ClientesFornecedores = () => {
     const item = type === 'cliente' ? clientes.find(c => c.id === id) : fornecedores.find(f => f.id === id);
     setItemToDelete(id);
     setTypeToDelete(type);
-    setNameToDelete(item.nome);
+    setNameToDelete(item.nomeFantasia || item.razaoSocial);
     setShowConfirmationModal(true);
   };
 
   const confirmDelete = async () => {
     if (typeToDelete === 'cliente') {
       await deleteCliente(itemToDelete);
+      fetchClientes({ itensPorPagina: 10, pagina: 1, ordem: 'ASC', ordenarPor: 'id' });
     } else if (typeToDelete === 'fornecedor') {
       await deleteFornecedor(itemToDelete);
+      fetchFornecedores();
     }
     setNotification({
       title: `${typeToDelete === 'cliente' ? 'Cliente' : 'Fornecedor'} removido com sucesso!`,
@@ -176,12 +178,12 @@ const ClientesFornecedores = () => {
                 </tr>
               </thead>
               <tbody>
-                {clientes.map(cliente => (
+                {clientes && clientes.map((cliente) => (
                   <tr key={cliente.id}>
-                    <td>{cliente.nome}</td>
+                    <td>{cliente.nomeFantasia}</td>
                     <td>{cliente.razaoSocial}<br /><span>{cliente.cpfCnpj}</span></td>
                     <td>{cliente.inscricalMunicipal}</td>
-                    <td>{cliente.nomeContato}</td>
+                    <td>{cliente.contato}</td>
                     <td>{cliente.email}</td>
                     <td>{cliente.inscricalEstadual}</td>
                     <td data-label="Ações" className="actions">
@@ -213,7 +215,7 @@ const ClientesFornecedores = () => {
                 </tr>
               </thead>
               <tbody>
-                {fornecedores.map(fornecedor => (
+                {fornecedores && fornecedores.map((fornecedor) => (
                   <tr key={fornecedor.id}>
                     <td>{fornecedor.nome}</td>
                     <td>{fornecedor.razaoSocial}<br /><span>{fornecedor.cpfCnpj}</span></td>
@@ -249,7 +251,7 @@ const ClientesFornecedores = () => {
         {showConfirmationModal && (
           <ConfirmationModal
             title="Confirmação"
-            message={`Confirma que deseja remover  ${nameToDelete}?`}
+            message={`Confirma que deseja remover ${nameToDelete}?`}
             onConfirm={confirmDelete}
             onCancel={() => setShowConfirmationModal(false)}
           />

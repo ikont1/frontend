@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }) => {
 
       navigate('/');
     } catch (error) {
-      console.log('Login error response:', error.response?.data);
       const errorMessage = error.response?.data?.message || 'Erro ao logar. Por favor, tente novamente.';
 
       if (error.code === 'ERR_NETWORK') {

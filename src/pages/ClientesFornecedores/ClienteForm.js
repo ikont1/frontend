@@ -9,21 +9,21 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
   const { addCliente, updateCliente } = useData();
 
   const [formData, setFormData] = useState({
-    nome: '',
     cpfCnpj: '',
     razaoSocial: '',
-    inscricaoMunicipal: '',
-    inscricaoEstadual: '',
+    nomeFantasia: '',
+    inscricalMunicipal: '',
+    inscricalEstadual: '',
     telefone: '',
     celular: '',
     email: '',
-    nomeContato: '',
+    contato: '',
     endereco: {
       endereco: '',
       complemento: '',
       numero: '',
       bairro: '',
-      estado: '',
+      uf: '',
       cidade: '',
       cep: '',
     },
@@ -39,7 +39,6 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     onClose(); // Fecha o modal
   };
 
-  // Valida os campos do primeiro passo do formulário
   const handleNextStep = () => {
     const validationErrors = validateStep1();
     if (Object.keys(validationErrors).length === 0) {
@@ -49,12 +48,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     }
   };
 
-  // Volta para o passo anterior do formulário
   const handlePrevStep = () => {
     setStep(step - 1);
   };
 
-  // Atualiza os valores do formulário e limpa os erros correspondentes
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name in formData.endereco) {
@@ -65,10 +62,9 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     setErrors({ ...errors, [name]: '' });
   };
 
-  // Valida os campos do primeiro passo do formulário
   const validateStep1 = () => {
     const newErrors = {};
-    if (!formData.nome) newErrors.nome = 'Nome é obrigatório';
+    if (!formData.nomeFantasia) newErrors.nomeFantasia = 'Nome é obrigatório';
     if (!formData.cpfCnpj) {
       newErrors.cpfCnpj = 'CNPJ/CPF é obrigatório';
     } else {
@@ -77,27 +73,27 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
         newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
       }
     }
+    if (!formData.inscricalEstadual) newErrors.inscricalEstadual = 'Inscrição estadual é obrigatória';
+    if (!formData.inscricalMunicipal) newErrors.inscricalMunicipal = 'Inscrição municipal é obrigatória';
     if (!formData.razaoSocial) newErrors.razaoSocial = 'Razão Social é obrigatória';
     if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
     if (!formData.celular) newErrors.celular = 'Celular é obrigatório';
     if (!formData.email) newErrors.email = 'E-mail é obrigatório';
-    if (!formData.nomeContato) newErrors.nomeContato = 'Nome do Contato é obrigatório';
+    if (!formData.contato) newErrors.contato = 'Nome do Contato é obrigatório';
     return newErrors;
   };
 
-  // Valida os campos do segundo passo do formulário
   const validateStep2 = () => {
     const newErrors = {};
     if (!formData.endereco.endereco) newErrors.endereco = 'Endereço é obrigatório';
     if (!formData.endereco.cep) newErrors.cep = 'CEP é obrigatório';
     if (!formData.endereco.numero) newErrors.numero = 'Número é obrigatório';
     if (!formData.endereco.bairro) newErrors.bairro = 'Bairro é obrigatório';
-    if (!formData.endereco.estado) newErrors.estado = 'Estado é obrigatório';
+    if (!formData.endereco.uf) newErrors.uf = 'Estado é obrigatório';
     if (!formData.endereco.cidade) newErrors.cidade = 'Cidade é obrigatória';
     return newErrors;
   };
 
-  // Envia o formulário para o backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrorsStep1 = validateStep1();
@@ -139,10 +135,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
       setErrors(validationErrors);
     }
   };
+
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <span style={{ marginTop: '-70px' }}>{initialData.nome}</span>
+        <span>{initialData.nomeFantasia}</span>
 
         <div className="step-indicator">
           <div className={`steps ${step >= 1 ? 'active' : ''}`}>
@@ -167,10 +164,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="nome">Nome</label>
-              <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleChange} required />
-              {errors.nome ? (
-                <span style={{ color: 'red', fontSize: '10px' }}>{errors.nome}</span>
+              <label htmlFor="nomeFantasia">Nome Fantasia</label>
+              <input type="text" id="nomeFantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} required />
+              {errors.nomeFantasia ? (
+                <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
               ) : (
                 <span>O nome da empresa deve ter entre 2 e 100 caracteres.</span>
               )}
@@ -197,20 +194,20 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="inscricaoMunicipal">Inscrição Municipal</label>
-              <input type="text" id="inscricaoMunicipal" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} />
-              {errors.inscricaoMunicipal ? (
-                <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricaoMunicipal}</span>
+              <label htmlFor="inscricalMunicipal">Inscrição Municipal</label>
+              <input type="text" id="inscricalMunicipal" name="inscricalMunicipal" value={formData.inscricalMunicipal} onChange={handleChange} />
+              {errors.inscricalMunicipal ? (
+                <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalMunicipal}</span>
               ) : (
                 <span>A Inscrição Municipal deve ter entre 2 e 100 caracteres alfanuméricos.</span>
               )}
             </div>
 
             <div className='form-group'>
-              <label htmlFor="inscricaoEstadual">Inscrição Estadual</label>
-              <input type="text" id="inscricaoEstadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} />
-              {errors.inscricaoEstadual ? (
-                <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricaoEstadual}</span>
+              <label htmlFor="inscricalEstadual">Inscrição Estadual</label>
+              <input type="text" id="inscricalEstadual" name="inscricalEstadual" value={formData.inscricalEstadual} onChange={handleChange} />
+              {errors.inscricalEstadual ? (
+                <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalEstadual}</span>
               ) : (
                 <span>A Inscrição Estadual deve ter entre 2 e 100 caracteres alfanuméricos.</span>
               )}
@@ -248,10 +245,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
                 )}
               </div>
               <div className="form-group">
-                <label htmlFor="nomeContato">Nome do Contato</label>
-                <input type="text" id="nomeContato" name="nomeContato" value={formData.nomeContato} onChange={handleChange} required />
-                {errors.nomeContato ? (
-                  <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeContato}</span>
+                <label htmlFor="contato">Nome do Contato</label>
+                <input type="text" id="contato" name="contato" value={formData.contato} onChange={handleChange} required />
+                {errors.contato ? (
+                  <span style={{ color: 'red', fontSize: '10px' }}>{errors.contato}</span>
                 ) : (
                   <span>O Nome para contato deve ter entre 2 e 100 caracteres.</span>
                 )}
@@ -315,11 +312,12 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
             <div className="form-group-modal">
               <div className="form-group">
-                <label htmlFor="estado">Estado (obrigatório)</label>
-                <select type="text" id="estado" name="estado" value={formData.endereco.estado} onChange={handleChange} required>
+                <label htmlFor="uf">Estado (obrigatório)</label>
+                <select type="text" id="uf" name="uf" value={formData.endereco.uf} onChange={handleChange} required>
                   <option value="">Selecione um Estado</option>
-                  <option value="Piaui">Piaui</option>
-                  <option value="São Paulo">São Paulo</option>
+                  <option value="PI">PI</option>
+                  <option value="SP">SP</option>
+                  <option value="GO">GO</option>
                 </select>
                 {errors.estado && <span style={{ color: 'red', fontSize: '10px' }}>{errors.estado}</span>}
               </div>
