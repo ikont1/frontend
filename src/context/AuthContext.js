@@ -123,6 +123,7 @@ export const AuthProvider = ({ children }) => {
       alert('Usuário cadastrado com sucesso! Verifique seu email');
       navigate('/login');
     } catch (error) {
+      console.error(error)
       console.log('Cadastro error response:', error.response?.data);
       setError(error.response?.data?.message || 'Erro ao cadastrar. Por favor, tente novamente.');
       setLoading(false);

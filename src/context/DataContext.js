@@ -38,23 +38,30 @@ export const DataProvider = ({ children }) => {
       console.error('Erro ao buscar clientes', error);
     }
   }, [token]);
-
+  
   // Função para buscar fornecedores
-  const fetchFornecedores = useCallback(async () => {
+  const fetchFornecedores = useCallback(async (params = {}) => {
     if (!token) return;
 
     try {
-      const response = await api.get('/fornecedores', {
+      const response = await api.get('/fornecedor', {
         headers: {
           Authorization: `Bearer ${token}`
+        },
+        params: {
+          itensPorPagina: params.itensPorPagina || 10,
+          pagina: params.pagina || 1,
+          ordem: params.ordem || 'ASC',
+          ordenarPor: params.ordenarPor || 'id',
+          filtro: params.filtro || ''
         }
       });
-      setFornecedores(response.data);
+      setFornecedores(response.data.data.fornecedores);
     } catch (error) {
       console.error('Erro ao buscar fornecedores', error);
     }
   }, [token]);
-
+  
   // Função para buscar contas a pagar
   const fetchContasAPagar = async () => {
     if (!token) return; // Se não há token, não faz a requisição
@@ -93,16 +100,18 @@ export const DataProvider = ({ children }) => {
     if (!token) return; // Se não há token, não faz a requisição
 
     try {
-      const response = await axios.post('/fornecedores', fornecedor, {
+      const response = await api.post('/fornecedor', fornecedor, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      setFornecedores([...fornecedores, response.data]);
+      setFornecedores([...fornecedores, response.data.data]);
     } catch (error) {
       console.error('Erro ao adicionar fornecedor', error);
+      throw error;
     }
   };
+
 
   // Função para adicionar uma conta a pagar
   const addContaAPagar = async (conta) => {
@@ -139,10 +148,10 @@ export const DataProvider = ({ children }) => {
 
   // Função para deletar um fornecedor
   const deleteFornecedor = async (id) => {
-    if (!token) return; // Se não há token, não faz a requisição
+    if (!token) return;
 
     try {
-      await axios.delete(`/fornecedores/${id}`, {
+      await api.delete(`/fornecedor/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -150,6 +159,7 @@ export const DataProvider = ({ children }) => {
       setFornecedores(fornecedores.filter(fornecedor => fornecedor.id !== id));
     } catch (error) {
       console.error('Erro ao deletar fornecedor', error);
+      throw error;
     }
   };
 
@@ -171,7 +181,7 @@ export const DataProvider = ({ children }) => {
 
   // Função para atualizar um cliente
   const updateCliente = async (id, updatedData) => {
-    if (!token) return; // Se não há token, não faz a requisição
+    if (!token) return;
    // Remove dados enviados
     const dataToSend = { ...updatedData };
     delete dataToSend.id;
@@ -179,7 +189,7 @@ export const DataProvider = ({ children }) => {
     delete dataToSend.atualizadoEm;
     delete dataToSend.deletadoEm;
     delete dataToSend.cpfCnpj;
-  
+    
     try {
       const response = await api.patch(`/cliente/${id}`, dataToSend, {
         headers: {
@@ -187,7 +197,7 @@ export const DataProvider = ({ children }) => {
         }
       });
       const updatedCliente = response.data;
-  
+      
       // Atualize a lista de clientes corretamente
       setClientes(clientes.map(cliente => cliente.id === id ? updatedCliente : cliente));
     } catch (error) {
@@ -196,20 +206,28 @@ export const DataProvider = ({ children }) => {
     }
   };
   
-
+  
   // Função para atualizar um fornecedor
   const updateFornecedor = async (id, updatedData) => {
-    if (!token) return; // Se não há token, não faz a requisição
-
+    if (!token) return;
+    const dataToSend = { ...updatedData };
+    delete dataToSend.id;
+    delete dataToSend.criadoEm;
+    delete dataToSend.atualizadoEm;
+    delete dataToSend.deletadoEm;
+    delete dataToSend.cpfCnpj;
+    
     try {
-      const response = await axios.put(`/fornecedores/${id}`, updatedData, {
+      const response = await api.patch(`/fornecedor/${id}`, dataToSend, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      setClientes(fornecedores.map(fornecedor => (fornecedor.id === id ? response.data : fornecedor)));
+      const updatedFornecedor = response.data;
+      setFornecedores(fornecedores.map(fornecedor => (fornecedor.id === id ? updatedFornecedor : fornecedor)));
     } catch (error) {
       console.error('Erro ao atualizar fornecedor', error);
+      throw error;
     }
   };
 

@@ -44,7 +44,7 @@ const ClientesFornecedores = () => {
 
   useEffect(() => {
     fetchClientes({ itensPorPagina: 10, pagina: 1, ordem: 'ASC', ordenarPor: 'id' });
-    fetchFornecedores();
+    fetchFornecedores({ itensPorPagina: 10, pagina: 1, ordem: 'ASC', ordenarPor: 'id' });
   }, [fetchClientes, fetchFornecedores]);
 
   const handleAddOptionClick = (option) => {
@@ -209,6 +209,8 @@ const ClientesFornecedores = () => {
                 <tr>
                   <th>Nome / Razão Social</th>
                   <th></th>
+                  <th>Inscrição Municipal</th>
+                  <th>Inscrição Estadual</th>
                   <th>E-mail</th>
                   <th>Telefone</th>
                   <th></th>
@@ -217,8 +219,10 @@ const ClientesFornecedores = () => {
               <tbody>
                 {fornecedores && fornecedores.map((fornecedor) => (
                   <tr key={fornecedor.id}>
-                    <td>{fornecedor.nome}</td>
+                    <td>{fornecedor.nomeFantasia}</td>
                     <td>{fornecedor.razaoSocial}<br /><span>{fornecedor.cpfCnpj}</span></td>
+                    <td>{fornecedor.inscricalMunicipal}</td>
+                    <td>{fornecedor.inscricalEstadual}</td>
                     <td>{fornecedor.email}</td>
                     <td>{fornecedor.telefone}</td>
                     <td data-label="Ações" className="actions">

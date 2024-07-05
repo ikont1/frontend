@@ -9,15 +9,17 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
   const { addFornecedor, updateFornecedor } = useData();
 
   const [formData, setFormData] = useState({
-    nome: initialData.nome || '',
+    nomeFantasia: initialData.nomeFantasia || '',
     cpfCnpj: initialData.cpfCnpj || '',
     razaoSocial: initialData.razaoSocial || '',
+    inscricalMunicipal: initialData.inscricalMunicipal || '',
+    inscricalEstadual: initialData.inscricalEstadual || '',
     email: initialData.email || '',
     telefone: initialData.telefone || '',
   });
 
   const [notification, setNotification] = useState(null);
-  const [errors, setErrors] = useState({}); 
+  const [errors, setErrors] = useState({});
 
   const handleNotificationClose = () => {
     setNotification(null);
@@ -27,12 +29,12 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: '' }); // Limpar erros ao alterar o campo
+    setErrors({ ...errors, [name]: '' });
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.nome) newErrors.nome = 'Nome é obrigatório';
+    if (!formData.nomeFantasia) newErrors.nomeFantasia = 'NomeFantasia é obrigatório';
     if (!formData.cpfCnpj) {
       newErrors.cpfCnpj = 'CNPJ/CPFC é obrigatório';
     } else {
@@ -42,6 +44,8 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
       }
     }
     if (!formData.razaoSocial) newErrors.razaoSocial = 'Razão Social é obrigatória';
+    if (!formData.inscricalMunicipal) newErrors.inscricalMunicipal = 'Inscrição municipal é obrigatória';
+    if (!formData.inscricalEstadual) newErrors.inscricalEstadual = 'Inscrição estadual é obrigatória';
     if (!formData.email) newErrors.email = 'E-mail é obrigatório';
     if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
     return newErrors;
@@ -91,10 +95,10 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
     <>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="nome">Nome (Obrigatório)</label>
-          <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleChange} />
-          {errors.nome ? (
-            <span style={{ color: 'red', fontSize: '10px' }}>{errors.nome}</span>
+          <label htmlFor="nomeFantasia">Nome (Obrigatório)</label>
+          <input type="text" id="nomeFantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
+          {errors.nomeFantasia ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
           ) : (
             <span>Este campo é obrigatório.</span>
           )}
@@ -115,6 +119,24 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.razaoSocial}</span>
           ) : (
             <span>O nome da Empresa deve ter entre 2 e 100 caracteres.</span>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="inscricalMunicipal">Inscrição municipal (Obrigatório)</label>
+          <input type="text" id="inscricalMunicipal" name="inscricalMunicipal" value={formData.inscricalMunicipal} onChange={handleChange} />
+          {errors.inscricalMunicipal ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalMunicipal}</span>
+          ) : (
+            <span>A Inscrição Municipal deve ter entre 2 e 100 caracteres.</span>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="inscricalEstadual">Inscrição estadual (Obrigatório)</label>
+          <input type="text" id="inscricalEstadual" name="inscricalEstadual" value={formData.inscricalEstadual} onChange={handleChange} />
+          {errors.inscricalEstadual ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalEstadual}</span>
+          ) : (
+            <span>a Inscrição estadual deve ter entre 2 e 100 caracteres.</span>
           )}
         </div>
         <div className="form-group">
