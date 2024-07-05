@@ -1,3 +1,4 @@
+/* Sidebar.css */
 .sidebar {
   width: 250px;
   background-color: #fff;
@@ -10,6 +11,33 @@
   justify-content: space-between;
   overflow-y: auto;
   z-index: 999;
+  transition: transform 0.3s ease;
+}
+
+.menu-icon {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: -10px;
+  z-index: 1000;
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 24px;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .menu-icon {
+    display: block;
+  }
 }
 
 .logo-container {
@@ -72,7 +100,7 @@ nav ul li a svg,
   margin-right: 10px;
 }
 
-.submenu svg{
+.submenu svg {
   color: var(--highlight-color);
   width: 20px;
   transform: translateY(25%);
@@ -87,7 +115,7 @@ nav ul li a svg,
 }
 
 nav ul li a:hover,
-.menu-item:hover{
+.menu-item:hover {
   background-color: #f0f0f0;
 }
 

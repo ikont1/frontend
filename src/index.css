@@ -35,6 +35,9 @@ body {
   padding: 20px;
   background-color: var(--background);
   margin-left: 250px;
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
 }
 
 .container {
