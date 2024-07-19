@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import FilterBar from '../../components/FilterBar/FilterBar';
@@ -6,13 +6,16 @@ import Modal from '../../components/Modal/Modal';
 import Notification from '../../components/Notification/Notification';
 import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
-import axios from 'axios';
+import { useFinance } from '../../context/FinanceContext';
+import { useData } from '../../context/DataContext';
 import { parseISO, format, isValid } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ContasReceber = () => {
+  const { fetchClientes, clientes } = useData();
+  const { contasAReceber, fetchContasAReceber, addContaAReceber, updateContaAReceber, deleteContaAReceber, informRecebimento, desfazerRecebimento, categoriasAReceber, fetchCategoriasAReceber } = useFinance();
   const [activeTooltip, setActiveTooltip] = useState(null);
-  const [contasReceber, setContasReceber] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -21,10 +24,9 @@ const ContasReceber = () => {
     valor: '',
     vencimento: '',
     categoria: '',
-    cliente: '',
+    clienteId: '',
     descricao: '',
-    nf: '',
-    status: 'A receber',
+    status: 'A receber'
   });
   const [selectedConta, setSelectedConta] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
@@ -35,141 +37,145 @@ const ContasReceber = () => {
     icon: null,
     buttons: [],
   });
-  const [modalMode, setModalMode] = useState('add'); // add, edit, view
+  const [modalMode, setModalMode] = useState('add');
   const [recebimento, setRecebimento] = useState({
-    dataRecebimento: '',
+    recebidoEm: '',
     multa: '',
     juros: '',
     desconto: '',
   });
-  const [expandSection, setExpandSection] = useState(false); // controlando a seção expandida
+  const [expandSection, setExpandSection] = useState(false);
+  const [filteredContasAReceber, setFilteredContasAReceber] = useState([]);
 
+  // Buscar dados iniciais
+  useEffect(() => {
+    fetchContasAReceber();
+    fetchCategoriasAReceber();
+    fetchClientes();
+  }, [fetchContasAReceber, fetchCategoriasAReceber, fetchClientes]);
 
-  // Verificar e atualizar status das contas
-  const atualizarStatusContas = (contas) => {
-    const dataAtual = new Date();
-    return contas.map(conta => {
-      const vencimento = parseISO(conta.vencimento);
-      if (isValid(vencimento) && vencimento < dataAtual && conta.status !== 'Recebido') {
-        return { ...conta, status: 'Vencido' };
-      }
-      return conta;
-    });
+  // Atualizar contas a receber filtradas quando contasAReceber mudar
+  useEffect(() => {
+    if (contasAReceber && Array.isArray(contasAReceber)) {
+      setFilteredContasAReceber(contasAReceber);
+    }
+  }, [contasAReceber]);
+
+  // Normalizar string removendo acentos e pontuação
+  const normalizeString = (str) => {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ");
   };
 
-  // Função para buscar os dados da API
-  const fetchContasReceber = useCallback(async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/contasReceber');
-      const contasAtualizadas = atualizarStatusContas(response.data);
-      setContasReceber(contasAtualizadas);
-    } catch (error) {
-      console.error('Erro ao buscar dados', error);
-    }
-  }, []);
+  // Lidar com o filtro de busca
+  const handleSearch = (searchTerm) => {
+    const normalizedSearchTerm = normalizeString(searchTerm.toLowerCase());
+    const filtered = contasAReceber.filter(conta =>
+      normalizeString(conta.categoria.toLowerCase()).includes(normalizedSearchTerm) ||
+      normalizeString(conta.descricao.toLowerCase()).includes(normalizedSearchTerm)
+    );
+    setFilteredContasAReceber(filtered);
+  };
 
-  // UseEffect para buscar os dados ao carregar o componente
-  useEffect(() => {
-    fetchContasReceber();
-  }, [fetchContasReceber]);
-
-  // Formatar a data
+  // Formatar data para 'yyyy-MM-dd'
   const formatDate = (dateString) => {
     if (!dateString) return 'Data inválida';
     const parsedDate = parseISO(dateString);
     if (!isValid(parsedDate)) {
-      return 'Data inválida'; // Retorne uma mensagem de erro ou valor padrão
+      return 'Data inválida';
     }
-    return format(parsedDate, 'dd/MM/yyyy');
+    return format(parsedDate, 'yyyy-MM-dd');
   };
 
-  // Formatar valor
+  // Formatar valor para o formato de moeda
   const formatValue = (value) => {
     if (!value) return '0,00';
-    const numbers = value.replace(/\D/g, '');
-    const formatted = numbers
-      .replace(/(\d)(\d{2})$/, '$1,$2')
-      .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    return formatted;
+    const formatted = parseFloat(value).toFixed(2).toString().replace('.', ',');
+    return formatted.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-
-  // Ativa o tooltip
+  // Alternar a visibilidade do tooltip de ações
   const handleActionsClick = (id) => {
     setActiveTooltip(activeTooltip === id ? null : id);
   };
 
-  // Função para adicionar nova conta a receber
+  // Abrir modal para adicionar uma nova conta
   const handleAdd = () => {
     setModalMode('add');
     setNovaConta({
       valor: '',
       vencimento: '',
       categoria: '',
-      cliente: '',
+      clienteId: '',
       descricao: '',
-      nf: '',
-      status: 'A receber',
+      status: 'A receber'
     });
     setShowModal(true);
   };
 
-  // Função para editar conta a receber
+  // Abrir modal para editar uma conta existente
   const handleEdit = (conta) => {
     setModalMode('edit');
-    setNovaConta(conta);
+    setNovaConta({
+      ...conta,
+      vencimento: formatDate(conta.vencimento),
+      valor: formatValue(conta.valor),
+    });
     setShowModal(true);
   };
 
-  // Função para visualizar conta a receber
+  // Abrir modal para visualizar uma conta existente
   const handleView = (conta) => {
     setModalMode('view');
-    setNovaConta(conta);
+    setNovaConta({
+      ...conta,
+      vencimento: formatDate(conta.vencimento),
+      valor: formatValue(conta.valor),
+    });
     setShowModal(true);
   };
 
-  // Função para confirmar exclusão
+  // Abrir modal para excluir uma conta
   const handleDelete = (conta) => {
     setSelectedConta(conta);
     setShowDeleteModal(true);
   };
 
-  // Função para confirmar recebimento
+  // Abrir modal para confirmar recebimento
   const handleConfirm = (conta) => {
-    if (conta.status === 'Recebido') {
+    if (conta.status === 'recebido') {
       setSelectedConta(conta);
       setShowUndoModal(true);
     } else {
       setSelectedConta({
         ...conta,
-        valorOriginal: conta.valor, // Armazena o valor original
+        valorOriginal: conta.valor,
       });
       setRecebimento({
-        dataRecebimento: '',
+        recebidoEm: '',
         multa: '',
         juros: '',
         desconto: '',
       });
-      setExpandSection(false); // Resetar a expansão da seção
+      setExpandSection(false);
       setShowConfirmModal(true);
     }
   };
 
-  // Carregar os dados da nova conta
+  // Lidar com mudanças de entrada no formulário de nova/edição de conta
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNovaConta({ ...novaConta, [name]: type === 'checkbox' ? (checked ? 'Recebido' : 'A receber') : value });
   };
 
-  // Carregar os dados de recebimento
+  // Lidar com mudanças de entrada no formulário de recebimento
   const handleRecebimentoChange = (e) => {
     const { name, value } = e.target;
     setRecebimento({ ...recebimento, [name]: value });
   };
 
-  // Calcular valor total do modal de confirmar pagamento
+  // Calcular valor total incluindo taxas e descontos
   const calcularValorTotal = () => {
-    const parseCurrency = (value) => parseFloat(value.replace(/(\d)(\d{2})$/, '$1,$2').replace(',', '.')) || 0;
+    const parseCurrency = (value) => parseFloat(value.toString().replace(',', '.')) || 0;
 
     const valorOriginal = parseCurrency(selectedConta?.valor);
     const multa = parseCurrency(recebimento.multa);
@@ -184,24 +190,21 @@ const ContasReceber = () => {
     });
   };
 
-  // Funçao de calcular totais de contas a receber, recibidas  e despesas
+  // Calcular totais para os status 'a receber' e 'recebido'
   const calcularTotais = () => {
     let totalAReceber = 0;
     let totalRecebido = 0;
-    let totalVencido = 0;
 
-    contasReceber.forEach(conta => {
-      const valor = parseFloat(conta.valor.replace(/(\d)(\d{2})$/, '$1,$2').replace(',', '.'));
-      if (conta.status === 'A receber' || conta.status === 'Vencido') {
+    filteredContasAReceber.forEach(conta => {
+      const valor = parseFloat(conta.valor) || 0;
+      if (conta.status === 'aReceber' || conta.status === 'vencido') {
         totalAReceber += valor;
-      } else if (conta.status === 'Recebido') {
+      } else if (conta.status === 'recebido') {
         totalRecebido += valor;
-      } else {
-        totalVencido += valor;
       }
     });
 
-    const totalReceitas = totalAReceber + totalRecebido + totalVencido;
+    const totalReceitas = totalAReceber + totalRecebido;
 
     return {
       totalAReceber: totalAReceber.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
@@ -212,46 +215,42 @@ const ContasReceber = () => {
 
   const { totalAReceber, totalRecebido, totalReceitas } = calcularTotais();
 
-  // Salvar/editar conta
+  // Lidar com a submissão do formulário para adicionar/editar contas
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Extrair apenas os campos permitidos
     const contaToSave = {
-      ...novaConta,
-      status: novaConta.status === 'Recebido' ? 'Recebido' : 'A receber',
-      valor: novaConta.valor.replace('.', '').replace(',', '.'),
-      valorOriginal: novaConta.valor.replace('.', '').replace(',', '.')
+      valor: parseFloat(novaConta.valor.replace(',', '.')),
+      vencimento: novaConta.vencimento,
+      categoria: novaConta.categoria,
+      clienteId: novaConta.clienteId,
+      descricao: novaConta.descricao,
     };
+
     try {
       if (modalMode === 'edit') {
-        await axios.put(`http://localhost:3001/contasReceber/${novaConta.id}`, contaToSave);
-        setNotificationData({
-          title: 'Dados Salvos',
-          message: 'Conta a receber atualizada com sucesso.',
-          type: 'success',
-          icon: ThumbsUp,
-          buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-        });
+        await updateContaAReceber(novaConta.id, contaToSave);
       } else {
-        await axios.post('http://localhost:3001/contasReceber', contaToSave);
-        setNotificationData({
-          title: 'Parabéns',
-          message: 'Conta a receber adicionada com sucesso.',
-          type: 'success',
-          icon: ThumbsUp,
-          buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-        });
+        await addContaAReceber(contaToSave);
       }
-      setShowNotification(true);
       setShowModal(false);
-      fetchContasReceber();
+      fetchContasAReceber();
     } catch (error) {
+      setNotificationData({
+        title: 'Erro',
+        message: error.response?.data?.message || 'Erro ao salvar conta a receber.',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+      });
+      setShowNotification(true);
       console.error('Erro ao salvar conta a receber', error);
     }
   };
 
-  // Confirmar recebimento de conta
+  // Lidar com a confirmação de recebimento
   const confirmRecebimento = async () => {
-    if (!recebimento.dataRecebimento) {
+    if (!recebimento.recebidoEm) {
       setNotificationData({
         title: 'Erro',
         message: 'Por favor, preencha a data de recebimento.',
@@ -262,76 +261,71 @@ const ContasReceber = () => {
       setShowNotification(true);
       return;
     }
-    try {
-      const valorTotal = calcularValorTotal();
-      const valorTotalSemFormato = valorTotal.replace(/\./g, '').replace(',', ''); // Remove pontos e vírgulas
 
+    try {
       const updatedConta = {
-        ...selectedConta,
-        status: 'Recebido',
-        valor: valorTotalSemFormato,
-        dataRecebimento: recebimento.dataRecebimento
+        recebidoEm: recebimento.recebidoEm,
+        multa: recebimento.multa ? parseFloat(recebimento.multa) : undefined,
+        juros: recebimento.juros ? parseFloat(recebimento.juros) : undefined,
+        desconto: recebimento.desconto ? parseFloat(recebimento.desconto) : undefined,
       };
-      await axios.put(`http://localhost:3001/contasReceber/${selectedConta.id}`, updatedConta);
+
+      await informRecebimento(selectedConta.id, updatedConta);
+
+      setShowConfirmModal(false);
+      fetchContasAReceber();
+    } catch (error) {
       setNotificationData({
-        title: 'Sucesso',
-        message: 'A conta foi recebida com sucesso.',
-        type: 'success',
-        icon: ThumbsUp,
+        title: 'Erro',
+        message: error.response?.data?.message || 'Erro ao informar recebimento.',
+        type: 'error',
+        icon: XCircle,
         buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
       });
       setShowNotification(true);
-      setShowConfirmModal(false);
-      fetchContasReceber();
-    } catch (error) {
-      console.error('Erro ao receber conta', error);
+      console.error('Erro ao informar recebimento', error);
     }
   };
 
-  // Desfazer recebimento de conta
+  // Lidar com a desfazer recebimento
   const confirmUndoRecebimento = async () => {
     try {
       const updatedConta = {
         ...selectedConta,
-        status: 'A receber',
-        valor: selectedConta.valorOriginal, // Restaura o valor original
-        dataRecebimento: ''
+        status: 'aReceber',
+        valor: selectedConta.valorOriginal,
+        recebidoEm: null,
+        multa: null,
+        juros: null,
+        desconto: null
       };
-      await axios.put(`http://localhost:3001/contasReceber/${selectedConta.id}`, updatedConta);
-      setNotificationData({
-        title: 'Sucesso',
-        message: 'O recebimento da conta foi desfeito com sucesso.',
-        type: 'success',
-        icon: ThumbsUp,
-        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-      });
-      setShowNotification(true);
+      await desfazerRecebimento(selectedConta.id, updatedConta);
       setShowUndoModal(false);
-      fetchContasReceber();
+      fetchContasAReceber();
     } catch (error) {
-      console.error('Erro ao desfazer recebimento da conta', error);
+      setShowNotification(true);
+      console.error('Erro ao desfazer recebimento', error);
     }
   };
 
-  // excluir conta
+  // Lidar com a exclusão de conta
   const confirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:3001/contasReceber/${selectedConta.id}`);
+      await deleteContaAReceber(selectedConta.id);
+      setShowDeleteModal(false);
+      fetchContasAReceber();
+    } catch (error) {
       setNotificationData({
-        title: 'Conta Removida',
-        message: 'A conta a receber foi removida com sucesso.',
-        type: 'success',
-        icon: ThumbsUp,
+        title: 'Erro',
+        message: error.response?.data?.message || 'Erro ao remover conta a receber.',
+        type: 'error',
+        icon: XCircle,
         buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
       });
       setShowNotification(true);
-      setShowDeleteModal(false);
-      fetchContasReceber();
-    } catch (error) {
       console.error('Erro ao remover conta a receber', error);
     }
   };
-
 
   return (
     <div className="container">
@@ -354,7 +348,7 @@ const ContasReceber = () => {
         />
 
         <div className='content content-table'>
-          <h1>Contas a receber</h1>
+          <h1 className='h1-search'>Contas a receber <SearchBar onSearch={handleSearch} placeholder='Categoria/descrição' /></h1>
           <table className="table">
             <thead>
               <tr>
@@ -369,7 +363,7 @@ const ContasReceber = () => {
               </tr>
             </thead>
             <tbody>
-              {contasReceber.map((conta, index) => (
+              {filteredContasAReceber.map((conta, index) => (
                 <tr key={index}>
                   <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
                   <td data-label="Categoria">
@@ -393,7 +387,7 @@ const ContasReceber = () => {
                       </div>
                     )}
                   </td>
-                  <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'Recebido' ? 'received' : ''}`}>
+                  <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'recebido' ? 'received' : ''}`}>
                     <ThumbsUp />
                   </td>
                 </tr>
@@ -402,6 +396,7 @@ const ContasReceber = () => {
           </table>
         </div>
 
+        {/* Soma totais */}
         <div className="totais-section">
           <div className="total-item">
             <span>A receber:</span>
@@ -439,11 +434,21 @@ const ContasReceber = () => {
           </div>
           <div className="form-group">
             <label htmlFor="categoria">Categoria</label>
-            <input type="text" id="categoria" name="categoria" value={novaConta.categoria} onChange={handleChange} required disabled={modalMode === 'view'} />
+            <select id="categoria" name="categoria" value={novaConta.categoria} onChange={handleChange} required disabled={modalMode === 'view'}>
+              <option value="">Selecione uma categoria</option>
+              {categoriasAReceber.map((categoria, index) => (
+                <option key={index} value={categoria}>{categoria}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
-            <label htmlFor="cliente">Cliente</label>
-            <input type="text" id="cliente" name="cliente" value={novaConta.cliente} onChange={handleChange} required disabled={modalMode === 'view'} />
+            <label htmlFor="clienteId">Cliente</label>
+            <select id="clienteId" name="clienteId" value={novaConta.clienteId} onChange={handleChange} required disabled={modalMode === 'view'}>
+              <option value="">Selecione um cliente</option>
+              {clientes.map((cliente, index) => (
+                <option key={index} value={cliente.id}>{cliente.nomeFantasia}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label htmlFor="descricao">Descrição (Opcional)</label>
@@ -452,7 +457,7 @@ const ContasReceber = () => {
           {(modalMode !== 'edit' && modalMode !== 'view') && (
             <div className="form-group">
               <input type="checkbox" id="recebido" name="status" checked={novaConta.status === 'Recebido'} onChange={handleChange} />
-              <label htmlFor="recebido">Marcar como recebida</label>
+              <label htmlFor="recebido">Marcar como recebido</label>
             </div>
           )}
           {modalMode === 'view' && (
@@ -500,12 +505,12 @@ const ContasReceber = () => {
             <span>R${formatValue(selectedConta?.valor)}</span>
           </div>
           <div className="form-group">
-            <label htmlFor="dataRecebimento">Data do recebimento</label>
+            <label htmlFor="recebidoEm">Data do recebimento</label>
             <input
               type="date"
-              id="dataRecebimento"
-              name="dataRecebimento"
-              value={recebimento.dataRecebimento}
+              id="recebidoEm"
+              name="recebidoEm"
+              value={recebimento.recebidoEm}
               onChange={handleRecebimentoChange}
               required
               placeholder="dd/mm/aaaa"

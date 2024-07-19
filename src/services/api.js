@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://api.ikont1.com.br/api', // Verifique se a baseURL está correta
+  baseURL: 'https://api.ikont1.com.br',
   headers: {
     'Content-Type': 'application/json',
   },

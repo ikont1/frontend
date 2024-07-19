@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import FilterBar from '../../components/FilterBar/FilterBar';
@@ -6,13 +6,16 @@ import Modal from '../../components/Modal/Modal';
 import Notification from '../../components/Notification/Notification';
 import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
-import axios from 'axios';
+import { useFinance } from '../../context/FinanceContext';
+import { useData } from '../../context/DataContext';
 import { parseISO, format, isValid } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ContasAPagar = () => {
+  const { fetchFornecedores, fornecedores } = useData();
+  const { contasAPagar, fetchContasAPagar, addContaAPagar, updateContaAPagar, deleteContaAPagar, informPagamento, desfazerPagamento, categorias, fetchCategorias } = useFinance();
   const [activeTooltip, setActiveTooltip] = useState(null);
-  const [contasAPagar, setContasAPagar] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -21,10 +24,9 @@ const ContasAPagar = () => {
     valor: '',
     vencimento: '',
     categoria: '',
-    cliente: '',
+    fornecedorId: '',
     descricao: '',
-    nf: '',
-    status: 'A pagar',
+    estaPago: false
   });
   const [selectedConta, setSelectedConta] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
@@ -35,139 +37,145 @@ const ContasAPagar = () => {
     icon: null,
     buttons: [],
   });
-  const [modalMode, setModalMode] = useState('add'); // add, edit, view
+  const [modalMode, setModalMode] = useState('add');
   const [pagamento, setPagamento] = useState({
-    dataPagamento: '',
+    pagoEm: '',
     multa: '',
     juros: '',
     desconto: '',
   });
-  const [expandSection, setExpandSection] = useState(false); // controlando a seção expandida
+  const [expandSection, setExpandSection] = useState(false);
+  const [filteredContasAPagar, setFilteredContasAPagar] = useState([]);
 
-  // Verificar e atualizar status das contas
-  const atualizarStatusContas = (contas) => {
-    const dataAtual = new Date();
-    return contas.map(conta => {
-      const vencimento = parseISO(conta.vencimento);
-      if (isValid(vencimento) && vencimento < dataAtual && conta.status !== 'Pago') {
-        return { ...conta, status: 'Vencido' };
-      }
-      return conta;
-    });
-  };
-
-  // Função para buscar os dados da API
-  const fetchContasAPagar = useCallback(async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/contasAPagar');
-      const contasAtualizadas = atualizarStatusContas(response.data);
-      setContasAPagar(contasAtualizadas);
-    } catch (error) {
-      console.error('Erro ao buscar dados', error);
-    }
-  }, []);
-
-  // UseEffect para buscar os dados ao carregar o componente
+  // Buscar dados iniciais
   useEffect(() => {
     fetchContasAPagar();
-  }, [fetchContasAPagar]);
+    fetchCategorias();
+    fetchFornecedores();
+  }, [fetchContasAPagar, fetchCategorias, fetchFornecedores]);
 
-  // Formatar a data
+  // Atualizar contas a pagar filtradas quando contasAPagar mudar
+  useEffect(() => {
+    if (contasAPagar && Array.isArray(contasAPagar)) {
+      setFilteredContasAPagar(contasAPagar);
+    }
+  }, [contasAPagar]);
+
+  // Normalizar string removendo acentos e pontuação
+  const normalizeString = (str) => {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ");
+  };
+
+  // Lidar com o filtro de busca
+  const handleSearch = (searchTerm) => {
+    const normalizedSearchTerm = normalizeString(searchTerm.toLowerCase());
+    const filtered = contasAPagar.filter(conta =>
+      normalizeString(conta.categoria.toLowerCase()).includes(normalizedSearchTerm) ||
+      normalizeString(conta.descricao.toLowerCase()).includes(normalizedSearchTerm)
+    );
+    setFilteredContasAPagar(filtered);
+  };
+
+  // Formatar data para 'yyyy-MM-dd'
   const formatDate = (dateString) => {
     if (!dateString) return 'Data inválida';
     const parsedDate = parseISO(dateString);
     if (!isValid(parsedDate)) {
-      return 'Data inválida'; // Retorne uma mensagem de erro ou valor padrão
+      return 'Data inválida';
     }
-    return format(parsedDate, 'dd/MM/yyyy');
+    return format(parsedDate, 'yyyy-MM-dd');
   };
 
-  // Formatar valor
+  // Formatar valor para o formato de moeda
   const formatValue = (value) => {
     if (!value) return '0,00';
-    const numbers = value.replace(/\D/g, '');
-    const formatted = numbers
-      .replace(/(\d)(\d{2})$/, '$1,$2')
-      .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    return formatted;
+    const formatted = parseFloat(value).toFixed(2).toString().replace('.', ',');
+    return formatted.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-  // Ativa o tooltip
+  // Alternar a visibilidade do tooltip de ações
   const handleActionsClick = (id) => {
     setActiveTooltip(activeTooltip === id ? null : id);
   };
 
-  // Função para adicionar nova conta a pagar
+  // Abrir modal para adicionar uma nova conta
   const handleAdd = () => {
     setModalMode('add');
     setNovaConta({
       valor: '',
       vencimento: '',
       categoria: '',
-      cliente: '',
+      fornecedorId: '',
       descricao: '',
-      nf: '',
-      status: 'A pagar',
+      estaPago: false
     });
     setShowModal(true);
   };
 
-  // Função para editar conta a pagar
+  // Abrir modal para editar uma conta existente
   const handleEdit = (conta) => {
     setModalMode('edit');
-    setNovaConta(conta);
+    setNovaConta({
+      ...conta,
+      vencimento: formatDate(conta.vencimento),
+      valor: formatValue(conta.valor),
+    });
     setShowModal(true);
   };
 
-  // Função para visualizar conta a pagar
+  // Abrir modal para visualizar uma conta existente
   const handleView = (conta) => {
     setModalMode('view');
-    setNovaConta(conta);
+    setNovaConta({
+      ...conta,
+      vencimento: formatDate(conta.vencimento),
+      valor: formatValue(conta.valor),
+    });
     setShowModal(true);
   };
 
-  // Função para confirmar exclusão
+  // Abrir modal para excluir uma conta
   const handleDelete = (conta) => {
     setSelectedConta(conta);
     setShowDeleteModal(true);
   };
 
-  // Função para confirmar pagamento
+  // Abrir modal para confirmar pagamento
   const handleConfirm = (conta) => {
-    if (conta.status === 'Pago') {
+    if (conta.status === 'pago') {
       setSelectedConta(conta);
       setShowUndoModal(true);
     } else {
       setSelectedConta({
         ...conta,
-        valorOriginal: conta.valor, // Armazena o valor original
+        valorOriginal: conta.valor,
       });
       setPagamento({
-        dataPagamento: '',
+        pagoEm: '',
         multa: '',
         juros: '',
         desconto: '',
       });
-      setExpandSection(false); // Resetar a expansão da seção
+      setExpandSection(false);
       setShowConfirmModal(true);
     }
   };
 
-  // Carregar os dados da nova conta a pagar
+  // Lidar com mudanças de entrada no formulário de nova/edição de conta
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNovaConta({ ...novaConta, [name]: type === 'checkbox' ? (checked ? 'Pago' : 'A pagar') : value });
+    setNovaConta({ ...novaConta, [name]: type === 'checkbox' ? (checked ? 'pago' : 'aPagar') : value });
   };
 
-  // Carregar os dados de pagamento
+  // Lidar com mudanças de entrada no formulário de pagamento
   const handlePagamentoChange = (e) => {
     const { name, value } = e.target;
     setPagamento({ ...pagamento, [name]: value });
   };
 
-  // Calcular valor total do modal de confirmar pagamento
+  // Calcular valor total incluindo taxas e descontos
   const calcularValorTotal = () => {
-    const parseCurrency = (value) => parseFloat(value.replace(/(\d)(\d{2})$/, '$1,$2').replace(',', '.')) || 0;
+    const parseCurrency = (value) => parseFloat(value.toString().replace(',', '.')) || 0;
 
     const valorOriginal = parseCurrency(selectedConta?.valor);
     const multa = parseCurrency(pagamento.multa);
@@ -182,16 +190,16 @@ const ContasAPagar = () => {
     });
   };
 
-  // Funçao de calcular totais de contas a pagar, pagas  e total de pagamentos
+  // Calcular totais para os status 'a pagar' e 'pago'
   const calcularTotais = () => {
     let totalAPagar = 0;
     let totalPago = 0;
 
-    contasAPagar.forEach(conta => {
-      const valor = parseFloat(conta.valor?.replace(/(\d)(\d{2})$/, '$1,$2').replace(',', '.') || 0);
-      if (conta.status === 'A pagar' || conta.status === 'Vencido') {
+    filteredContasAPagar.forEach(conta => {
+      const valor = parseFloat(conta.valor) || 0;
+      if (conta.status === 'aPagar' || conta.status === 'vencido') {
         totalAPagar += valor;
-      } else if (conta.status === 'Pago') {
+      } else if (conta.status === 'pago') {
         totalPago += valor;
       }
     });
@@ -207,36 +215,24 @@ const ContasAPagar = () => {
 
   const { totalAPagar, totalPago, totalPagamentos } = calcularTotais();
 
-  // Salvar/editar conta
+  // Lidar com a submissão do formulário para adicionar/editar contas
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Extrair apenas os campos permitidos
     const contaToSave = {
-      ...novaConta,
-      status: novaConta.status === 'Pago' ? 'Pago' : 'A pagar',
-      valor: novaConta.valor.replace('.', '').replace(',', '.'),
-      valorOriginal: novaConta.valor.replace('.', '').replace(',', '.')
+      valor: parseFloat(novaConta.valor.replace(',', '.')),
+      vencimento: novaConta.vencimento,
+      categoria: novaConta.categoria,
+      fornecedorId: novaConta.fornecedorId,
+      descricao: novaConta.descricao,
     };
+
     try {
       if (modalMode === 'edit') {
-        await axios.put(`http://localhost:3001/contasAPagar/${novaConta.id}`, contaToSave);
-        setNotificationData({
-          title: 'Dados Salvos',
-          message: 'Conta a pagar atualizada com sucesso.',
-          type: 'success',
-          icon: ThumbsUp,
-          buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-        });
+        await updateContaAPagar(novaConta.id, contaToSave);
       } else {
-        await axios.post('http://localhost:3001/contasAPagar', contaToSave);
-        setNotificationData({
-          title: 'Parabéns',
-          message: 'Conta a pagar adicionada com sucesso.',
-          type: 'success',
-          icon: ThumbsUp,
-          buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-        });
+        await addContaAPagar(contaToSave);
       }
-      setShowNotification(true);
       setShowModal(false);
       fetchContasAPagar();
     } catch (error) {
@@ -244,9 +240,9 @@ const ContasAPagar = () => {
     }
   };
 
-  // Confirmar pagamento de conta apagar
+  // Lidar com a confirmação de pagamento
   const confirmPagamento = async () => {
-    if (!pagamento.dataPagamento) {
+    if (!pagamento.pagoEm) {
       setNotificationData({
         title: 'Erro',
         message: 'Por favor, preencha a data de pagamento.',
@@ -257,25 +253,24 @@ const ContasAPagar = () => {
       setShowNotification(true);
       return;
     }
-    try {
-      const valorTotal = calcularValorTotal();
-      const valorTotalSemFormato = valorTotal.replace(/\./g, '').replace(',', ''); // Remove pontos e vírgulas
 
+    try {
       const updatedConta = {
-        ...selectedConta,
-        status: 'Pago',
-        valor: valorTotalSemFormato,
-        dataPagamento: pagamento.dataPagamento
+        pagoEm: pagamento.pagoEm,
       };
-      await axios.put(`http://localhost:3001/contasAPagar/${selectedConta.id}`, updatedConta);
-      setNotificationData({
-        title: 'Sucesso',
-        message: 'A conta foi paga com sucesso.',
-        type: 'success',
-        icon: ThumbsUp,
-        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-      });
-      setShowNotification(true);
+
+      if (pagamento.multa) {
+        updatedConta.multa = parseFloat(pagamento.multa);
+      }
+      if (pagamento.juros) {
+        updatedConta.juros = parseFloat(pagamento.juros);
+      }
+      if (pagamento.desconto) {
+        updatedConta.desconto = parseFloat(pagamento.desconto);
+      }
+
+      await informPagamento(selectedConta.id, updatedConta);
+
       setShowConfirmModal(false);
       fetchContasAPagar();
     } catch (error) {
@@ -283,24 +278,19 @@ const ContasAPagar = () => {
     }
   };
 
-  // Desfazer pagamento de conta
+  // Lidar com a desfazer pagamento
   const confirmUndoPagamento = async () => {
     try {
       const updatedConta = {
         ...selectedConta,
-        status: 'A pagar',
-        valor: selectedConta.valorOriginal, // Restaura o valor original
-        dataPagamento: ''
+        status: 'aPagar',
+        valor: selectedConta.valorOriginal,
+        pagoEm: null,
+        multa: null,
+        juros: null,
+        desconto: null
       };
-      await axios.put(`http://localhost:3001/contasAPagar/${selectedConta.id}`, updatedConta);
-      setNotificationData({
-        title: 'Sucesso',
-        message: 'O pagamento da conta foi desfeito com sucesso.',
-        type: 'success',
-        icon: ThumbsUp,
-        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-      });
-      setShowNotification(true);
+      await desfazerPagamento(selectedConta.id, updatedConta);
       setShowUndoModal(false);
       fetchContasAPagar();
     } catch (error) {
@@ -308,27 +298,16 @@ const ContasAPagar = () => {
     }
   };
 
-  // excluir conta
+  // Lidar com a exclusão de conta
   const confirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:3001/contasAPagar/${selectedConta.id}`);
-      setNotificationData({
-        title: 'Pagamento Removido',
-        message: 'A conta a pagar foi removida com sucesso.',
-        type: 'success',
-        icon: ThumbsUp,
-        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-      });
-      setShowNotification(true);
+      await deleteContaAPagar(selectedConta.id);
       setShowDeleteModal(false);
       fetchContasAPagar();
     } catch (error) {
       console.error('Erro ao remover conta a pagar', error);
     }
   };
-
-
-
 
   return (
     <div className="container">
@@ -348,13 +327,13 @@ const ContasAPagar = () => {
         />
 
         <div className='content content-table'>
-          <h1>Contas a pagar</h1>
+          <h1 className='h1-search'>Contas a pagar <SearchBar onSearch={handleSearch} placeholder='Categoria/descrição' /></h1>
           <table className="table">
             <thead>
               <tr>
                 <th>Vencimento</th>
                 <th>Categoria</th>
-                <th>Cliente</th>
+                <th>Fornecedor</th>
                 <th>Descrição</th>
                 <th>Status</th>
                 <th>Valor</th>
@@ -363,39 +342,44 @@ const ContasAPagar = () => {
               </tr>
             </thead>
             <tbody>
-              {contasAPagar.map((conta, index) => (
-                <tr key={index}>
-                  <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
-                  <td data-label="Categoria">
-                    {conta.categoria} <span className="nf-badge">{`NF ${conta.nf || 'N/A'}`}</span>
-                  </td>
-                  <td data-label="Cliente">{conta.cliente}</td>
-                  <td data-label="Descrição">{conta.descricao}</td>
-                  <td data-label="Status">
-                    <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status}</span>
-                  </td>
-                  <td data-label="Valor">R${formatValue(conta.valor)}</td>
-                  <td data-label="Ações" className="actions">
-                    <button onClick={() => handleActionsClick(index)}>...</button>
-                    {activeTooltip === index && (
-                      <div className="tooltip">
-                        <ul>
-                          <li onClick={() => handleEdit(conta)}>Editar</li>
-                          <li onClick={() => handleView(conta)}>Visualizar</li>
-                          <li onClick={() => handleDelete(conta)} className="remove">Remover</li>
-                        </ul>
-                      </div>
-                    )}
-                  </td>
-                  <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'Pago' ? 'received' : ''}`}>
-                    <ThumbsUp />
-                  </td>
+              {filteredContasAPagar.length > 0 ? (
+                filteredContasAPagar.map((conta, index) => (
+                  <tr key={index}>
+                    <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
+                    <td data-label="Categoria">{conta.categoria}</td>
+                    <td data-label="Fornecedor">{fornecedores.find(f => f.id === conta.fornecedorId)?.nomeFantasia || conta.fornecedorId}</td>
+                    <td data-label="Descrição">{conta.descricao}</td>
+                    <td data-label="Status">
+                      <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status}</span>
+                    </td>
+                    <td data-label="Valor">R${formatValue(conta.valor)}</td>
+                    <td data-label="Ações" className="actions">
+                      <button onClick={() => handleActionsClick(index)}>...</button>
+                      {activeTooltip === index && (
+                        <div className="tooltip">
+                          <ul>
+                            <li onClick={() => handleEdit(conta)}>Editar</li>
+                            <li onClick={() => handleView(conta)}>Visualizar</li>
+                            <li onClick={() => handleDelete(conta)} className="remove">Remover</li>
+                          </ul>
+                        </div>
+                      )}
+                    </td>
+                    <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'pago' ? 'received' : ''}`}>
+                      <ThumbsUp />
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan='8'>Nenhum dado a ser mostrado</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
 
+        {/* Totais */}
         <div className="totais-section">
           <div className="total-item">
             <span>A pagar:</span>
@@ -412,7 +396,7 @@ const ContasAPagar = () => {
         </div>
       </div>
 
-      {/* Modal de cadastrar/editar conta */}
+      {/* Modal de Adcionar, editar e visualizar Conta */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={modalMode === 'view' ? 'Visualizar conta a pagar' : (modalMode === 'edit' ? 'Editar conta a pagar' : 'Nova conta a pagar')}>
         <form onSubmit={handleSubmit}>
           {modalMode === 'edit' && (
@@ -433,19 +417,29 @@ const ContasAPagar = () => {
           </div>
           <div className="form-group">
             <label htmlFor="categoria">Categoria</label>
-            <input type="text" id="categoria" name="categoria" value={novaConta.categoria} onChange={handleChange} required disabled={modalMode === 'view'} />
+            <select id="categoria" name="categoria" value={novaConta.categoria} onChange={handleChange} required disabled={modalMode === 'view'}>
+              <option value="">Selecione uma categoria</option>
+              {categorias.map((categoria, index) => (
+                <option key={index} value={categoria}>{categoria}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
-            <label htmlFor="cliente">Cliente</label>
-            <input type="text" id="cliente" name="cliente" value={novaConta.cliente} onChange={handleChange} required disabled={modalMode === 'view'} />
+            <label htmlFor="fornecedorId">Fornecedor</label>
+            <select id="fornecedorId" name="fornecedorId" value={novaConta.fornecedorId} onChange={handleChange} required disabled={modalMode === 'view'}>
+              <option value="">Selecione um fornecedor</option>
+              {fornecedores.map((fornecedor, index) => (
+                <option key={index} value={fornecedor.id}>{fornecedor.nomeFantasia}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label htmlFor="descricao">Descrição (Opcional)</label>
-            <input type="text" id="descricao" name="descricao" value={novaConta.descricao} onChange={handleChange} disabled={modalMode === 'view'} />
+            <input type="text" id="descricao" name="descricao" value={novaConta.descricao} onChange={handleChange} required disabled={modalMode === 'view'} />
           </div>
           {(modalMode !== 'edit' && modalMode !== 'view') && (
             <div className="form-group">
-              <input type="checkbox" id="pago" name="status" checked={novaConta.status === 'Pago'} onChange={handleChange} />
+              <input type="checkbox" id="pago" name="estaPago" checked={novaConta.estaPago === 'pago'} onChange={handleChange} />
               <label htmlFor="pago">Marcar como pago</label>
             </div>
           )}
@@ -462,7 +456,7 @@ const ContasAPagar = () => {
         </form>
       </Modal>
 
-      {/* Modal de excluir conta */}
+      {/* Modal de Remover conta */}
       <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Remover conta a pagar">
         <div className="delete-modal-content">
           <div className="delete-info">
@@ -483,7 +477,7 @@ const ContasAPagar = () => {
         </div>
       </Modal>
 
-      {/* Modal de confirmar pagamento */}
+      {/* Modal de Confirmar pagamento */}
       <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} title="Confirmar o pagamento">
         <div className="confirm-modal-content">
           <div className="confirm-info">
@@ -494,12 +488,12 @@ const ContasAPagar = () => {
             <span>R${formatValue(selectedConta?.valor)}</span>
           </div>
           <div className="form-group">
-            <label htmlFor="dataPagamento">Data do pagamento</label>
+            <label htmlFor="pagoEm">Data do pagamento</label>
             <input
               type="date"
-              id="dataPagamento"
-              name="dataPagamento"
-              value={pagamento.dataPagamento}
+              id="pagoEm"
+              name="pagoEm"
+              value={pagamento.pagoEm}
               onChange={handlePagamentoChange}
               required
               placeholder="dd/mm/aaaa"
@@ -590,3 +584,4 @@ const ContasAPagar = () => {
 };
 
 export default ContasAPagar;
+

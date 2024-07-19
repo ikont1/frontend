@@ -114,24 +114,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const cadastrarUsuario = async (login, email, nome) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await api.post('/usuario', { login, email, nome });
-      setLoading(false);
-      alert('Usuário cadastrado com sucesso! Verifique seu email');
-      navigate('/login');
-    } catch (error) {
-      console.error(error)
-      console.log('Cadastro error response:', error.response?.data);
-      setError(error.response?.data?.message || 'Erro ao cadastrar. Por favor, tente novamente.');
-      setLoading(false);
-    }
-  };
 
   return (
-    <AuthContext.Provider value={{ token, loading, error, login, logout, resetPassword, setPassword, cadastrarUsuario }}>
+    <AuthContext.Provider value={{ token, loading, error, login, logout, resetPassword, setPassword }}>
       {children}
       {notification && (
         <Notification

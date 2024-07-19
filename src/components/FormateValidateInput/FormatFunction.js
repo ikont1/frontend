@@ -53,11 +53,11 @@ export const formatFunctions = {
   valor: value => {
     const numbers = value.replace(/\D/g, '');
     const formatted = numbers
-      .replace(/(\d)(\d{2})$/, '$1,$2')
-      .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      .replace(/(\d{2})$/, ',$1')
+      .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
     return {
       formatted,
-      raw: numbers.slice(0, -2) + '.' + numbers.slice(-2)  // Converte para o formato de número
+      raw: numbers.slice(0, -2) + '.' + numbers.slice(-2)   // Converte para o formato de número
     };
   },
   senha: value => {
@@ -97,7 +97,7 @@ const validateFunctions = {
   senha: value => !validatePassword(value) // Retorna true se não houver erros
 };
 
-export const FormattedInput = ({ type, placeholder, value, onChange, name, readOnly,required }) => {
+export const FormattedInput = ({ type, placeholder, value, onChange, name, readOnly, required }) => {
   const [displayValue, setDisplayValue] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);

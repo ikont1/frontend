@@ -10,7 +10,7 @@ import NotasFiscais from "../pages/NotasFiscais/NotasFiscais.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 import RecuperarSenha from "../pages/Login/recuperarSenha.js";
 import RedefinirSenha from "../pages/Login/redefinirSenha.js";
-import CadastroUsuario from "../pages/Usuario/CadastroUsuario.js";
+import CadastrarConta from "../pages/Conta/CadastroConta.js";
 
 
 function RoutesApp() {
@@ -20,7 +20,7 @@ function RoutesApp() {
       <Route path="/login" element={<Login />} />
       <Route path="/recuperar-senha" element={<RecuperarSenha/>} />
       <Route path="/nova-senha" element={<RedefinirSenha/>} />
-      <Route path="/cadastro-usuario" element={<CadastroUsuario/>} />
+      <Route path="/cadastro-conta" element={<CadastrarConta/>} />
 
       {/* Rotas bloqueadas */}
       <Route element={<ProtectedRoute />}>

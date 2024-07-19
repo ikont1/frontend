@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import axios from 'axios';
 import api from '../services/api';
 import { useAuth } from './AuthContext';
 
@@ -14,7 +13,6 @@ export const DataProvider = ({ children }) => {
   const { token } = useAuth();  // Obtém o token do contexto de autenticação
   const [clientes, setClientes] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
-  const [contasAPagar, setContasAPagar] = useState([]);
 
   // Função para buscar clientes
   const fetchClientes = useCallback(async (params = {}) => {
@@ -35,7 +33,11 @@ export const DataProvider = ({ children }) => {
       });
       setClientes(response.data.data.clientes);
     } catch (error) {
-      console.error('Erro ao buscar clientes', error);
+      if (error.response && error.response.status === 404) {
+        setClientes([]); // Se não encontrar clientes, seta um array vazio
+      } else {
+        console.error('Erro ao buscar clientes', error);
+      }
     }
   }, [token]);
   
@@ -58,25 +60,14 @@ export const DataProvider = ({ children }) => {
       });
       setFornecedores(response.data.data.fornecedores);
     } catch (error) {
-      console.error('Erro ao buscar fornecedores', error);
+      if (error.response && error.response.status === 404) {
+        setFornecedores([]); // Se não encontrar fornecedores, seta um array vazio
+      } else {
+        console.error('Erro ao buscar fornecedores', error);
+      }
     }
   }, [token]);
   
-  // Função para buscar contas a pagar
-  const fetchContasAPagar = async () => {
-    if (!token) return; // Se não há token, não faz a requisição
-
-    try {
-      const response = await axios.get('/contasAPagar', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setContasAPagar(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar contas a pagar', error);
-    }
-  };
 
   // Função para adicionar um cliente
   const addCliente = async (cliente) => {
@@ -109,23 +100,6 @@ export const DataProvider = ({ children }) => {
     } catch (error) {
       console.error('Erro ao adicionar fornecedor', error);
       throw error;
-    }
-  };
-
-
-  // Função para adicionar uma conta a pagar
-  const addContaAPagar = async (conta) => {
-    if (!token) return; // Se não há token, não faz a requisição
-
-    try {
-      const response = await axios.post('/contasAPagar', conta, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setContasAPagar([...contasAPagar, response.data]);
-    } catch (error) {
-      console.error('Erro ao adicionar conta a pagar', error);
     }
   };
 
@@ -163,22 +137,6 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // Função para deletar uma conta a pagar
-  const deleteContaAPagar = async (id) => {
-    if (!token) return; // Se não há token, não faz a requisição
-
-    try {
-      await axios.delete(`/contasAPagar/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setContasAPagar(contasAPagar.filter(conta => conta.id !== id));
-    } catch (error) {
-      console.error('Erro ao deletar conta a pagar', error);
-    }
-  };
-
   // Função para atualizar um cliente
   const updateCliente = async (id, updatedData) => {
     if (!token) return;
@@ -206,7 +164,6 @@ export const DataProvider = ({ children }) => {
     }
   };
   
-  
   // Função para atualizar um fornecedor
   const updateFornecedor = async (id, updatedData) => {
     if (!token) return;
@@ -231,21 +188,6 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // Função para atualizar uma conta a pagar
-  const updateContaAPagar = async (id, updatedData) => {
-    if (!token) return; // Se não há token, não faz a requisição
-
-    try {
-      const response = await axios.put(`/contasAPagar/${id}`, updatedData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setContasAPagar(contasAPagar.map(conta => (conta.id === id ? response.data : conta)));
-    } catch (error) {
-      console.error('Erro ao atualizar conta a pagar', error);
-    }
-  };
 
 
   return (
@@ -255,16 +197,12 @@ export const DataProvider = ({ children }) => {
         fornecedores,
         fetchClientes,
         fetchFornecedores,
-        fetchContasAPagar,
         addCliente,
         addFornecedor,
-        addContaAPagar,
         deleteCliente,
         deleteFornecedor,
-        deleteContaAPagar,
         updateCliente,
         updateFornecedor,
-        updateContaAPagar
       }}
     >
       {children}

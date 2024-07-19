@@ -114,7 +114,8 @@ a {
 .table .status {
   border-radius: 10px;
   padding: 5px 10px;
-  color: var(--white);
+  background-color: var(--secondary-warning);
+  color: var(--warning-color);
   font-weight: bold;
   display: inline-block;
 }

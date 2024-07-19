@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './FilterBar.css';
-import { Calendar, PlusCircle, Filter, ArrowDown, ChevronLeft, ChevronRight, Search } from 'react-feather';
+import { Calendar, PlusCircle, Filter, ArrowDown, ChevronLeft, ChevronRight } from 'react-feather';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { addMonths, subMonths, format } from 'date-fns';
@@ -11,7 +11,6 @@ registerLocale('pt-BR', ptBR);
 
 const FilterBar = ({ onAdd, titleButton, filterConfig }) => {
   const [showFilters, setShowFilters] = useState(false);
-  const [showPesquisar, setShowPesquisar] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [startDate, setStartDate] = useState(null);
@@ -20,9 +19,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig }) => {
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
-  };
-  const togglePesquisar = () => {
-    setShowPesquisar(!showPesquisar);
   };
 
   const toggleModal = (modal) => {
@@ -109,17 +105,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig }) => {
         <button className="filter-button" onClick={toggleFilters}>
           <Filter /> Filtrar
         </button>
-
-        {filterConfig.buttonPesquisar && (
-          <div className='container-pesquisar'>
-            <button className="filter-button pesquisar-button" onClick={togglePesquisar}>
-              <Search /> Pesquisar
-            </button>
-            {showPesquisar && (
-              <input type='text' placeholder='Digte para pesquisar...' />
-            )}
-          </div>
-        )}
       </div>
 
       {showFilters && (

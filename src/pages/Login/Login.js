@@ -87,7 +87,7 @@ const Login = () => {
         </form>
 
         <div className="div-botton">
-          <Link to="/cadastro-usuario" className="register-link">Não é cliente? Comece agora</Link>
+          <Link to="/cadastro-conta" className="register-link">Não é cliente? Comece agora</Link>
           <div className="social-media">
             <FaInstagram aria-hidden="true" className="i-sociais" />
             <FaWhatsapp aria-hidden="true" className="i-sociais" />

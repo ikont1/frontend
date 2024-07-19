@@ -1,3 +1,4 @@
+// pages/ClientesFornecedores/ClientesFornecedores.js
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import Header from '../../components/Header/Header';
@@ -9,10 +10,10 @@ import ConfirmationModal from '../../components/Modal/confirmationModal';
 import ClienteForm from './ClienteForm';
 import FornecedorForm from './FornecedorForm';
 import Notification from '../../components/Notification/Notification';
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ClientesFornecedores = () => {
   const { clientes, fornecedores, fetchClientes, fetchFornecedores, deleteCliente, deleteFornecedor } = useData();
-
   const [activeTab, setActiveTab] = useState('clientes');
   const [showAddOptions, setShowAddOptions] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null);
@@ -25,6 +26,8 @@ const ClientesFornecedores = () => {
   const [typeToDelete, setTypeToDelete] = useState(null);
   const [nameToDelete, setNameToDelete] = useState('');
   const [notification, setNotification] = useState(null);
+  const [filteredClientes, setFilteredClientes] = useState([]);
+  const [filteredFornecedores, setFilteredFornecedores] = useState([]);
 
   const handleModalClose = () => {
     setIsModalOpen(false);
@@ -128,6 +131,32 @@ const ClientesFornecedores = () => {
     setNotification(null);
   };
 
+
+  // Busca
+  useEffect(() => {
+    setFilteredClientes(clientes);
+  }, [clientes]);
+
+  useEffect(() => {
+    setFilteredFornecedores(fornecedores);
+  }, [fornecedores]);
+  
+  const handleSearch = (searchTerm) => {
+    if (activeTab === 'clientes') {
+      const filtered = clientes.filter(cliente =>
+        cliente.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cliente.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredClientes(filtered);
+    } else if (activeTab === 'fornecedores') {
+      const filtered = fornecedores.filter(fornecedor =>
+        fornecedor.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fornecedor.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredFornecedores(filtered);
+    }
+  };
+
   return (
     <div className="container">
       <Sidebar />
@@ -163,7 +192,12 @@ const ClientesFornecedores = () => {
         </div>
 
         <div className="content content-table">
-          <h1>Clientes e Fornecedores</h1>
+          <h1 className='h1-search'>Clientes e Fornecedores
+            <SearchBar
+              onSearch={handleSearch}
+              placeholder='Nome fantasia/Razão social'
+            />
+          </h1>
           {activeTab === 'clientes' && (
             <table className="table">
               <thead>
@@ -178,27 +212,33 @@ const ClientesFornecedores = () => {
                 </tr>
               </thead>
               <tbody>
-                {clientes && clientes.map((cliente) => (
-                  <tr key={cliente.id}>
-                    <td>{cliente.nomeFantasia}</td>
-                    <td>{cliente.razaoSocial}<br /><span>{cliente.cpfCnpj}</span></td>
-                    <td>{cliente.inscricalMunicipal}</td>
-                    <td>{cliente.contato}</td>
-                    <td>{cliente.email}</td>
-                    <td>{cliente.inscricalEstadual}</td>
-                    <td data-label="Ações" className="actions">
-                      <button onClick={() => handleActionsClick(cliente.id)}>...</button>
-                      {activeTooltip === cliente.id && (
-                        <div className="tooltip">
-                          <ul>
-                            <li onClick={() => handleEditClick(cliente.id, 'cliente')}>Editar</li>
-                            <li onClick={() => handleDeleteClick(cliente.id, 'cliente')} className="remove">Remover</li>
-                          </ul>
-                        </div>
-                      )}
-                    </td>
+                {filteredClientes.length > 0 ? (
+                  filteredClientes.map((cliente) => (
+                    <tr key={cliente.id}>
+                      <td>{cliente.nomeFantasia}</td>
+                      <td>{cliente.razaoSocial}<br /><span>{cliente.cpfCnpj}</span></td>
+                      <td>{cliente.inscricalMunicipal}</td>
+                      <td>{cliente.contato}</td>
+                      <td>{cliente.email}</td>
+                      <td>{cliente.inscricalEstadual}</td>
+                      <td data-label="Ações" className="actions">
+                        <button onClick={() => handleActionsClick(cliente.id)}>...</button>
+                        {activeTooltip === cliente.id && (
+                          <div className="tooltip">
+                            <ul>
+                              <li onClick={() => handleEditClick(cliente.id, 'cliente')}>Editar</li>
+                              <li onClick={() => handleDeleteClick(cliente.id, 'cliente')} className="remove">Remover</li>
+                            </ul>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan='8'>Nenhum dado a ser mostrado</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           )}
@@ -217,27 +257,33 @@ const ClientesFornecedores = () => {
                 </tr>
               </thead>
               <tbody>
-                {fornecedores && fornecedores.map((fornecedor) => (
-                  <tr key={fornecedor.id}>
-                    <td>{fornecedor.nomeFantasia}</td>
-                    <td>{fornecedor.razaoSocial}<br /><span>{fornecedor.cpfCnpj}</span></td>
-                    <td>{fornecedor.inscricalMunicipal}</td>
-                    <td>{fornecedor.inscricalEstadual}</td>
-                    <td>{fornecedor.email}</td>
-                    <td>{fornecedor.telefone}</td>
-                    <td data-label="Ações" className="actions">
-                      <button onClick={() => handleActionsClick(fornecedor.id)}>...</button>
-                      {activeTooltip === fornecedor.id && (
-                        <div className="tooltip">
-                          <ul>
-                            <li onClick={() => handleEditClick(fornecedor.id, 'fornecedor')}>Editar</li>
-                            <li onClick={() => handleDeleteClick(fornecedor.id, 'fornecedor')} className="remove">Remover</li>
-                          </ul>
-                        </div>
-                      )}
-                    </td>
+                {filteredFornecedores.length > 0 ? (
+                  filteredFornecedores.map((fornecedor) => (
+                    <tr key={fornecedor.id}>
+                      <td>{fornecedor.nomeFantasia}</td>
+                      <td>{fornecedor.razaoSocial}<br /><span>{fornecedor.cpfCnpj}</span></td>
+                      <td>{fornecedor.inscricalMunicipal}</td>
+                      <td>{fornecedor.inscricalEstadual}</td>
+                      <td>{fornecedor.email}</td>
+                      <td>{fornecedor.telefone}</td>
+                      <td data-label="Ações" className="actions">
+                        <button onClick={() => handleActionsClick(fornecedor.id)}>...</button>
+                        {activeTooltip === fornecedor.id && (
+                          <div className="tooltip">
+                            <ul>
+                              <li onClick={() => handleEditClick(fornecedor.id, 'fornecedor')}>Editar</li>
+                              <li onClick={() => handleDeleteClick(fornecedor.id, 'fornecedor')} className="remove">Remover</li>
+                            </ul>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan='8'>Nenhum dado a ser mostrado</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           )}
