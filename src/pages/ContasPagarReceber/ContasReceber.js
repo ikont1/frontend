@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import FilterBar from '../../components/FilterBar/FilterBar';
@@ -7,13 +7,13 @@ import Notification from '../../components/Notification/Notification';
 import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
-import { useData } from '../../context/DataContext';
+import { useClientSupplier } from '../../context/ClientSupplierContext';
 import { parseISO, format, isValid } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ContasReceber = () => {
-  const { fetchClientes, clientes } = useData();
+  const { fetchClientes, clientes } = useClientSupplier();
   const { contasAReceber, fetchContasAReceber, addContaAReceber, updateContaAReceber, deleteContaAReceber, informRecebimento, desfazerRecebimento, categoriasAReceber, fetchCategoriasAReceber } = useFinance();
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -46,6 +46,11 @@ const ContasReceber = () => {
   });
   const [expandSection, setExpandSection] = useState(false);
   const [filteredContasAReceber, setFilteredContasAReceber] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({
+    categorias: [],
+    status: [],
+    clienteId: null,
+  });
 
   // Buscar dados iniciais
   useEffect(() => {
@@ -54,12 +59,52 @@ const ContasReceber = () => {
     fetchClientes();
   }, [fetchContasAReceber, fetchCategoriasAReceber, fetchClientes]);
 
-  // Atualizar contas a receber filtradas quando contasAReceber mudar
+  const filterContas = useCallback(() => {
+    const { categorias, status, clienteId } = selectedFilters;
+    const filtered = contasAReceber.filter(conta => {
+      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
+      const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
+      const matchesCliente = !clienteId || conta.clienteId === clienteId;
+      return matchesCategoria && matchesStatus && matchesCliente;
+    });
+    setFilteredContasAReceber(filtered);
+  }, [contasAReceber, selectedFilters]);
+  
+  // Atualizar contas a receber filtradas quando contasAReceber ou filtros mudarem
   useEffect(() => {
     if (contasAReceber && Array.isArray(contasAReceber)) {
-      setFilteredContasAReceber(contasAReceber);
+      filterContas();
     }
-  }, [contasAReceber]);
+  }, [contasAReceber, selectedFilters, filterContas]);
+
+  
+
+  const handleFilterChange = (e) => {
+    const { value, checked } = e.target;
+    const filterType = e.target.closest('.form-group').querySelector('h5').textContent.toLowerCase();
+    
+    setSelectedFilters(prevFilters => {
+      const updatedFilters = { ...prevFilters };
+      
+      if (filterType === 'categoria') {
+        if (checked) {
+          updatedFilters.categorias.push(value);
+        } else {
+          updatedFilters.categorias = updatedFilters.categorias.filter(cat => cat !== value);
+        }
+      } else if (filterType === 'status') {
+        if (checked) {
+          updatedFilters.status.push(value);
+        } else {
+          updatedFilters.status = updatedFilters.status.filter(stat => stat !== value);
+        }
+      } else if (filterType === 'cliente') {
+        updatedFilters.clienteId = checked ? value : null;
+      }
+      
+      return updatedFilters;
+    });
+  };
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -345,6 +390,9 @@ const ContasReceber = () => {
             buttonPeriod: true,
             buttonMeses: true,
           }}
+          categorias={categoriasAReceber}
+          clientes={clientes}
+          onFilterChange={handleFilterChange}
         />
 
         <div className='content content-table'>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import FilterBar from '../../components/FilterBar/FilterBar';
@@ -7,13 +7,13 @@ import Notification from '../../components/Notification/Notification';
 import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
-import { useData } from '../../context/DataContext';
+import { useClientSupplier } from '../../context/ClientSupplierContext';
 import { parseISO, format, isValid } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ContasAPagar = () => {
-  const { fetchFornecedores, fornecedores } = useData();
+  const { fetchFornecedores, fornecedores } = useClientSupplier();
   const { contasAPagar, fetchContasAPagar, addContaAPagar, updateContaAPagar, deleteContaAPagar, informPagamento, desfazerPagamento, categorias, fetchCategorias } = useFinance();
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -46,6 +46,9 @@ const ContasAPagar = () => {
   });
   const [expandSection, setExpandSection] = useState(false);
   const [filteredContasAPagar, setFilteredContasAPagar] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({
+    status2: [],
+  });
 
   // Buscar dados iniciais
   useEffect(() => {
@@ -54,12 +57,41 @@ const ContasAPagar = () => {
     fetchFornecedores();
   }, [fetchContasAPagar, fetchCategorias, fetchFornecedores]);
 
-  // Atualizar contas a pagar filtradas quando contasAPagar mudar
+  const filterContas = useCallback(() => {
+    const { status2 } = selectedFilters;
+    const filtered = contasAPagar.filter(conta => {
+      const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
+      return matchesStatus;
+    });
+    setFilteredContasAPagar(filtered);
+  }, [contasAPagar, selectedFilters]);
+ 
+  // Atualizar contas a pagar filtradas quando contasAPagar ou filtros mudarem
   useEffect(() => {
     if (contasAPagar && Array.isArray(contasAPagar)) {
-      setFilteredContasAPagar(contasAPagar);
+      filterContas();
     }
-  }, [contasAPagar]);
+  }, [contasAPagar, selectedFilters, filterContas]);
+
+
+  const handleFilterChange = (e) => {
+    const { value, checked } = e.target;
+    const filterType = e.target.closest('.form-group').querySelector('h5').textContent.toLowerCase();
+    
+    setSelectedFilters(prevFilters => {
+      const updatedFilters = { ...prevFilters };
+      
+      if (filterType === 'status') {
+        if (checked) {
+          updatedFilters.status2.push(value);
+        } else {
+          updatedFilters.status2 = updatedFilters.status2.filter(stat => stat !== value);
+        }
+      }
+      
+      return updatedFilters;
+    });
+  };
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -324,6 +356,7 @@ const ContasAPagar = () => {
             buttonPeriod: true,
             buttonMeses: true,
           }}
+          onFilterChange={handleFilterChange}
         />
 
         <div className='content content-table'>
@@ -584,4 +617,3 @@ const ContasAPagar = () => {
 };
 
 export default ContasAPagar;
-

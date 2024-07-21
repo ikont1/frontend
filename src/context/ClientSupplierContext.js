@@ -3,13 +3,13 @@ import api from '../services/api';
 import { useAuth } from './AuthContext';
 
 // Criação do contexto
-const DataContext = createContext();
+const ClientSupplierContext = createContext();
 
 // Hook para usar o contexto
-export const useData = () => useContext(DataContext);
+export const useClientSupplier = () => useContext(ClientSupplierContext);
 
 // Provedor do contexto
-export const DataProvider = ({ children }) => {
+export const ClientSupplierProvider = ({ children }) => {
   const { token } = useAuth();  // Obtém o token do contexto de autenticação
   const [clientes, setClientes] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
@@ -68,7 +68,6 @@ export const DataProvider = ({ children }) => {
     }
   }, [token]);
   
-
   // Função para adicionar um cliente
   const addCliente = async (cliente) => {
     if (!token) return;
@@ -88,7 +87,7 @@ export const DataProvider = ({ children }) => {
 
   // Função para adicionar um fornecedor
   const addFornecedor = async (fornecedor) => {
-    if (!token) return; // Se não há token, não faz a requisição
+    if (!token) return;
 
     try {
       const response = await api.post('/fornecedor', fornecedor, {
@@ -140,14 +139,13 @@ export const DataProvider = ({ children }) => {
   // Função para atualizar um cliente
   const updateCliente = async (id, updatedData) => {
     if (!token) return;
-   // Remove dados enviados
     const dataToSend = { ...updatedData };
     delete dataToSend.id;
     delete dataToSend.criadoEm;
     delete dataToSend.atualizadoEm;
     delete dataToSend.deletadoEm;
     delete dataToSend.cpfCnpj;
-    
+
     try {
       const response = await api.patch(`/cliente/${id}`, dataToSend, {
         headers: {
@@ -155,15 +153,13 @@ export const DataProvider = ({ children }) => {
         }
       });
       const updatedCliente = response.data;
-      
-      // Atualize a lista de clientes corretamente
       setClientes(clientes.map(cliente => cliente.id === id ? updatedCliente : cliente));
     } catch (error) {
       console.error('Erro ao atualizar cliente', error);
       throw error;
     }
   };
-  
+
   // Função para atualizar um fornecedor
   const updateFornecedor = async (id, updatedData) => {
     if (!token) return;
@@ -173,7 +169,7 @@ export const DataProvider = ({ children }) => {
     delete dataToSend.atualizadoEm;
     delete dataToSend.deletadoEm;
     delete dataToSend.cpfCnpj;
-    
+
     try {
       const response = await api.patch(`/fornecedor/${id}`, dataToSend, {
         headers: {
@@ -181,17 +177,15 @@ export const DataProvider = ({ children }) => {
         }
       });
       const updatedFornecedor = response.data;
-      setFornecedores(fornecedores.map(fornecedor => (fornecedor.id === id ? updatedFornecedor : fornecedor)));
+      setFornecedores(fornecedores.map(fornecedor => fornecedor.id === id ? updatedFornecedor : fornecedor));
     } catch (error) {
       console.error('Erro ao atualizar fornecedor', error);
       throw error;
     }
   };
 
-
-
   return (
-    <DataContext.Provider
+    <ClientSupplierContext.Provider
       value={{
         clientes,
         fornecedores,
@@ -206,6 +200,6 @@ export const DataProvider = ({ children }) => {
       }}
     >
       {children}
-    </DataContext.Provider>
+    </ClientSupplierContext.Provider>
   );
 };

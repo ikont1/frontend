@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useData } from '../../context/DataContext';
+import { useClientSupplier } from '../../context/ClientSupplierContext';
 import './ClientesFornecedores.css';
 import { ThumbsUp, AlertTriangle } from 'react-feather';
 import Notification from '../../components/Notification/Notification';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 
 const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
-  const { addCliente, updateCliente } = useData();
+  const { addCliente, updateCliente } = useClientSupplier();
 
   const [formData, setFormData] = useState({
     cpfCnpj: '',

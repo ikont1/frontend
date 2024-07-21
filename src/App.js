@@ -1,9 +1,9 @@
 import { BrowserRouter } from "react-router-dom";
 import RoutesApp from "./routes";
-import { DataProvider } from "./context/DataContext";
 import { AuthProvider } from "./context/AuthContext";
 import { AccountProvider } from "./context/AccountContext";
 import { FinanceProvider } from "./context/FinanceContext";
+import { ClientSupplierProvider } from "./context/ClientSupplierContext";
 
 
 function App() {
@@ -11,11 +11,11 @@ function App() {
     <BrowserRouter className="container">
       <AuthProvider>
         <AccountProvider>
-          <DataProvider>
+          <ClientSupplierProvider>
             <FinanceProvider>
               <RoutesApp />
             </FinanceProvider>
-          </DataProvider>
+          </ClientSupplierProvider>
         </AccountProvider>
       </AuthProvider>
     </BrowserRouter >

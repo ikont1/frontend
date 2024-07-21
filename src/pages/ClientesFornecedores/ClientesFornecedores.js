@@ -1,6 +1,6 @@
 // pages/ClientesFornecedores/ClientesFornecedores.js
 import React, { useState, useEffect } from 'react';
-import { useData } from '../../context/DataContext';
+import { useClientSupplier } from '../../context/ClientSupplierContext';
 import Header from '../../components/Header/Header';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { ChevronDown, PlusCircle, ThumbsUp } from 'react-feather';
@@ -13,7 +13,7 @@ import Notification from '../../components/Notification/Notification';
 import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ClientesFornecedores = () => {
-  const { clientes, fornecedores, fetchClientes, fetchFornecedores, deleteCliente, deleteFornecedor } = useData();
+  const { clientes, fornecedores, fetchClientes, fetchFornecedores, deleteCliente, deleteFornecedor } = useClientSupplier();
   const [activeTab, setActiveTab] = useState('clientes');
   const [showAddOptions, setShowAddOptions] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null);

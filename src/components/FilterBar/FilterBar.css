@@ -189,6 +189,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
   width: 400px;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .modal-filter>span {
