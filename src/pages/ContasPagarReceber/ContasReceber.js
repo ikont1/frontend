@@ -8,7 +8,7 @@ import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
-import { parseISO, format, isValid } from 'date-fns';
+import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns'; // Adicione startOfMonth e endOfMonth
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
 
@@ -50,6 +50,11 @@ const ContasReceber = () => {
     categorias: [],
     status: [],
     clienteId: null,
+    period: {
+      start: null,
+      end: null
+    },
+    month: null,
   });
 
   // Buscar dados iniciais
@@ -59,17 +64,30 @@ const ContasReceber = () => {
     fetchClientes();
   }, [fetchContasAReceber, fetchCategoriasAReceber, fetchClientes]);
 
-  const filterContas = useCallback(() => {
-    const { categorias, status, clienteId } = selectedFilters;
-    const filtered = contasAReceber.filter(conta => {
-      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
-      const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
-      const matchesCliente = !clienteId || conta.clienteId === clienteId;
-      return matchesCategoria && matchesStatus && matchesCliente;
-    });
-    setFilteredContasAReceber(filtered);
-  }, [contasAReceber, selectedFilters]);
-  
+const filterContas = useCallback(() => {
+  const { categorias, status, clienteId, period, month } = selectedFilters;
+  const filtered = contasAReceber.filter(conta => {
+    const contaVencimento = parseISO(conta.vencimento);
+
+    const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
+    const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
+    const matchesCliente = !clienteId || conta.clienteId === clienteId;
+    const matchesPeriod = (!period.start && !period.end) || 
+      (isValid(new Date(period.start)) && isValid(new Date(period.end)) && 
+        contaVencimento >= new Date(period.start) && 
+        contaVencimento <= new Date(period.end));
+    const matchesMonth = !month || 
+      (isValid(new Date(month)) && 
+        contaVencimento >= startOfMonth(new Date(month)) &&
+        contaVencimento <= endOfMonth(new Date(month)));
+
+    return matchesCategoria && matchesStatus && matchesCliente && matchesPeriod && matchesMonth;
+  });
+  setFilteredContasAReceber(filtered);
+}, [contasAReceber, selectedFilters]);
+
+
+
   // Atualizar contas a receber filtradas quando contasAReceber ou filtros mudarem
   useEffect(() => {
     if (contasAReceber && Array.isArray(contasAReceber)) {
@@ -77,34 +95,42 @@ const ContasReceber = () => {
     }
   }, [contasAReceber, selectedFilters, filterContas]);
 
-  
+
 
   const handleFilterChange = (e) => {
-    const { value, checked } = e.target;
-    const filterType = e.target.closest('.form-group').querySelector('h5').textContent.toLowerCase();
-    
+    const { name, value, checked } = e.target;
+
     setSelectedFilters(prevFilters => {
       const updatedFilters = { ...prevFilters };
-      
-      if (filterType === 'categoria') {
+
+      if (name === 'categoria') {
         if (checked) {
           updatedFilters.categorias.push(value);
         } else {
           updatedFilters.categorias = updatedFilters.categorias.filter(cat => cat !== value);
         }
-      } else if (filterType === 'status') {
+      } else if (name === 'status') {
         if (checked) {
           updatedFilters.status.push(value);
         } else {
           updatedFilters.status = updatedFilters.status.filter(stat => stat !== value);
         }
-      } else if (filterType === 'cliente') {
+      } else if (name === 'cliente') {
         updatedFilters.clienteId = checked ? value : null;
+      } else if (name === 'periodStart' || name === 'periodEnd') {
+        updatedFilters.period = {
+          ...updatedFilters.period,
+          [name === 'periodStart' ? 'start' : 'end']: value,
+        };
+      } else if (name === 'month') {
+        updatedFilters.month = value;
       }
-      
+
       return updatedFilters;
     });
   };
+
+
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -394,6 +420,7 @@ const ContasReceber = () => {
           clientes={clientes}
           onFilterChange={handleFilterChange}
         />
+
 
         <div className='content content-table'>
           <h1 className='h1-search'>Contas a receber <SearchBar onSearch={handleSearch} placeholder='Categoria/descrição' /></h1>

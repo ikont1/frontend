@@ -19,30 +19,71 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
   const [searchCliente, setSearchCliente] = useState('');
   const [filteredClientes, setFilteredClientes] = useState(clientes || []);
 
+  // Atualizar clientes filtrados quando a lista de clientes mudar
   useEffect(() => {
     setFilteredClientes(clientes);
   }, [clientes]);
 
+  // Alternar exibição dos filtros
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
+  // Alternar exibição dos modais
   const toggleModal = (modal) => {
     setActiveModal(activeModal === modal ? null : modal);
   };
 
+  // Navegar para o mês anterior
   const handlePrevMonth = () => {
-    setSelectedMonth(subMonths(selectedMonth, 1));
+    const newMonth = subMonths(selectedMonth, 1);
+    setSelectedMonth(newMonth);
+    // Atualizar filtro por mês
+    onFilterChange({
+      target: {
+        name: 'month',
+        value: newMonth.toISOString().split('T')[0],
+      }
+    });
   };
 
+  // Navegar para o próximo mês
   const handleNextMonth = () => {
-    setSelectedMonth(addMonths(selectedMonth, 1));
+    const newMonth = addMonths(selectedMonth, 1);
+    setSelectedMonth(newMonth);
+    // Atualizar filtro por mês
+    onFilterChange({
+      target: {
+        name: 'month',
+        value: newMonth.toISOString().split('T')[0],
+      }
+    });
   };
 
+
+  // Alternar exibição do seletor de data
   const toggleDatePicker = () => {
     setShowDatePicker(!showDatePicker);
   };
 
+  // Aplicar filtro por período
+  const applyPeriodFilter = () => {
+    setShowDatePicker(false);
+    onFilterChange({
+      target: {
+        name: 'periodStart',
+        value: startDate ? startDate.toISOString().split('T')[0] : null,
+      }
+    });
+    onFilterChange({
+      target: {
+        name: 'periodEnd',
+        value: endDate ? endDate.toISOString().split('T')[0] : null,
+      }
+    });
+  };
+
+  // Filtrar clientes com base no texto digitado
   const handleClientSearch = (e) => {
     const searchTerm = e.target.value.toLowerCase();
     setSearchCliente(searchTerm);
@@ -56,6 +97,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
     <div className='filter-bar-container'>
       <div className="filter-bar">
 
+        {/* Botão para adicionar nova conta */}
         {filterConfig.buttonAdd && (
           <button className="add-button-receber" onClick={onAdd}>
             <PlusCircle /> {titleButton}
@@ -64,6 +106,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
 
         <div className="filters">
 
+          {/* Filtro por mês */}
           {filterConfig.buttonMeses && (
             <div className="date-filter">
               <ChevronLeft className="icon-left" onClick={handlePrevMonth} />
@@ -72,12 +115,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
             </div>
           )}
 
+          {/* Filtro por período */}
           {filterConfig.buttonPeriod && (
             <button className="period-button" onClick={toggleDatePicker}>
               <Calendar /> Selecionar período
             </button>
           )}
 
+          {/* Seletor de datas */}
           {showDatePicker && (
             <div className="date-picker-modal">
               <span>Data início</span>
@@ -102,7 +147,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
                 locale="pt-BR"
                 inline
               />
-              <button onClick={() => setShowDatePicker(false)}>Aplicar</button>
+              <button onClick={applyPeriodFilter}>Aplicar</button>
             </div>
           )}
         </div>
@@ -114,9 +159,11 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
         </button>
       </div>
 
+      {/* Filtros avançados */}
       {showFilters && (
         <div className="advanced-filters">
 
+          {/* Filtro por categoria */}
           {filterConfig.categoria && (
             <div className="form-group">
               <h5>Categoria</h5>
@@ -129,7 +176,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
                     {categorias.map(categoria => (
                       <li key={categoria}>
                         <label>
-                          <input type="checkbox" onChange={onFilterChange} value={categoria} />
+                          <input type="checkbox" name="categoria" onChange={onFilterChange} value={categoria} />
                           {categoria}
                         </label>
                       </li>
@@ -140,6 +187,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
             </div>
           )}
 
+          {/* Filtro por status (contas a receber) */}
           {filterConfig.status && (
             <div className="form-group">
               <h5>Status</h5>
@@ -150,15 +198,17 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
                 <div className="modal-filter">
                   <h5>Status</h5>
                   <ul>
-                    <li><label><input type="checkbox" onChange={onFilterChange} value="areceber" /> A receber</label></li>
-                    <li><label><input type="checkbox" onChange={onFilterChange} value="recebido" /> Recebido</label></li>
-                    <li><label><input type="checkbox" onChange={onFilterChange} value="vencido" /> Vencido</label></li>
+                    <li><label><input type="checkbox" name="status" onChange={onFilterChange} value="areceber" /> A receber</label></li>
+                    <li><label><input type="checkbox" name="status" onChange={onFilterChange} value="recebido" /> Recebido</label></li>
+                    <li><label><input type="checkbox" name="status" onChange={onFilterChange} value="vencido" /> Vencido</label></li>
                   </ul>
                 </div>
               )}
             </div>
           )}
 
+
+          {/* Filtro por cliente */}
           {filterConfig.cliente && (
             <div className="form-group">
               <h5>Cliente</h5>
@@ -173,7 +223,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
                     {filteredClientes.map(cliente => (
                       <li key={cliente.id}>
                         <label>
-                          <input type="checkbox" onChange={onFilterChange} value={cliente.id} />
+                          <input type="checkbox" name="cliente" onChange={onFilterChange} value={cliente.id} />
                           {cliente.nomeFantasia}
                         </label>
                       </li>
@@ -184,12 +234,17 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
             </div>
           )}
 
+          {/* Filtro para exibir somente faturas */}
           {filterConfig.exibirFaturas && (
             <div className="form-group input-checkbox">
-              <label><input type="checkbox" name="faturas" onChange={onFilterChange} /> Exibir somente faturas</label>
+              <label>
+                <input type="checkbox" name="faturas" onChange={onFilterChange} />
+                Exibir somente faturas
+              </label>
             </div>
           )}
 
+          {/* Filtro por status (contas a pagar) */}
           {filterConfig.status2 && (
             <div className="form-group">
               <h5>Status</h5>
@@ -200,15 +255,44 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
                 <div className="modal-filter">
                   <h5>Status</h5>
                   <ul>
-                    <li><label><input type="checkbox" onChange={onFilterChange} value="apagar" /> A pagar</label></li>
-                    <li><label><input type="checkbox" onChange={onFilterChange} value="pago" /> Pago</label></li>
-                    <li><label><input type="checkbox" onChange={onFilterChange} value="vencido" /> Vencido</label></li>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="status2"
+                          value="apagar"
+                          onChange={onFilterChange}
+                        /> A pagar
+                      </label>
+                    </li>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="status2"
+                          value="pago"
+                          onChange={onFilterChange}
+                        /> Pago
+                      </label>
+                    </li>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="status2"
+                          value="vencido"
+                          onChange={onFilterChange}
+                        /> Vencido
+                      </label>
+                    </li>
                   </ul>
                 </div>
               )}
             </div>
           )}
 
+
+          {/* Filtro por situação da nota fiscal */}
           {filterConfig.situacaoNF && (
             <div className="form-group">
               <h5>Situação</h5>

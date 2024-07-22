@@ -8,7 +8,7 @@ import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
-import { parseISO, format, isValid } from 'date-fns';
+import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
 
@@ -48,6 +48,11 @@ const ContasAPagar = () => {
   const [filteredContasAPagar, setFilteredContasAPagar] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
     status2: [],
+    period: {
+      start: null,
+      end: null
+    },
+    month: null,
   });
 
   // Buscar dados iniciais
@@ -58,10 +63,19 @@ const ContasAPagar = () => {
   }, [fetchContasAPagar, fetchCategorias, fetchFornecedores]);
 
   const filterContas = useCallback(() => {
-    const { status2 } = selectedFilters;
+    const { status2, period, month } = selectedFilters;
     const filtered = contasAPagar.filter(conta => {
+      const contaVencimento = new Date(conta.vencimento);
+  
       const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
-      return matchesStatus;
+      const matchesPeriod = (!period.start && !period.end) || 
+        (period.start && period.end && 
+          contaVencimento >= new Date(period.start) && 
+          contaVencimento <= new Date(period.end));
+      const matchesMonth = !month || 
+        (contaVencimento >= startOfMonth(new Date(month)) &&
+         contaVencimento <= endOfMonth(new Date(month)));
+      return matchesStatus && matchesPeriod && matchesMonth;
     });
     setFilteredContasAPagar(filtered);
   }, [contasAPagar, selectedFilters]);
@@ -75,23 +89,31 @@ const ContasAPagar = () => {
 
 
   const handleFilterChange = (e) => {
-    const { value, checked } = e.target;
-    const filterType = e.target.closest('.form-group').querySelector('h5').textContent.toLowerCase();
-    
+    const { name, value, checked } = e.target;
+  
     setSelectedFilters(prevFilters => {
       const updatedFilters = { ...prevFilters };
-      
-      if (filterType === 'status') {
+  
+      if (name === 'status2') {
         if (checked) {
           updatedFilters.status2.push(value);
         } else {
           updatedFilters.status2 = updatedFilters.status2.filter(stat => stat !== value);
         }
+      } else if (name === 'periodStart' || name === 'periodEnd') {
+        updatedFilters.period = {
+          ...updatedFilters.period,
+          [name === 'periodStart' ? 'start' : 'end']: value,
+        };
+      } else if (name === 'month') {
+        updatedFilters.month = value;
       }
-      
+  
       return updatedFilters;
     });
   };
+  
+  
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -340,6 +362,7 @@ const ContasAPagar = () => {
       console.error('Erro ao remover conta a pagar', error);
     }
   };
+
 
   return (
     <div className="container">
