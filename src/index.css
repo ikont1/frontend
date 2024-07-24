@@ -35,6 +35,7 @@ body {
   padding: 20px;
   background-color: var(--background);
   margin-left: 250px;
+
   @media (max-width: 768px) {
     margin-left: 0;
   }
@@ -213,8 +214,9 @@ a {
 .content-table {
   padding: 20px 0;
   padding-bottom: 60px;
+
   >h1 {
-      margin-left: 20px;
+    margin-left: 20px;
   }
 }
 
@@ -266,6 +268,7 @@ form {
   flex: 1 1 100%;
   margin-bottom: 20px;
 }
+
 .form-group-modal {
   display: flex;
   gap: 20px;

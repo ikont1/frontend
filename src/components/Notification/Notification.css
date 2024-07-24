@@ -33,6 +33,10 @@
   border: 2px solid var(--error-color);
 }
 
+.notification.success2 {
+  border: 2px solid var(--primary-color);
+}
+
 .notification-icon {
   font-size: 30px;
   color: var(--highlight-color);
@@ -66,6 +70,9 @@
 .notification.error .notification-icon {
   color: var(--error-color);
 }
+.notification.success2 .notification-icon {
+  color: var(--primary-color);
+}
 
 .notification-message h2 {
   font-size: 24px;
@@ -75,6 +82,9 @@
 
 .notification.error .notification-message h2 {
   color: var(--error-color);
+}
+.notification.success2 .notification-message h2 {
+  color: var(--primary-color);
 }
 
 .notification-message p {

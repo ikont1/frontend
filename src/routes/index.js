@@ -5,12 +5,12 @@ import Carteira from "../pages/Carteira/Carteira";
 import ContasReceber from "../pages/ContasPagarReceber/ContasReceber.js";
 import ContasAPagar from "../pages/ContasPagarReceber/ContasAPagar.js";
 import ClientesFornecedores from "../pages/ClientesFornecedores/ClientesFornecedores.js";
-import MinhaEmpresa from "../pages/MinhaEmpresa/MinhaEmpresa.js";
+import MinhaEmpresa from "../pages/Conta/MinhaEmpresa.js";
 import NotasFiscais from "../pages/NotasFiscais/NotasFiscais.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 import RecuperarSenha from "../pages/Login/recuperarSenha.js";
 import RedefinirSenha from "../pages/Login/redefinirSenha.js";
-import CadastrarConta from "../pages/Conta/CadastroConta.js";
+import DetalhesConta from "../pages/Carteira/DetalhesConta.js";
 
 
 function RoutesApp() {
@@ -20,7 +20,6 @@ function RoutesApp() {
       <Route path="/login" element={<Login />} />
       <Route path="/recuperar-senha" element={<RecuperarSenha/>} />
       <Route path="/nova-senha" element={<RedefinirSenha/>} />
-      <Route path="/cadastro-conta" element={<CadastrarConta/>} />
 
       {/* Rotas bloqueadas */}
       <Route element={<ProtectedRoute />}>
@@ -31,6 +30,7 @@ function RoutesApp() {
         <Route path="/contas-pagar" element={<ContasAPagar />} />
         <Route path="/clientes-fornecedores" element={<ClientesFornecedores />} />
         <Route path="/minha-empresa" element={<MinhaEmpresa />} />
+        <Route path="/conta/:id" element={<DetalhesConta/>} />
       </Route>
     </Routes >
   );

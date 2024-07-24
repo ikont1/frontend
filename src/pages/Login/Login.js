@@ -7,12 +7,24 @@ import { FaWhatsapp, FaInstagram, FaFacebook, FaYoutube, FaLinkedin } from 'reac
 import { useAuth } from '../../context/AuthContext';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import Notification from '../../components/Notification/Notification';
+import Modal from '../../components/Modal/Modal';
+import CadastroConta from '../../pages/Conta/CadastroConta';
 
 const Login = () => {
   const { login, loading, error, setNotification } = useAuth();
   const [cpfCnpj, setCpfCnpj] = useState('');
   const [senha, setSenha] = useState('');
   const [inputError, setInputError] = useState({});
+
+  const [showModal, setShowModal] = useState(false);
+
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
 
   useEffect(() => {
     if (error) {
@@ -87,7 +99,7 @@ const Login = () => {
         </form>
 
         <div className="div-botton">
-          <Link to="/cadastro-conta" className="register-link">Não é cliente? Comece agora</Link>
+          <span className="register-link" onClick={handleOpenModal}>Não é cliente? Comece agora</span>
           <div className="social-media">
             <FaInstagram aria-hidden="true" className="i-sociais" />
             <FaWhatsapp aria-hidden="true" className="i-sociais" />
@@ -99,7 +111,7 @@ const Login = () => {
       </div>
 
       {error && ['Sua conta está temporariamente inativa!', 'Problemas de conexão com internet!', 'Erro no servidor!'].includes(error) && (
-        <Notification 
+        <Notification
           title={error.includes('inativa') ? 'Sua conta está temporariamente inativa!' : error.includes('conexão') ? 'Problemas de conexão com internet!' : 'Erro no servidor!'}
           message={error.includes('inativa') ? 'Entre em contato com o nosso suporte para obter assistência.' : error.includes('conexão') ? 'Houve um problema de conexão. Por favor, verifique sua internet e tente novamente.' : 'Desculpe, ocorreu um erro no servidor. Por favor, tente novamente mais tarde.'}
           type="error"
@@ -111,6 +123,15 @@ const Login = () => {
           ]}
         />
       )}
+
+      {/* Modal de cadastrar conta */}
+      <Modal
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        size='large'
+        title="Cadastre-se agora na iKont1">
+        <CadastroConta />
+      </Modal>
     </div>
   );
 };

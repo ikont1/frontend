@@ -16,6 +16,7 @@ export const AccountProvider = ({ children }) => {
     setNotification(null);
   };
 
+  // Cadastrar conta
   const cadastrarConta = async (data) => {
     setLoading(true);
     setError(null);
@@ -23,9 +24,9 @@ export const AccountProvider = ({ children }) => {
       await api.post('/conta', data);
       setLoading(false);
       setNotification({
-        title: 'Conta cadastrada com sucesso!',
-        message: 'Verifique seu email que enviamos mais informações.',
-        type: 'success',
+        title: 'Tudo certo!',
+        message: 'Enviaremos um e-mail de Confirmação de Pagamento',
+        type: 'success2',
         icon: ThumbsUp,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
       });
@@ -44,6 +45,7 @@ export const AccountProvider = ({ children }) => {
     }
   };
 
+  // Atualizar dados minha empresa
   const atualizarConta = async (id, data) => {
     setLoading(true);
     setError(null);
@@ -69,12 +71,14 @@ export const AccountProvider = ({ children }) => {
     }
   };
 
+  // Listar dados minha empresa
   const listarContas = async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await api.get('/conta');
       setLoading(false);
+      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error(error);
@@ -84,6 +88,7 @@ export const AccountProvider = ({ children }) => {
     }
   };
 
+  // Listar conta porid
   const listarContaPorId = async (id) => {
     setLoading(true);
     setError(null);
@@ -99,6 +104,7 @@ export const AccountProvider = ({ children }) => {
     }
   };
 
+  // Deletar conta
   const deletarConta = async (id) => {
     setLoading(true);
     setError(null);

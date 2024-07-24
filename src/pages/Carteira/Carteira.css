@@ -1,0 +1,263 @@
+.container-carteira {
+  display: flex;
+  flex-direction: column;
+  padding: 60px 20px;
+
+  >h3 {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    margin-bottom: 20px;
+
+    .walet-icon {
+      font-size: 30px;
+      color: var(--primary-color);
+    }
+  }
+}
+
+/* Cards conta */
+.contas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.card-conta {
+  width: 350px;
+  height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f5f5f5;
+  padding-bottom: 10px;
+}
+
+.banco-logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 16px;
+}
+
+.banco-info {
+  flex: 1;
+}
+
+.banco-info h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.banco-dados {
+  display: flex;
+  gap: 8px;
+}
+
+.banco-dados span {
+  background-color: #F8F5FA;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.saldo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menu-icon-conta {
+  margin-top: -20px;
+  font-size: 30px;
+  cursor: pointer;
+  color: var(--text-color);
+  padding: 0;
+  background: none;
+}
+
+.card-conta .card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+}
+
+.card-conta .saldo-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-left: 3px solid var(--primary-color);
+  padding-left: 10px;
+
+  .span-total {
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.card-conta .saldo-total span {
+  font-size: 14px;
+}
+
+.card-conta .saldo-total span:first-child {
+  color: #888;
+}
+
+/* card de adicionar conta */
+.add-conta {
+  position: relative;
+  background: none;
+  box-shadow: none;
+  border: 1px dashed var(--text-color);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+}
+
+.add-button-conta {
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  .plus-icon {
+    transform: translateY(10%);
+  }
+}
+
+.banco-logo-placeholder {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-color);
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+/* Tooltip */
+
+.saldo-tooltip {
+  position: relative;
+}
+
+.tooltip-carteira {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.tooltip-carteira ul {
+  width: 120px;
+}
+.tooltip-carteira li {
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 1px solid #DEDEDE;
+  cursor: pointer;
+}
+
+.tooltip-carteira li:hover {
+  background: #f5f5f5;
+}
+
+
+/* Detalhes da conta */
+.detalhes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.banco-logo {
+  width: 50px;
+  height: 50px;
+  margin-right: 20px;
+}
+
+.banco-info-detalhes {
+  flex: 1;
+}
+
+.banco-info-detalhes h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.banco-dados-detalhes {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-color);
+  width: 280px;
+  border-bottom: 1px solid #DEDEDE;
+  >p {
+    font-size: 18px;
+    margin-left: 100px;
+    font-weight: 500;
+  }
+}
+
+.integrar-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--primary-color);
+  font-size: 14px;
+  letter-spacing: 1px;
+  >.icon{
+    font-size: 20px;
+  }
+}
+
+.saldo-atual {
+  background-color: #fff;
+  padding: 8px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.saldo-atual span {
+  font-size: 12px;
+}
+
+.saldo-atual h2 {
+  font-size: 20px;
+  font-weight: 500;
+}

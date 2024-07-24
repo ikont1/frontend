@@ -1,32 +1,91 @@
-.cadastro-container {
-  background-color: #fff;
-  height: 100vh;
-  .logo{
-    width: 300px;
-    margin: 40px 0 20px 0;
-  }
-}
-
-.cadastro-container .cadastro-form {
+.container-cadastro-button {
+  margin-top: 40px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  >h1 {
-    margin-bottom: 40px;
-  }
-  >form {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    .input-group{
-      width: 500px !important;
+  align-items: flex-start;
 
+  >span {
+    margin-bottom: 10px;
+    font-size: 12px;
+
+    >a {
+      text-decoration: underline;
+      color: var(--highlight-color);
     }
-    .container-reset-submit{
-      display: flex;
-      justify-content: center;
-      padding:  20px 0;
-    }
+  }
+
+  >button {
+    background-color: var(--primary-color);
   }
 }
+
+@media (max-width: 600px){
+  .cadastro-form .input-group {
+    width: 100% !important;
+  }
+}
+
+/* Miha empresa */
+.empresa-container {
+  padding: 10px 0;
+  >h1 {
+    border-bottom: 1px solid var(--background);
+    padding: 20px 20px 30px 20px;
+  }
+  >.section-header {
+    padding-left: 20px;
+    margin: 30px 0 -10px 0;
+  }
+}
+
+.empresa-section {
+  margin: 20px 0 0 0;
+  padding: 20px;
+}
+
+.div1 {
+  display: flex;
+  gap: 50px;
+}
+.div1>img{
+  width: 150px;
+  height: 150px;
+  margin: 20px 50px 0 0;
+}
+
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin: 20px 0 10px 0 ;
+}
+
+.section-header svg {
+  color: var(--primary-color);
+  margin: 0 10px 3px 0;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.section-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.form-group-empresa2{
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+
+}
+.form-group-empresa {
+  flex: 1 1 15%;
+  display: flex;
+  flex-direction: column;
+}
+

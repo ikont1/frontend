@@ -6,6 +6,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { FaWhatsapp, FaInstagram, FaFacebook, FaYoutube, FaLinkedin } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
+import Modal from '../../components/Modal/Modal';
+import CadastroConta from '../../pages/Conta/CadastroConta';
+
+
 
 const RedefinirSenha = () => {
   const { setPassword, login, loading, error } = useAuth();
@@ -15,6 +19,17 @@ const RedefinirSenha = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const location = useLocation();
+
+  const [showModal, setShowModal] = useState(false);
+
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
 
   useEffect(() => {
     if (error) {
@@ -112,7 +127,7 @@ const RedefinirSenha = () => {
         )}
 
         <div className="div-botton">
-          <Link to="/cadastro-conta" className="register-link">Não é cliente? Comece agora</Link>
+          <span className="register-link" onClick={handleOpenModal}>Não é cliente? Comece agora</span>
           <div className="social-media">
             <FaInstagram aria-hidden="true" className="i-sociais" />
             <FaWhatsapp aria-hidden="true" className="i-sociais" />
@@ -122,6 +137,15 @@ const RedefinirSenha = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de cadastrar conta */}
+      <Modal
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        size='large'
+        title="Cadastre-se agora na iKont1">
+        <CadastroConta />
+      </Modal>
     </div>
   );
 };
