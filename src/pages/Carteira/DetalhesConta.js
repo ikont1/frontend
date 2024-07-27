@@ -8,7 +8,7 @@ import { useWallet } from '../../context/WalletContext';
 import IntegracaoModal from '../../components/Modal/integracaoModal';
 
 const bancoLogos = {
-  '001': require('../../assets/imgs/bblogo.png'),
+  '001': require('../../assets/imgs/bbLogo.png'),
   '237': require('../../assets/imgs/bradescologo.png'),
   '341': require('../../assets/imgs/itaulogo.png'),
   '260': require('../../assets/imgs/nubanklogo.png'),
