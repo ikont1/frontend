@@ -27,7 +27,7 @@ const Carteira = () => {
     '104': require('../../assets/imgs/caixalogo.png'),
   };
 
-  // função para o tooltip de opcoes
+  // função para o tooltip de opcões
   const handleTooltipToggle = (id) => {
     setActiveTooltip(activeTooltip === id ? null : id);
   };
