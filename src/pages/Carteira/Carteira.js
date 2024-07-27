@@ -4,15 +4,28 @@ import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import './Carteira.css';
 import { BiWallet } from 'react-icons/bi';
-import bancoLogo from '../../assets/imgs/bbLogo.png';
 import { PlusCircle } from 'react-feather';
 import { useWallet } from '../../context/WalletContext';
+import ConfirmationModal from '../../components/Modal/confirmationModal';
 
 const Carteira = () => {
-  const { listarContas } = useWallet();
+  const { listarContas, excluirConta, desativarConta, reativarConta } = useWallet();
   const [contas, setContas] = useState([]);
   const [activeTooltip, setActiveTooltip] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedContaId, setSelectedContaId] = useState(null);
+  const [modalAction, setModalAction] = useState(null); // 'desativar' ou 'reativar'
   const navigate = useNavigate();
+
+
+
+  const bancoLogos = {
+    '001': require('../../assets/imgs/bblogo.png'),
+    '237': require('../../assets/imgs/bradescologo.png'),
+    '341': require('../../assets/imgs/itaulogo.png'),
+    '260': require('../../assets/imgs/nubanklogo.png'),
+    '104': require('../../assets/imgs/caixalogo.png'),
+  };
 
   // função para o tooltip de opcoes
   const handleTooltipToggle = (id) => {
@@ -24,10 +37,45 @@ const Carteira = () => {
     navigate(`/conta/${id}`);
   };
 
+  // Excluir conta
+  const handleDeleteAccount = (id) => {
+    setSelectedContaId(id);
+    setModalAction('excluir');
+    setShowModal(true);
+    setActiveTooltip(null)
+  };
+
   // Desativar conta
   const handleDeactivateAccount = (id) => {
-    console.log(`Desativar conta ${id}`);
-    // Lógica para desativar a conta
+    setSelectedContaId(id);
+    setModalAction('desativar');
+    setShowModal(true);
+    setActiveTooltip(null)
+  };
+
+  // Reativar conta
+  const handleReactivateAccount = (id) => {
+    setSelectedContaId(id);
+    setModalAction('reativar');
+    setShowModal(true);
+    setActiveTooltip(null)
+  };
+
+  // Confirmar ação do modal
+  const handleConfirmModal = async () => {
+    setShowModal(false);
+    try {
+      if (modalAction === 'excluir') {
+        await excluirConta(selectedContaId);
+      } else if (modalAction === 'desativar') {
+        await desativarConta(selectedContaId);
+      } else if (modalAction === 'reativar') {
+        await reativarConta(selectedContaId);
+      }
+      fetchContas();
+    } catch (error) {
+      console.error(`Erro ao ${modalAction} conta:`, error);
+    }
   };
 
   // Lista todas as contas
@@ -54,14 +102,13 @@ const Carteira = () => {
           <h3><BiWallet className='walet-icon' /> Contas e Carteiras</h3>
 
           <div className='contas'>
-            {contas > 0 ? (
-              <p></p>
-            ) : (
+            {contas.length > 0 ? (
               contas.map(conta => (
                 <div className="card-conta" key={conta.id}>
                   <div className="card-header">
-                    <img src={bancoLogo} alt="Banco Logo" className="banco-logo" />
+                    <img src={bancoLogos[conta.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo" />
                     <div className="banco-info">
+                      {conta.status === 'inativo' && <span className="flag-inativa">Conta inativa</span>}
                       <h3>{conta.nomeBanco}</h3>
                       <div className="banco-dados">
                         <span className="agencia">{conta.agencia}</span>
@@ -73,8 +120,17 @@ const Carteira = () => {
                       {activeTooltip === conta.id && (
                         <div className="tooltip-carteira">
                           <ul>
-                            <li onClick={() => handleViewAccount(conta.id)}>Visualizar conta</li>
-                            <li onClick={() => handleDeactivateAccount(conta.id)}>Desativar conta</li>
+                            {conta.status === 'ativo' ? (
+                              <>
+                                <li onClick={() => handleViewAccount(conta.id)}>Visualizar conta</li>
+                                <li onClick={() => handleDeactivateAccount(conta.id)}>Desativar conta</li>
+                              </>
+                            ) : (
+                              <>
+                                <li onClick={() => handleReactivateAccount(conta.id)}>Reativar conta</li>
+                                <li onClick={() => handleDeleteAccount(conta.id)}>Excluir conta</li>
+                              </>
+                            )}
                           </ul>
                         </div>
                       )}
@@ -89,10 +145,11 @@ const Carteira = () => {
                   </div>
                 </div>
               ))
+            ) : (
+              <p>Nenhuma conta cadastrada.</p>
             )}
 
-
-            <div className="card-conta add-conta">
+            <div className="card-conta add-conta" onClick={() => navigate('/cadastro-conta-bancaria')}>
               <div className="overlay">
                 <button className="add-button-conta">
                   <span className="plus-icon"><PlusCircle /> </span> Criar conta
@@ -118,11 +175,18 @@ const Carteira = () => {
                 </div>
               </div>
             </div>
-
-
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <ConfirmationModal
+          title={modalAction === 'excluir' ? 'Excluir Conta' : modalAction === 'desativar' ? 'Desativar Conta' : 'Reativar Conta'}
+          message={`Tem certeza que deseja ${modalAction} esta conta?`}
+          onConfirm={handleConfirmModal}
+          onCancel={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 };

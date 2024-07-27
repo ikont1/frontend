@@ -11,6 +11,7 @@ import ProtectedRoute from "./ProtectedRoute.js";
 import RecuperarSenha from "../pages/Login/recuperarSenha.js";
 import RedefinirSenha from "../pages/Login/redefinirSenha.js";
 import DetalhesConta from "../pages/Carteira/DetalhesConta.js";
+import CadastroContaBancaria from '../pages/Carteira/CadastroContaBancaria.js';
 
 
 function RoutesApp() {
@@ -31,6 +32,7 @@ function RoutesApp() {
         <Route path="/clientes-fornecedores" element={<ClientesFornecedores />} />
         <Route path="/minha-empresa" element={<MinhaEmpresa />} />
         <Route path="/conta/:id" element={<DetalhesConta/>} />
+        <Route path="/cadastro-conta-bancaria" element={<CadastroContaBancaria />} />
       </Route>
     </Routes >
   );

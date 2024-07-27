@@ -3,21 +3,33 @@ import { useParams } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import './Carteira.css';
-import { BiWallet, BiSolidZap } from 'react-icons/bi';
+import { BiWallet, BiSolidZap, BiLike } from 'react-icons/bi';
 import { useWallet } from '../../context/WalletContext';
-import bancoLogo from '../../assets/imgs/bbLogo.png';
+import IntegracaoModal from '../../components/Modal/integracaoModal';
 
+const bancoLogos = {
+  '001': require('../../assets/imgs/bblogo.png'),
+  '237': require('../../assets/imgs/bradescologo.png'),
+  '341': require('../../assets/imgs/itaulogo.png'),
+  '260': require('../../assets/imgs/nubanklogo.png'),
+  '104': require('../../assets/imgs/caixalogo.png'),
+};
 
 const DetalhesConta = () => {
   const { id } = useParams();
   const { listarContas } = useWallet();
   const [conta, setConta] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   useEffect(() => {
     const fetchConta = async () => {
       try {
         const contasData = await listarContas();
         const contaEncontrada = contasData.find(conta => conta.id === parseInt(id));
+        if (contaEncontrada) {
+          contaEncontrada.bancoLogo = bancoLogos[contaEncontrada.codigoBanco] || bancoLogos['default'];
+        }
         setConta(contaEncontrada);
       } catch (error) {
         console.error('Erro ao buscar conta:', error);
@@ -27,13 +39,27 @@ const DetalhesConta = () => {
     fetchConta();
   }, [id, listarContas]);
 
+  const handleIntegrarClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleConfirmIntegracao = () => {
+    // Lógica de confirmação de integração
+    console.log('Integração confirmada');
+    setIsModalOpen(false);
+  };
+
   if (!conta) {
     return (
       <div className="container">
         <Sidebar />
         <div className="main-content">
           <Header />
-          <p>Nenhuma conta não encontrada...</p >
+          <p>Nenhuma conta encontrada...</p>
         </div>
       </div>
     );
@@ -49,18 +75,17 @@ const DetalhesConta = () => {
           <h3><BiWallet className='walet-icon' /> Contas e Carteiras</h3>
 
           <div className="detalhes-header">
-            <img src={bancoLogo} alt="Banco Logo" className="banco-logo" />
+            <img src={conta.bancoLogo} alt="Banco Logo" className="banco-logo" />
             <div className="banco-info-detalhes">
               <h3>{conta.nomeBanco}</h3>
               <div className="banco-dados-detalhes">
                 <span className="agencia">{conta.agencia}</span>
                 <span className="conta">{conta.numeroConta}</span>
-
                 <p>R${conta.saldoInicial}</p>
               </div>
             </div>
 
-            <button className="integrar-button"><BiSolidZap className='icon'/> Integrar</button>
+            <button className="integrar-button" onClick={handleIntegrarClick}><BiSolidZap className='icon' /> Integrar</button>
           </div>
 
           <div className="saldo-atual">
@@ -99,9 +124,19 @@ const DetalhesConta = () => {
                 </tr>
               </tbody>
             </table>
+
           </div>
         </div>
+        <button className="resolv-conciliacao"><BiLike className='icon' /> Resolver conciliações</button>
       </div>
+
+      {/* Modal de integraçao */}
+      <IntegracaoModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        conta={conta}
+        onConfirm={handleConfirmIntegracao}
+      />
     </div>
   );
 };

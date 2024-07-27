@@ -31,7 +31,6 @@ export const AccountProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
       });
     } catch (error) {
-      console.error(error);
       setError(error.response?.data?.message || 'Erro ao cadastrar. Por favor, tente novamente.');
       setNotification({
         title: 'Erro',
@@ -46,16 +45,17 @@ export const AccountProvider = ({ children }) => {
   };
 
   // Atualizar dados minha empresa
-  const atualizarConta = async (id, data) => {
+  const atualizarConta = async (data) => {
     setLoading(true);
     setError(null);
     try {
-      await api.patch(`/conta/${id}`, data);
+      await api.patch('/conta', data);
       setLoading(false);
       setNotification({
         title: 'Sucesso!',
-        message: 'Conta atualizada com sucesso!',
+        message: 'Dados da Empresa foram atualizados com sucesso',
         type: 'success',
+        icon: ThumbsUp,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
       });
     } catch (error) {
@@ -64,7 +64,9 @@ export const AccountProvider = ({ children }) => {
       setNotification({
         title: 'Erro',
         message: error.response?.data?.message || 'Erro ao atualizar. Por favor, tente novamente.',
+        secondaryMessage: 'Verifique todos os capos e tente novamente',
         type: 'error',
+        icon: AlertTriangle,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
       });
       setLoading(false);
@@ -78,7 +80,6 @@ export const AccountProvider = ({ children }) => {
     try {
       const response = await api.get('/conta');
       setLoading(false);
-      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error(error);
@@ -88,47 +89,7 @@ export const AccountProvider = ({ children }) => {
     }
   };
 
-  // Listar conta porid
-  const listarContaPorId = async (id) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(`/conta/${id}`);
-      setLoading(false);
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      setError('Erro ao obter conta. Por favor, tente novamente.');
-      setLoading(false);
-      return null;
-    }
-  };
 
-  // Deletar conta
-  const deletarConta = async (id) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await api.delete(`/conta/${id}`);
-      setLoading(false);
-      setNotification({
-        title: 'Sucesso!',
-        message: 'Conta deletada com sucesso!',
-        type: 'success',
-        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
-      });
-    } catch (error) {
-      console.error(error);
-      setError('Erro ao deletar conta. Por favor, tente novamente.');
-      setNotification({
-        title: 'Erro',
-        message: 'Erro ao deletar conta. Por favor, tente novamente.',
-        type: 'error',
-        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
-      });
-      setLoading(false);
-    }
-  };
 
   return (
     <AccountContext.Provider
@@ -138,8 +99,6 @@ export const AccountProvider = ({ children }) => {
         cadastrarConta,
         atualizarConta,
         listarContas,
-        listarContaPorId,
-        deletarConta
       }}
     >
       {children}
