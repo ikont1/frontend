@@ -12,6 +12,7 @@ import RecuperarSenha from "../pages/Login/recuperarSenha.js";
 import RedefinirSenha from "../pages/Login/redefinirSenha.js";
 import DetalhesConta from "../pages/Carteira/DetalhesConta.js";
 import CadastroContaBancaria from '../pages/Carteira/CadastroContaBancaria.js';
+import Conciliacao from "../pages/Conciliacao/Conciliacao.js";
 
 
 function RoutesApp() {
@@ -19,8 +20,8 @@ function RoutesApp() {
     <Routes>
       {/* Rotas livres */}
       <Route path="/login" element={<Login />} />
-      <Route path="/recuperar-senha" element={<RecuperarSenha/>} />
-      <Route path="/nova-senha" element={<RedefinirSenha/>} />
+      <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+      <Route path="/nova-senha" element={<RedefinirSenha />} />
 
       {/* Rotas bloqueadas */}
       <Route element={<ProtectedRoute />}>
@@ -31,8 +32,9 @@ function RoutesApp() {
         <Route path="/contas-pagar" element={<ContasAPagar />} />
         <Route path="/clientes-fornecedores" element={<ClientesFornecedores />} />
         <Route path="/minha-empresa" element={<MinhaEmpresa />} />
-        <Route path="/conta/:id" element={<DetalhesConta/>} />
+        <Route path="/conta/:id" element={<DetalhesConta />} />
         <Route path="/cadastro-conta-bancaria" element={<CadastroContaBancaria />} />
+        <Route path="/conciliacao-financeira" element={<Conciliacao />} />
       </Route>
     </Routes >
   );

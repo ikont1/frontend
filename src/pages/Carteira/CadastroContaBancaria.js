@@ -38,6 +38,7 @@ const CadastroContaBancaria = () => {
     '341': require('../../assets/imgs/itaulogo.png'),
     '260': require('../../assets/imgs/nubanklogo.png'),
     '104': require('../../assets/imgs/caixalogo.png'),
+    '403': require('../../assets/imgs/coraLogo.png'),
   };
 
 
@@ -49,7 +50,6 @@ const CadastroContaBancaria = () => {
     const fetchNameConta = async () => {
       try {
         const nomeConta = await listarContasRef.current();
-        console.log(nomeConta.data.conta.razaoSocial);
         setNameConta(nomeConta.data.conta.razaoSocial);
       } catch (error) {
         console.log('Erro ao buscar nome da conta', error);
@@ -200,6 +200,7 @@ const CadastroContaBancaria = () => {
                       <option value="237">Bradesco</option>
                       <option value="341">Itaú</option>
                       <option value="260">Nubank</option>
+                      <option value="403">Cora SCD</option>
                       <option value="104">Caixa Econômica</option>
                     </select>
                     {errors.codigoBanco && <span className="error">{errors.codigoBanco}</span>}

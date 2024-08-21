@@ -13,6 +13,7 @@ const bancoLogos = {
   '341': require('../../assets/imgs/itaulogo.png'),
   '260': require('../../assets/imgs/nubanklogo.png'),
   '104': require('../../assets/imgs/caixalogo.png'),
+  '403': require('../../assets/imgs/coraLogo.png'),
 };
 
 const DetalhesConta = () => {

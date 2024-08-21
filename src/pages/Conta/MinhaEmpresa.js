@@ -61,7 +61,7 @@ const MinhaEmpresa = () => {
           cnae: conta.cnae || '',
           telefone: conta.telefone || '',
           email: conta.email || '',
-          logoUrl: conta.logo.url || ''
+          // logoUrl: conta.logo.url || ''
         });
       } else {
         console.error('Estrutura de dados inesperada:', response.data);

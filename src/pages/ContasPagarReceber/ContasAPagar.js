@@ -403,7 +403,7 @@ const ContasAPagar = () => {
                   <tr key={index}>
                     <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
                     <td data-label="Categoria">{conta.categoria}</td>
-                    <td data-label="Fornecedor">{fornecedores.find(f => f.id === conta.fornecedorId)?.nomeFantasia || conta.fornecedorId}</td>
+                    <td data-label="Fornecedor">{conta.fornecedor.nomeFantasia}</td>
                     <td data-label="Descrição">{conta.descricao}</td>
                     <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status}</span>

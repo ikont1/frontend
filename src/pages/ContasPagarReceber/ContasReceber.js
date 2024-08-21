@@ -444,7 +444,7 @@ const filterContas = useCallback(() => {
                   <td data-label="Categoria">
                     {conta.categoria} <span className="nf-badge">{`NF ${conta.nf || 'N/A'}`}</span>
                   </td>
-                  <td data-label="Cliente">{conta.cliente}</td>
+                  <td data-label="Cliente">{conta.cliente.nomeFantasia}</td>
                   <td data-label="Descrição">{conta.descricao}</td>
                   <td data-label="Status">
                     <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status}</span>
