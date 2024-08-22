@@ -134,13 +134,13 @@
   align-items: center;
 }
 
-.banco-info{
+.banco-dados{
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.banco-info span {
+.banco-dados span {
   background-color: #F8F5FA;
   color: #B7B1B6;
   padding: 1px 5px;

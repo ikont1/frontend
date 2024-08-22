@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FileText, DollarSign, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, UserPlus, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle} from 'react-feather';
+import { FileText, DollarSign, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle} from 'react-feather';
 import './Sidebar.css';
 import logo from '../../assets/imgs/logosvg.svg';
 import { useAuth } from '../../context/AuthContext';
@@ -78,11 +78,11 @@ const Sidebar = () => {
                   </ul>
                 )}
               </li>
-              <li>
+              {/* <li>
                 <NavLink to="/rh" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                   <UserPlus className="icon" /> RH
                 </NavLink>
-              </li>
+              </li> */}
               <li className="divider"></li>
               <li>
                 <NavLink style={{ fontWeight: 100 }} to="/minha-empresa" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>

@@ -186,7 +186,7 @@ const Conciliacao = () => {
             <h3>Lançamentos importados</h3>
             <div className="card-banco">
               <img src={bancoLogos} alt="Banco do Brasil" className="banco-logo" />
-              <div className="banco-info">
+              <div className="banco-dados">
                 <p>Banco do Brasil</p>
                 <span>000-1</span>
                 <span>23958596606</span>

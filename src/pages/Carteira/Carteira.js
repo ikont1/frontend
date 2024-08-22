@@ -39,12 +39,12 @@ const Carteira = () => {
   };
 
   // Excluir conta
-  const handleDeleteAccount = (id) => {
-    setSelectedContaId(id);
-    setModalAction('excluir');
-    setShowModal(true);
-    setActiveTooltip(null)
-  };
+  // const handleDeleteAccount = (id) => {
+  //   setSelectedContaId(id);
+  //   setModalAction('excluir');
+  //   setShowModal(true);
+  //   setActiveTooltip(null)
+  // };
 
   // Desativar conta
   const handleDeactivateAccount = (id) => {
@@ -129,7 +129,7 @@ const Carteira = () => {
                             ) : (
                               <>
                                 <li onClick={() => handleReactivateAccount(conta.id)}>Reativar conta</li>
-                                <li onClick={() => handleDeleteAccount(conta.id)}>Excluir conta</li>
+                                {/* <li onClick={() => handleDeleteAccount(conta.id)}>Excluir conta</li> */}
                               </>
                             )}
                           </ul>
