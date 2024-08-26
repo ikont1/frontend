@@ -3,12 +3,12 @@ import './Login.css';
 import logo from '../../assets/imgs/logosvg.svg';
 import imgLogin from '../../assets/imgs/img-login.png';
 import { Link } from 'react-router-dom';
-import { FaWhatsapp, FaInstagram, FaFacebook, FaYoutube, FaLinkedin } from 'react-icons/fa';
+import { FaWhatsapp, FaInstagram, FaFacebook, FaLinkedin } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import Notification from '../../components/Notification/Notification';
-import Modal from '../../components/Modal/Modal';
-import CadastroConta from '../../pages/Conta/CadastroConta';
+// import Modal from '../../components/Modal/Modal';
+// import CadastroConta from '../../pages/Conta/CadastroConta';
 
 const Login = () => {
   const { login, loading, error, setNotification } = useAuth();
@@ -16,15 +16,13 @@ const Login = () => {
   const [senha, setSenha] = useState('');
   const [inputError, setInputError] = useState({});
 
-  const [showModal, setShowModal] = useState(false);
-
-  const handleOpenModal = () => {
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
+  // const [showModal, setShowModal] = useState(false);
+  // const handleOpenModal = () => {
+  //   setShowModal(true);
+  // };
+  // const handleCloseModal = () => {
+  //   setShowModal(false);
+  // };
 
   useEffect(() => {
     if (error) {
@@ -99,13 +97,22 @@ const Login = () => {
         </form>
 
         <div className="div-botton">
-          <span className="register-link" onClick={handleOpenModal}>Não é cliente? Comece agora</span>
+          <Link to='https://ikont1.com.br/#planos' className="register-link" target="_blank" rel="noopener noreferrer">
+            Não é cliente? Comece agora
+          </Link>
           <div className="social-media">
-            <FaInstagram aria-hidden="true" className="i-sociais" />
-            <FaWhatsapp aria-hidden="true" className="i-sociais" />
-            <FaFacebook aria-hidden="true" className="i-sociais" />
-            <FaYoutube aria-hidden="true" className="i-sociais" />
-            <FaLinkedin aria-hidden="true" className="i-sociais" />
+            <Link to='https://www.instagram.com/ikont1/' target="_blank" rel="noopener noreferrer">
+              <FaInstagram aria-hidden="true" className="i-sociais" />
+            </Link>
+            <Link to='https://app.ikont1.com.br/login' target="_blank" rel="noopener noreferrer">
+              <FaWhatsapp aria-hidden="true" className="i-sociais" />
+            </Link>
+            <Link to='https://www.facebook.com/profile.php?id=61560873020631' target="_blank" rel="noopener noreferrer">
+              <FaFacebook aria-hidden="true" className="i-sociais" />
+            </Link>
+            <Link to='https://www.linkedin.com/company/ikont1' target="_blank" rel="noopener noreferrer">
+              <FaLinkedin aria-hidden="true" className="i-sociais" />
+            </Link>
           </div>
         </div>
       </div>
@@ -125,13 +132,13 @@ const Login = () => {
       )}
 
       {/* Modal de cadastrar conta */}
-      <Modal
+      {/* <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
         size='large'
         title="Cadastre-se agora na iKont1">
         <CadastroConta />
-      </Modal>
+      </Modal> */}
     </div>
   );
 };
