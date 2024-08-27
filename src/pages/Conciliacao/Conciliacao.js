@@ -176,7 +176,7 @@ const Conciliacao = () => {
           {/* Feedback visual */}
           {isLoading && (
             <div className="upload-status">
-              <p style={{backgroundColor: 'red'}}>{uploadStatus}</p>
+              <p>{uploadStatus}</p>
             </div>
           )}
         </div>

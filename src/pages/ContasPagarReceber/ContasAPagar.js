@@ -64,22 +64,37 @@ const ContasAPagar = () => {
 
   const filterContas = useCallback(() => {
     const { status2, period, month } = selectedFilters;
+    const currentMonth = new Date();
     const filtered = contasAPagar.filter(conta => {
       const contaVencimento = new Date(conta.vencimento);
-  
+
+      const isCurrentMonth = contaVencimento.getMonth() === currentMonth.getMonth() &&
+        contaVencimento.getFullYear() === currentMonth.getFullYear();
+      const isOverdue = conta.status.toLowerCase() === 'vencido';
+
       const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
-      const matchesPeriod = (!period.start && !period.end) || 
-        (period.start && period.end && 
-          contaVencimento >= new Date(period.start) && 
-          contaVencimento <= new Date(period.end));
-      const matchesMonth = !month || 
-        (contaVencimento >= startOfMonth(new Date(month)) &&
-         contaVencimento <= endOfMonth(new Date(month)));
-      return matchesStatus && matchesPeriod && matchesMonth;
+      const matchesPeriod = (period.start && period.end &&
+        contaVencimento >= new Date(period.start) &&
+        contaVencimento <= new Date(period.end));
+      const matchesMonth = (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
+        (month && (contaVencimento >= startOfMonth(new Date(month)) &&
+          contaVencimento <= endOfMonth(new Date(month))));
+
+
+      return matchesStatus && (matchesPeriod || matchesMonth);
     });
-    setFilteredContasAPagar(filtered);
+
+    // Ordenar as contas vencidas no topo
+    const sortedFiltered = filtered.sort((a, b) => {
+      if (a.status === 'vencido' && b.status !== 'vencido') return -1;
+      if (a.status !== 'vencido' && b.status === 'vencido') return 1;
+      return new Date(a.vencimento) - new Date(b.vencimento);
+    });
+
+    setFilteredContasAPagar(sortedFiltered);
   }, [contasAPagar, selectedFilters]);
- 
+
+
   // Atualizar contas a pagar filtradas quando contasAPagar ou filtros mudarem
   useEffect(() => {
     if (contasAPagar && Array.isArray(contasAPagar)) {
@@ -90,10 +105,10 @@ const ContasAPagar = () => {
 
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
-  
+
     setSelectedFilters(prevFilters => {
       const updatedFilters = { ...prevFilters };
-  
+
       if (name === 'status2') {
         if (checked) {
           updatedFilters.status2.push(value);
@@ -105,15 +120,23 @@ const ContasAPagar = () => {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
+
+        // Resetar filtro de mês ao selecionar um período
+        updatedFilters.month = null;
       } else if (name === 'month') {
         updatedFilters.month = value;
+        // Resetar período ao selecionar um mês
+        updatedFilters.period = {
+          start: null,
+          end: null,
+        };
       }
-  
+
       return updatedFilters;
     });
   };
-  
-  
+
+
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -452,7 +475,7 @@ const ContasAPagar = () => {
         </div>
       </div>
 
-      {/* Modal de Adcionar, editar e visualizar Conta */}
+      {/* Modal de Adicionar, editar e visualizar Conta */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={modalMode === 'view' ? 'Visualizar conta a pagar' : (modalMode === 'edit' ? 'Editar conta a pagar' : 'Nova conta a pagar')}>
         <form onSubmit={handleSubmit}>
           {modalMode === 'edit' && (
@@ -491,7 +514,7 @@ const ContasAPagar = () => {
           </div>
           <div className="form-group">
             <label htmlFor="descricao">Descrição (Opcional)</label>
-            <input type="text" id="descricao" name="descricao" value={novaConta.descricao} onChange={handleChange} required disabled={modalMode === 'view'} />
+            <input type="text" id="descricao" name="descricao" value={novaConta.descricao} onChange={handleChange} disabled={modalMode === 'view'} />
           </div>
           {(modalMode !== 'edit' && modalMode !== 'view') && (
             <div className="form-group">

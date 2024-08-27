@@ -81,6 +81,10 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
         value: endDate ? endDate.toISOString().split('T')[0] : null,
       }
     });
+
+    // Zerar as datas após aplicar o filtro
+    setStartDate(null);
+    setEndDate(null);
   };
 
   // Filtrar clientes com base no texto digitado

@@ -80,7 +80,8 @@
   justify-content: space-between;
   color: var(--highlight-color);
   font-size: 16px;
-
+  cursor: pointer;
+  
   >div {
     text-align: right;
   }
@@ -95,6 +96,11 @@
   font-weight: 200;
   color: var(--text-color);
   font-size: 12px;
+  text-align: right;
+}
+
+.upload-status {
+  width: 100%;
   text-align: right;
 }
 

@@ -64,27 +64,40 @@ const ContasReceber = () => {
     fetchClientes();
   }, [fetchContasAReceber, fetchCategoriasAReceber, fetchClientes]);
 
-const filterContas = useCallback(() => {
-  const { categorias, status, clienteId, period, month } = selectedFilters;
-  const filtered = contasAReceber.filter(conta => {
-    const contaVencimento = parseISO(conta.vencimento);
+  const filterContas = useCallback(() => {
+    const { categorias, status, clienteId, period, month } = selectedFilters;
+    const currentMonth = new Date();
+    const filtered = contasAReceber.filter(conta => {
+      const contaVencimento = parseISO(conta.vencimento);
 
-    const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
-    const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
-    const matchesCliente = !clienteId || conta.clienteId === clienteId;
-    const matchesPeriod = (!period.start && !period.end) || 
-      (isValid(new Date(period.start)) && isValid(new Date(period.end)) && 
-        contaVencimento >= new Date(period.start) && 
+      const isCurrentMonth = contaVencimento.getMonth() === currentMonth.getMonth() &&
+        contaVencimento.getFullYear() === currentMonth.getFullYear();
+      const isOverdue = conta.status.toLowerCase() === 'vencido';
+
+      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
+      const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
+      const matchesCliente = !clienteId || conta.clienteId === clienteId;
+      const matchesPeriod = (period.start && period.end &&
+        contaVencimento >= new Date(period.start) &&
         contaVencimento <= new Date(period.end));
-    const matchesMonth = !month || 
-      (isValid(new Date(month)) && 
-        contaVencimento >= startOfMonth(new Date(month)) &&
-        contaVencimento <= endOfMonth(new Date(month)));
+      const matchesMonth = (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
+        (month && (contaVencimento >= startOfMonth(new Date(month)) &&
+          contaVencimento <= endOfMonth(new Date(month))));
 
-    return matchesCategoria && matchesStatus && matchesCliente && matchesPeriod && matchesMonth;
-  });
-  setFilteredContasAReceber(filtered);
-}, [contasAReceber, selectedFilters]);
+
+      return matchesCategoria && matchesStatus && matchesCliente && (matchesPeriod || matchesMonth);
+    });
+
+    // Ordena as contas vencidas no topo
+    const sortedFiltered = filtered.sort((a, b) => {
+      if (a.status === 'vencido' && b.status !== 'vencido') return -1;
+      if (a.status !== 'vencido' && b.status === 'vencido') return 1;
+      return new Date(a.vencimento) - new Date(b.vencimento);
+    });
+
+    setFilteredContasAReceber(sortedFiltered);
+  }, [contasAReceber, selectedFilters]);
+
 
 
 
@@ -122,8 +135,15 @@ const filterContas = useCallback(() => {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
+        // Resetar filtro de mês ao selecionar um período
+        updatedFilters.month = null;
       } else if (name === 'month') {
         updatedFilters.month = value;
+        // Resetar período ao selecionar um mês
+        updatedFilters.period = {
+          start: null,
+          end: null,
+        };
       }
 
       return updatedFilters;
