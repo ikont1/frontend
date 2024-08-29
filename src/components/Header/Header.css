@@ -11,19 +11,19 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+}
 
-  >button {
-    background-color: var(--primary-color);
-    border-radius: 20px;
-    padding: 8px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.header .left button {
+  background-color: var(--primary-color);
+  border-radius: 20px;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    >svg {
-      transform: translateY(-15%);
-      margin-right: 10px;
-    }
+  >svg {
+    transform: translateY(-15%);
+    margin-right: 10px;
   }
 }
 
