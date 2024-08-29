@@ -429,7 +429,7 @@ const ContasAPagar = () => {
                     <td data-label="Fornecedor">{conta.fornecedor.nomeFantasia}</td>
                     <td data-label="Descrição">{conta.descricao}</td>
                     <td data-label="Status">
-                      <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status}</span>
+                      <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aPagar' ? 'a pagar' : conta.status}</span>
                     </td>
                     <td data-label="Valor">R${formatValue(conta.valor)}</td>
                     <td data-label="Ações" className="actions">

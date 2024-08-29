@@ -29,7 +29,7 @@
   >h4 {
     position: relative;
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     gap: 6px;
     margin-bottom: -10px;
     font-weight: 500;
@@ -72,7 +72,7 @@
     >h4 {
       position: relative;
       display: flex;
-      align-items: center;
+      /* align-items: center; */
       gap: 6px;
       font-weight: 500;
       margin-bottom: 10px;
