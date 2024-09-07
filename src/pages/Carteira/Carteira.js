@@ -113,7 +113,7 @@ const Carteira = () => {
                       <h3>{conta.nomeBanco}</h3>
                       <div className="banco-dados">
                         <span className="agencia">{conta.agencia}</span>
-                        <span className="conta">{conta.numeroConta}</span>
+                        <span className="conta">{`${conta.numeroConta}-${conta.contaDV}`}</span>
                       </div>
                     </div>
                     <div className='saldo saldo-tooltip'>

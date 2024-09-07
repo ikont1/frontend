@@ -81,7 +81,7 @@
   color: var(--highlight-color);
   font-size: 16px;
   cursor: pointer;
-  
+
   >div {
     text-align: right;
   }
@@ -109,8 +109,9 @@
   display: flex;
   justify-content: space-evenly;
   align-items: center;
-  margin-top: 20px;
-  h3{
+  margin: 60px 0;
+
+  h3 {
     color: #B7B1B6;
   }
 }
@@ -140,18 +141,17 @@
   align-items: center;
 }
 
-.banco-dados{
+.banco-dados-conciliacao {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.banco-dados span {
+.banco-dados-conciliacao span {
   background-color: #F8F5FA;
   color: #B7B1B6;
   padding: 1px 5px;
   border-radius: 10px;
-  max-width: 120px;
 }
 
 .setas {
@@ -184,11 +184,307 @@
 .card-sugestoes .icone-sugestoes::before {
   content: '';
   position: absolute;
-  bottom: -9px;  /* Ajuste a posição vertical */
-  right: -9px;  /* Ajuste a posição horizontal */
-  width: 16px;  /* Ajuste o tamanho do quadrado menor */
-  height: 16px;  /* Ajuste o tamanho do quadrado menor */
+  bottom: -9px;
+  /* Ajuste a posição vertical */
+  right: -9px;
+  /* Ajuste a posição horizontal */
+  width: 16px;
+  /* Ajuste o tamanho do quadrado menor */
+  height: 16px;
+  /* Ajuste o tamanho do quadrado menor */
   border: 2px solid var(--primary-color);
   border-radius: 4px;
   background-color: #fff;
+}
+
+
+/* Transacoes.css */
+.transacoes-container {
+  margin: 20px 0;
+}
+
+.transacoes-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 342px;
+  margin: 60px auto 20px;
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.transacoes-header.default {
+  background-color: #d6ffd6;
+}
+
+.transacoes-header.conciliadas-active {
+  background-color: #ffcece;
+}
+
+.transacoes-header button {
+  border: none;
+  outline: none;
+  padding: 10px 40px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 30px;
+}
+
+.transacoes-header .pendentes {
+  background-color: #ffcece;
+  color: var(--error-color);
+  border-radius: 30px;
+}
+
+.transacoes-header .conciliadas {
+  background-color: #d6ffd6;
+  color: var(--success-color);
+  border-radius: 30px;
+}
+
+.transacoes-header .badge {
+  display: inline-block;
+  min-width: 25px;
+  padding: 5px;
+  margin-left: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 12px;
+  color: inherit;
+}
+
+.texto-pendente {
+  letter-spacing: .4px;
+  margin-left: 10px;
+  color: var(--error-color);
+  /* Cor do texto quando pendente */
+}
+
+.fundo-branco {
+  padding-top: 20px;
+  border-radius: 20px 0;
+
+  background-color: white;
+}
+
+.texto-conciliado {
+  color: var(--primary-color);
+  /* Cor do texto quando conciliado */
+}
+
+.valor-pendente {
+  color: var(--error-color);
+  /* Cor do valor quando pendente */
+}
+
+.valor-conciliado {
+  color: var(--primary-color);
+  /* Cor do valor quando conciliado */
+}
+
+
+/* Estilo para a linha de conciliação */
+.content-tabs {
+  padding: 20px 0;
+}
+
+.conciliacao-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* Estilo para o card de conciliação */
+.conciliacao-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 45%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.conciliacao-card>div {
+  display: flex;
+}
+
+.transacao-extrato .descricao {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  color: #B7B1B6;
+
+}
+
+
+.transacao-conta>div {
+  flex-direction: column;
+  width: 70%;
+
+  >div {
+    display: flex;
+    gap: 5px;
+  }
+
+  >p {
+    color: #B7B1B6;
+  }
+}
+
+.conciliacao-card>h3 {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+/* Estilo para a logo do banco */
+.conciliacao-card img {
+  width: 50px;
+  height: 50px;
+  margin-right: 15px;
+}
+
+.desfazer-button {
+  margin: 0 25px;
+  position: relative;
+}
+
+.desfazer-button::before,
+.desfazer-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 25px;
+  height: 2px;
+  background-color: #e0e0e0;
+  z-index: -1;
+}
+
+.desfazer-button::before {
+  left: -25px;
+}
+
+.desfazer-button::after {
+  right: -25px;
+}
+
+.conciliacao-row .sugestao-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+
+  >h4 {
+    background-color: #d6ffd6;
+    color: #0b9055;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 2px 6px;
+  }
+
+  .sugestao-botoes {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    padding: 20px 0 20px 0;
+    border-top: 1px solid #DEDEDE;
+    border-bottom: 1px solid #DEDEDE;
+
+    >button {
+      background: transparent;
+      color: var(--highlight-color);
+      padding: 0;
+      font-size: 14px;
+    }
+  }
+
+  .sugestao-info{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    >span{
+      background-color: var(--secondary-error);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+  }
+}
+
+.conciliacao-row .sugestao-contas {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .buscar-ou-criar-button {
+    background-color: #d6ffd6;
+    color: var(--text-color);
+  }
+}
+
+
+.modal-conciliar {
+
+  .table-contas-conciliacao {
+    height: 400px;
+    overflow: auto;
+  }
+
+  >div {
+    margin-bottom: 20px;
+
+    .data {
+      background-color: #F8F5FA;
+      padding: 0 6px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+  }
+}
+
+.buscar-conta-tabela {
+  margin-top: 40px;
+
+}
+
+.container-button-add-conta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  >h5 {
+    border-bottom: 2px solid var(--primary-color);
+    width: 150px;
+    padding: 0 5px 0;
+  }
+
+  >button {
+    background: transparent;
+    color: var(--text-color);
+    padding: 0;
+    font-size: 14px;
+  }
+}
+
+.conciliar-button {
+  background-color: var(--primary-color);
+  float: right;
+}
+
+
+.desfazer-button:disabled {
+  background-color: #ccc;
+  color: var(--text-color);
+  cursor: not-allowed;
+  opacity: 0.6;
 }

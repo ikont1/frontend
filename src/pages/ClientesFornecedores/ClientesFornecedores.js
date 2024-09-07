@@ -140,7 +140,7 @@ const ClientesFornecedores = () => {
   useEffect(() => {
     setFilteredFornecedores(fornecedores);
   }, [fornecedores]);
-  
+
   const handleSearch = (searchTerm) => {
     if (activeTab === 'clientes') {
       const filtered = clientes.filter(cliente =>
@@ -213,10 +213,14 @@ const ClientesFornecedores = () => {
               </thead>
               <tbody>
                 {filteredClientes.length > 0 ? (
-                  filteredClientes.map((cliente) => (
-                    <tr key={cliente.id}>
+                  filteredClientes.map((cliente, index) => (
+                    <tr key={cliente.id || index}>
                       <td>{cliente.nomeFantasia}</td>
-                      <td>{cliente.razaoSocial}<br /><span>{cliente.cpfCnpj}</span></td>
+                      <td>
+                        {cliente.razaoSocial}
+                        <br />
+                        <span>{cliente.cpfCnpj}</span>
+                      </td>
                       <td>{cliente.inscricalMunicipal}</td>
                       <td>{cliente.contato}</td>
                       <td>{cliente.email}</td>
@@ -236,10 +240,11 @@ const ClientesFornecedores = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan='8'>Nenhum dado a ser mostrado</td>
+                    <td colSpan="8">Nenhum dado a ser mostrado</td>
                   </tr>
                 )}
               </tbody>
+
             </table>
           )}
 
@@ -258,10 +263,14 @@ const ClientesFornecedores = () => {
               </thead>
               <tbody>
                 {filteredFornecedores.length > 0 ? (
-                  filteredFornecedores.map((fornecedor) => (
-                    <tr key={fornecedor.id}>
+                  filteredFornecedores.map((fornecedor, index) => (
+                    <tr key={fornecedor.id || index}>
                       <td>{fornecedor.nomeFantasia}</td>
-                      <td>{fornecedor.razaoSocial}<br /><span>{fornecedor.cpfCnpj}</span></td>
+                      <td>
+                        {fornecedor.razaoSocial}
+                        <br />
+                        <span>{fornecedor.cpfCnpj}</span>
+                      </td>
                       <td>{fornecedor.inscricalMunicipal}</td>
                       <td>{fornecedor.inscricalEstadual}</td>
                       <td>{fornecedor.email}</td>
@@ -281,10 +290,12 @@ const ClientesFornecedores = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan='8'>Nenhum dado a ser mostrado</td>
+                    <td colSpan="8">Nenhum dado a ser mostrado</td>
                   </tr>
                 )}
               </tbody>
+
+
             </table>
           )}
         </div>

@@ -196,6 +196,7 @@ const ContasAPagar = () => {
       ...conta,
       vencimento: formatDate(conta.vencimento),
       valor: formatValue(conta.valor),
+      fornecedorId: conta.fornecedor?.id || '',
     });
     setShowModal(true);
   };
@@ -426,7 +427,7 @@ const ContasAPagar = () => {
                   <tr key={index}>
                     <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
                     <td data-label="Categoria">{conta.categoria}</td>
-                    <td data-label="Fornecedor">{conta.fornecedor.nomeFantasia}</td>
+                    <td data-label="Fornecedor">{conta.fornecedor ? conta.fornecedor.nomeFantasia : 'Fornecedor não informado'}</td>
                     <td data-label="Descrição">{conta.descricao}</td>
                     <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aPagar' ? 'a pagar' : conta.status}</span>
@@ -505,7 +506,11 @@ const ContasAPagar = () => {
           </div>
           <div className="form-group">
             <label htmlFor="fornecedorId">Fornecedor</label>
-            <select id="fornecedorId" name="fornecedorId" value={novaConta.fornecedorId} onChange={handleChange} required disabled={modalMode === 'view'}>
+            <select
+              id="fornecedorId"
+              name="fornecedorId"
+              value={novaConta.fornecedorId}
+              onChange={handleChange} required disabled={modalMode === 'view'}>
               <option value="">Selecione um fornecedor</option>
               {fornecedores.map((fornecedor, index) => (
                 <option key={index} value={fornecedor.id}>{fornecedor.nomeFantasia}</option>

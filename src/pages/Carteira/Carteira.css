@@ -284,6 +284,95 @@
   }
 }
 
+/* tabela de transacoes */
+.td-transacao-extrato {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.td-data-extrato>span {
+  background-color: var(--secondary-sucess);
+  color: var(--success-color);
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+
+.td-valor-extrato {
+  color: var(--text-color);
+}
+
+/* Estilos para status e valores baseados no estado de conciliação */
+.status-conciliado>span,
+.status-naoConciliado>span,
+.status-sugestao>span,
+.valor-naoConciliado>span  {
+  padding: 6px 40px;
+}
+
+.status-conciliado>span {
+  background-color: var(--secondary-sucess);
+  color: var(--primary-color);
+}
+
+.status-naoConciliado>span {
+  background-color: var(--secondary-error);
+  color: var(--error-color);
+}
+
+.status-sugestao>span {
+  background-color: var(--background);
+  color: var(--text-color);
+}
+
+.valor-naoConciliado {
+  color: var(--error-color);
+}
+
+@media (max-width: 768px) {
+  .table-extrato .table thead {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  /* Ocultar "Últimas transações" no modo responsivo */
+  .table-extrato .table thead th:first-child {
+    display: none;
+  }
+
+  .table-extrato .table tr {
+    border-bottom: 1px solid #DEDEDE;
+    overflow: hidden;
+  }
+
+  .table-extrato .table td {
+    border: none;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Ajustes para a td de transações ocupar toda a linha */
+  .table-extrato .td-transacao-extrato {
+    max-width: 100%;
+    padding-left: 12px;
+    text-align: left;
+    display: block;
+    position: relative;
+    left: 0;
+    width: auto;
+  }
+
+  /* Ocultar o label 'Últimas transações' no modo responsivo */
+  .table-extrato .table td.td-transacao-extrato:before {
+    content: none;
+  }
+}
+
+
 
 /* Cadastrar conta bancaria */
 .cadastro-conta-container {
@@ -298,7 +387,7 @@
   flex-direction: column;
   align-items: center;
 
-  > h2 {
+  >h2 {
     font-size: 18px;
   }
 }
@@ -384,7 +473,7 @@
   flex-direction: column;
   gap: 40px;
 
-  > h3 {
+  >h3 {
     font-weight: 500;
   }
 }
@@ -394,7 +483,7 @@
   justify-content: center;
   gap: 20px;
 
-  > div {
+  >div {
     width: 200px;
     border-radius: 20px;
   }
@@ -412,7 +501,7 @@
   cursor: pointer;
 }
 
-.account-type:hover{
+.account-type:hover {
   border: 2px solid var(--highlight-color);
 }
 
@@ -448,7 +537,7 @@
   align-items: center;
 }
 
-.step-content .step4 > h2 {
+.step-content .step4>h2 {
   text-align: center;
   letter-spacing: 1px;
 }
@@ -466,12 +555,14 @@
 
 .group-checkbox {
   display: flex !important;
-  > label {
+
+  >label {
     display: flex;
     align-items: center;
     gap: 5px;
     width: 100%;
-    > input {
+
+    >input {
       width: auto !important;
     }
   }

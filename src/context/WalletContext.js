@@ -20,6 +20,7 @@ export const WalletProvider = ({ children }) => {
   const listarContas = async () => {
     try {
       const response = await api.get('/conta-bancaria');
+    
       return response.data.data.contas;
     } catch (error) {
       console.error('Erro ao listar contas:', error);
@@ -123,6 +124,16 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
+  const listarExtrato = async (id) => {
+    try {
+      const response = await api.get(`/conta-bancaria/${id}/extrato`);
+      return response.data.data.dados;
+    } catch (error) {
+      console.error('Erro ao listar extrato:', error);
+      throw error;
+    }
+  };
+
 
   return (
     <WalletContext.Provider value={{
@@ -130,7 +141,8 @@ export const WalletProvider = ({ children }) => {
       cadastrarConta,
       excluirConta,
       reativarConta,
-      desativarConta
+      desativarConta,
+      listarExtrato
     }}>
       {children}
 

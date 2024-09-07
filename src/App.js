@@ -5,6 +5,7 @@ import { AccountProvider } from "./context/AccountContext";
 import { FinanceProvider } from "./context/FinanceContext";
 import { ClientSupplierProvider } from "./context/ClientSupplierContext";
 import { WalletProvider } from "./context/WalletContext";
+import { ConciliacaoProvider } from "./context/ConciliacaoContext";
 
 function App() {
   return (
@@ -14,7 +15,11 @@ function App() {
           <ClientSupplierProvider>
             <FinanceProvider>
               <WalletProvider>
-                <RoutesApp />
+                <ConciliacaoProvider>
+
+                  <RoutesApp />
+
+                </ConciliacaoProvider>
               </WalletProvider>
             </FinanceProvider>
           </ClientSupplierProvider>
