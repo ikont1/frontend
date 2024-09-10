@@ -19,6 +19,7 @@ export const ConciliacaoProvider = ({ children }) => {
   // Função para criar conciliação manual
   const criarConciliacao = async (data) => {
     setLoading(true);
+
     try {
       await api.post('/conciliacao-bancaria', data);
       setNotification({
@@ -38,8 +39,6 @@ export const ConciliacaoProvider = ({ children }) => {
         icon: AlertTriangle,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
       });
-
-      console.error('Erro ao conciliar transação:', error);
     } finally {
       setLoading(false);
     }

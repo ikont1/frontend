@@ -109,13 +109,13 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <div className='saldo saldo-tooltip'>
-                          <span className="saldo-label">R${conta.saldoInicial}</span>
+                          <span className="saldo-label">R$ {parseFloat(conta.saldoInicial).toLocaleString()}</span>
                         </div>
                       </div>
                       <div className="card-footer">
                         <div className="saldo-total">
                           <span>Saldo total</span>
-                          <span className='span-total'>R${conta.saldoInicial}</span>
+                          <span className='span-total'>R${parseFloat(conta.saldoInicial).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -174,7 +174,7 @@ const Dashboard = () => {
                   <div className='total'>
                     <p>Total</p>
                     <span>
-                      R${contasAReceber.reduce((total, conta) => total + conta.valor, 0)}
+                      R${(contasAReceber.reduce((total, conta) => total + conta.valor, 0)).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -205,7 +205,7 @@ const Dashboard = () => {
                   <div className='total'>
                     <p>Total</p>
                     <span>
-                      R${contasAPagar.reduce((total, conta) => total + conta.valor, 0)}
+                      R${(contasAPagar.reduce((total, conta) => total + conta.valor, 0)).toLocaleString()}
                     </span>
                   </div>
                 </div>

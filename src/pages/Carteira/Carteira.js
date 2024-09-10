@@ -135,13 +135,13 @@ const Carteira = () => {
                           </ul>
                         </div>
                       )}
-                      <span className="saldo-label">R${conta.saldoInicial}</span>
+                      <span className="saldo-label">R${parseFloat(conta.saldoInicial).toLocaleString()}</span>
                     </div>
                   </div>
                   <div className="card-footer">
                     <div className="saldo-total">
                       <span>Saldo total</span>
-                      <span className='span-total'>R${conta.saldoInicial}</span>
+                      <span className='span-total'>R${parseFloat(conta.saldoInicial).toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

@@ -25,6 +25,9 @@
   width: 100%;
   max-width: 500px;
   padding: 10px;
+  .div-tipo-conta {
+    display: flex;
+  }
 }
 
 .banco-logo-container {
@@ -40,7 +43,13 @@
 }
 
 .banco-detalhes {
-  margin-left: -80px;
+  /* margin-left: -100px; */
+  >span {
+    background-color: #F8F5FA;
+    padding: 1px 5px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
 }
 
 .banco-detalhes h3 {
@@ -49,24 +58,13 @@
 }
 
 .conta-identificadores {
-  display: flex;
-  gap: 10px;
   font-size: 14px;
   color: #B7B1B6;
-  margin-top: 8px;
 
-  >span {
-    background-color: #F8F5FA;
-    padding: 1px 5px;
-    border-radius: 10px;
-  }
 }
 
 .icon-dropdown {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--text-color);
+  width: 40%;
 }
 
 .importar-extrato {

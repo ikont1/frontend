@@ -41,7 +41,6 @@ const CadastroContaBancaria = () => {
     '403': require('../../assets/imgs/coraLogo.png'),
   };
 
-
   // Usar useRef para evitar loop
   const listarContasRef = useRef(listarContas);
 
@@ -59,30 +58,36 @@ const CadastroContaBancaria = () => {
     fetchNameConta();
   }, []);
 
+  // Validação para checar os campos obrigatórios na segunda etapa
+  const validateStep2 = () => {
+    const newErrors = {};
+    if (!formData.codigoBanco) newErrors.codigoBanco = 'Campo obrigatório';
+    if (!formData.nomeConta) newErrors.nomeConta = 'Campo obrigatório';
+    if (!formData.agencia) newErrors.agencia = 'Campo obrigatório';
+    if (!formData.numeroConta) newErrors.numeroConta = 'Campo obrigatório';
+    if (!formData.contaDV) newErrors.contaDV = 'Campo obrigatório';
+    if (!formData.saldoInicial) newErrors.saldoInicial = 'Campo obrigatório';
+    if (!formData.dataSaldoInicial) newErrors.dataSaldoInicial = 'Campo obrigatório';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleNextStep = async () => {
-    if (step === 2) {
-      const newErrors = {};
-      if (!formData.codigoBanco) newErrors.codigoBanco = 'Campo obrigatório';
-      if (!formData.nomeConta) newErrors.nomeConta = 'Campo obrigatório';
-      if (!formData.agencia) newErrors.agencia = 'Campo obrigatório';
-      if (!formData.numeroConta) newErrors.numeroConta = 'Campo obrigatório';
-      if (!formData.contaDV) newErrors.contaDV = 'Campo obrigatório';
-      if (!formData.saldoInicial) newErrors.saldoInicial = 'Campo obrigatório';
-      if (!formData.dataSaldoInicial) newErrors.dataSaldoInicial = 'Campo obrigatório';
-
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        return;
-      } else {
-        setErrors({});
-      }
+    if (step === 2 && !validateStep2()) {
+      return;
     }
+
     if (step < 4) {
       setStep(step + 1);
     } else {
+      // Remover campos opcionais se estiverem vazios
+      const dadosFiltrados = Object.fromEntries(
+        Object.entries(formData).filter(([_, value]) => value !== '')
+      );
+
       try {
-        await cadastrarConta(formData);
+        await cadastrarConta(dadosFiltrados);
         navigate('/carteira');
       } catch (error) {
         console.error('Erro ao cadastrar conta:', error);
@@ -160,8 +165,8 @@ const CadastroContaBancaria = () => {
                     Poupança
                   </div>
                   <div
-                    className={`account-type ${formData.tipo === 'contaPagamento' ? 'selected' : ''}`}
-                    onClick={() => setFormData({ ...formData, tipo: 'contaPagamento' })}
+                    className={`account-type ${formData.tipo === 'meiosDePagamento' ? 'selected' : ''}`}
+                    onClick={() => setFormData({ ...formData, tipo: 'meiosDePagamento' })}
                   >
                     <BiDollar className='icon' />
                     Contas de pagamento
@@ -173,7 +178,7 @@ const CadastroContaBancaria = () => {
             {step === 2 && (
               <div className="step2">
                 <div className='steps-header'>
-                  <h2>Dados da conta da  {nameConta}</h2>
+                  <h2>Dados da conta da {nameConta}</h2>
                 </div>
 
                 <div className="step-indicator2">
@@ -213,7 +218,7 @@ const CadastroContaBancaria = () => {
 
                   <div className='form-group-agencia-conta'>
                     <div className="form-group">
-                      <label>Agência e dígito</label>
+                      <label>Agência</label>
                       <input type="text" name="agencia" value={formData.agencia} onChange={handleChange} required />
                       {errors.agencia && <span className="error">{errors.agencia}</span>}
                     </div>
@@ -223,14 +228,14 @@ const CadastroContaBancaria = () => {
                       {errors.numeroConta && <span className="error">{errors.numeroConta}</span>}
                     </div>
                     <div className="form-group input-dv">
-                      <label>Dígito conta</label>
+                      <label>Dígito</label>
                       <input type="text" name="contaDV" value={formData.contaDV} onChange={handleChange} required />
                       {errors.contaDV && <span className="error">{errors.contaDV}</span>}
                     </div>
                   </div>
 
                   <div className="form-group form-group-cifrao">
-                    <label htmlFor="valor">Qual o valor do saldo da conta?</label>
+                    <label htmlFor="valor">Saldo da conta</label>
                     <div className='div-sifrao'>
                       <span>R$</span>
                       <FormattedInput type="valor" name="saldoInicial" value={formData.saldoInicial} onChange={handleChange} required />
@@ -245,7 +250,7 @@ const CadastroContaBancaria = () => {
                   <div className="form-group group-checkbox">
                     <label>
                       <input type="checkbox" name="contaPrincipal" checked={formData.contaPrincipal} onChange={handleChange} />
-                      Essa conta é a principal?
+                      Esta conta é a principal?
                     </label>
                   </div>
                   <div className="form-group optional-data">
@@ -293,7 +298,7 @@ const CadastroContaBancaria = () => {
                       <h3>{formData.nomeConta}</h3>
                       <div className="banco-dados">
                         <span className="agencia">{formData.agencia}</span>
-                        <span className="conta">{formData.numeroConta}</span>
+                        <span className="conta">{formData.numeroConta} - {formData.contaDV}</span>
                       </div>
                     </div>
                     <div className='saldo'>

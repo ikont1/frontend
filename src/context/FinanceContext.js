@@ -191,7 +191,6 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-receber');
-
       setContasAReceber(response.data.data.contas);
     } catch (error) {
       setError(error);

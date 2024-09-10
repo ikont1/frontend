@@ -129,11 +129,18 @@ export const WalletProvider = ({ children }) => {
       const response = await api.get(`/conta-bancaria/${id}/extrato`);
       return response.data.data.dados;
     } catch (error) {
-      console.error('Erro ao listar extrato:', error);
-      throw error;
+      // Trata especificamente o erro 404
+      if (error.response && error.response.status === 404) {
+        console.warn(`Nenhum extrato encontrado para a conta ${id}.`);
+        return []; // Retorna uma lista vazia caso não haja extrato
+      } else {
+        // Loga os outros tipos de erro
+        console.error('Erro ao listar extrato:', error);
+        throw error;
+      }
     }
   };
-
+  
 
   return (
     <WalletContext.Provider value={{

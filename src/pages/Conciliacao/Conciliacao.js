@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Conciliacao.css';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
-import { ArrowDown, Upload, ArrowLeft, ArrowRight, AlertTriangle, ThumbsUp } from 'react-feather';
+import { Upload, ArrowLeft, ArrowRight, AlertTriangle, ThumbsUp } from 'react-feather';
 import axios from 'axios';
 import { useWallet } from '../../context/WalletContext';
 import { useConciliacao } from '../../context/ConciliacaoContext';
@@ -14,7 +14,6 @@ import { FormattedInput } from '../../components/FormateValidateInput/FormatFunc
 import Notification from '../../components/Notification/Notification';
 
 
-
 const Conciliacao = () => {
   const { listarContas, listarExtrato } = useWallet();
   const { desfazerConciliacao, criarConciliacao, aceitarConciliacao, recusarConciliacao } = useConciliacao();
@@ -23,14 +22,16 @@ const Conciliacao = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
-  const [contaPrincipal, setContaPrincipal] = useState(null);
+  const [todasContas, setTodasContas] = useState([]);
   const [transacoes, setTransacoes] = useState([]);
+  const [contaSelecionada, setContaSelecionada] = useState(null);
+  const [selectedContaConciliacao, setSelectedContaConciliacao] = useState(null);
   const [selectedTransacao, setSelectedTransacao] = useState(null);
-  const [contaSelecionada, setContaSelecionada] = useState(null); // Estado para guardar a conta selecionada
 
   const [showBuscarModal, setShowBuscarModal] = useState(false);
   const [showCriarContaPagarModal, setShowCriarContaPagarModal] = useState(false);
   const [showCriarContaReceberModal, setShowCriarContaReceberModal] = useState(false);
+  const [contaAEditar, setContaAEditar] = useState(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showDesfazerModal, setShowDesfazerModal] = useState(false);
   const [showAceiteModal, setShowAceiteModal] = useState(false);
@@ -59,7 +60,6 @@ const Conciliacao = () => {
     estaPago: false
   });
 
-
   // Notificação
   const [notification, setNotification] = useState(null);
   const handleNotificationClose = () => {
@@ -75,54 +75,106 @@ const Conciliacao = () => {
     '403': require('../../assets/imgs/coraLogo.png'),
   };
 
-  // Fetch categorias, fornecedores e clientes ao abrir os modais
+
+  // Limpar o formulário de criar conta a pagar quando o modal for fechado
+  useEffect(() => {
+    if (!showCriarContaPagarModal) {
+      setNovaContaAPagar({
+        valor: '',
+        vencimento: '',
+        categoria: '',
+        fornecedorId: '',
+        descricao: '',
+        estaPago: false
+      });
+      // Removido o setContaSelecionada(null)
+    }
+  }, [showCriarContaPagarModal]);
+
+
+  // Limpar o formulário de criar conta a receber quando o modal for fechado
+  useEffect(() => {
+    if (!showCriarContaReceberModal) {
+      setNovaContaAReceber({
+        valor: '',
+        vencimento: '',
+        categoria: '',
+        clienteId: '',
+        descricao: '',
+        status: 'A receber'
+      });
+      // Removido o setContaSelecionada(null)
+    }
+  }, [showCriarContaReceberModal]);
+
   useEffect(() => {
     fetchCategorias();
     fetchCategoriasAReceber();
     fetchFornecedores();
     fetchClientes();
-  }, [fetchCategorias, fetchFornecedores, fetchClientes, fetchCategoriasAReceber]);
 
-  // Buscar a conta principal
-  useEffect(() => {
-    const fetchContaPrincipal = async () => {
+    // Agora, vamos usar as funções `fetchContasAReceber` e `fetchContasAPagar` para carregar as contas ao montar o componente.
+    const carregarContas = async () => {
       try {
-        const contasData = await listarContas();
-        const principal = contasData.find(conta => conta.contaPrincipal === true);
-        setContaPrincipal(principal);
-        if (principal) {
-          const extratoData = await listarExtrato(principal.id);
-          setTransacoes(extratoData);
-        }
+        await fetchContasAReceber();
+        await fetchContasAPagar();
       } catch (error) {
-        console.error('Erro ao buscar a conta principal ou listar extrato:', error);
+        console.error('Erro ao carregar contas a receber ou a pagar:', error);
       }
     };
 
-    fetchContaPrincipal();
-  }, [listarContas, listarExtrato]);
+    carregarContas();
+  }, [fetchCategorias, fetchFornecedores, fetchClientes, fetchCategoriasAReceber, fetchContasAReceber, fetchContasAPagar]);
 
-  // Fetch contas a pagar e a receber
+  // Função para buscar todas as contas e definir conta principal como padrão
   useEffect(() => {
     const fetchContas = async () => {
       try {
-        await fetchContasAPagar();
-        await fetchContasAReceber();
+        const contasData = await listarContas();
+        setTodasContas(contasData); // Armazena todas as contas
+
+        const principal = contasData.find(conta => conta.contaPrincipal === true);
+        if (principal) {
+          setContaSelecionada(principal); // Define a conta principal como conta selecionada
+          const extratoData = await listarExtrato(principal.id);
+          setTransacoes(extratoData); // Carrega o extrato da conta principal
+        }
       } catch (error) {
-        console.error('Erro ao listar contas:', error);
+        console.error('Erro ao listar contas ou buscar o extrato:', error);
       }
     };
+
     fetchContas();
-  }, [fetchContasAPagar, fetchContasAReceber]);
+  }, [listarContas, listarExtrato]);
+
+  // Atualizar as transações ao mudar a conta selecionada
+  useEffect(() => {
+    if (contaSelecionada) {
+
+      listarExtrato(contaSelecionada.id)
+        .then((extratoAtualizado) => {
+          if (extratoAtualizado.length === 0) {
+          }
+          setTransacoes(extratoAtualizado); // Atualiza as transações da conta selecionada
+        })
+        .catch((error) => {
+          if (error.response && error.response.status === 404) {
+            setTransacoes([]); // Define transações como vazio quando o extrato não é encontrado
+          } else {
+            console.error("Erro ao listar o extrato:", error);
+          }
+        });
+    }
+  }, [contaSelecionada, listarExtrato]);
 
   // Função para capturar o arquivo selecionado e iniciar o upload automaticamente
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
 
-    if (!file || !contaPrincipal) {
+    if (!file || !contaSelecionada) {
       setNotification({
         title: 'Erro',
-        message: 'Nenhum arquivo selecionado.',
+        message: 'Nenhum arquivo selecionado ou conta não selecionada.',
         type: 'error',
         icon: AlertTriangle,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
@@ -137,7 +189,7 @@ const Conciliacao = () => {
       const signedData = await getSignedUrl();
       await uploadFileToS3(file, signedData);
       const fileKey = signedData.fields.key.replace(/\${filename}/, file.name);
-      await submitFileKey(fileKey, contaPrincipal.id);
+      await submitFileKey(fileKey, contaSelecionada.id);
       setNotification({
         title: 'Sucesso!',
         message: 'Arquivo OFX enviado com sucesso.',
@@ -147,17 +199,27 @@ const Conciliacao = () => {
       });
 
       // Atualiza a página automaticamente após o envio do arquivo
-      const extratoAtualizado = await listarExtrato(contaPrincipal.id);
+      const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
     } catch (error) {
-      console.error('Erro durante o upload:', error);
-      setNotification({
-        title: 'Erro',
-        message: 'Erro ao enviar o arquivo. Tente novamente.',
-        type: 'error',
-        icon: AlertTriangle,
-        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
-      });
+      if (error.response && error.response.data && error.response.data.error === "O extrato importado não pertence a conta informada") {
+        setNotification({
+          title: 'Erro',
+          message: 'O extrato importado não pertence à conta selecionada. Verifique se o arquivo OFX está correto.',
+          type: 'error',
+          icon: AlertTriangle,
+          buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+        });
+      } else {
+        console.error('Erro durante o upload:', error);
+        setNotification({
+          title: 'Erro',
+          message: 'Erro ao enviar o arquivo. Tente novamente.',
+          type: 'error',
+          icon: AlertTriangle,
+          buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -207,6 +269,7 @@ const Conciliacao = () => {
   async function submitFileKey(fileKey, contaId) {
     const token = localStorage.getItem('token');
     try {
+      console.log("Enviando chave do arquivo:", fileKey, "para a conta:", contaId); // Verificar os dados da conta e do arquivo
       const response = await axios.post(`https://api.ikont1.com.br/conta-bancaria/${contaId}/extrato`,
         { chaveArquivo: fileKey },
         {
@@ -217,7 +280,7 @@ const Conciliacao = () => {
         });
       console.log("Resposta do envio da chave ao backend:", response.data);
     } catch (error) {
-      console.error('Erro ao enviar a chave do arquivo para o backend:', error);
+      console.error('Erro ao enviar a chave do arquivo para o backend:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -282,7 +345,6 @@ const Conciliacao = () => {
         categoria: '',
         clienteId: '',
         descricao: '',
-        status: 'A receber'
       });
     } catch (error) {
       console.error('Erro ao criar conta a receber:', error);
@@ -291,8 +353,9 @@ const Conciliacao = () => {
 
   // Função para abrir o modal de edição da conta sugerida aPagar/aReceber
   const handleOpenEditModal = (contaSugerida, tipo) => {
+    setContaAEditar(contaSugerida); // Define a conta em edição
+
     if (tipo === 'debito') {
-      setContaSelecionada(contaSugerida);  // Marca a conta como sendo a selecionada para edição
       setNovaContaAPagar({
         valor: contaSugerida.valor.toFixed(2),
         vencimento: contaSugerida.vencimento ? contaSugerida.vencimento.split('T')[0] : '',
@@ -302,7 +365,6 @@ const Conciliacao = () => {
       });
       setShowCriarContaPagarModal(true);
     } else if (tipo === 'credito') {
-      setContaSelecionada(contaSugerida);
       setNovaContaAReceber({
         valor: contaSugerida.valor.toFixed(2),
         vencimento: contaSugerida.vencimento ? contaSugerida.vencimento.split('T')[0] : '',
@@ -313,7 +375,6 @@ const Conciliacao = () => {
       setShowCriarContaReceberModal(true);
     }
   };
-
   // Função para atualizar conta a pagar
   const handleAtualizarContaPagar = async (e) => {
     e.preventDefault();
@@ -327,11 +388,11 @@ const Conciliacao = () => {
     };
 
     try {
-      // Use contaSelecionada ao invés de contaSugerida para pegar o ID correto
-      await updateContaAPagar(contaSelecionada.id, contaToUpdate);
+      await updateContaAPagar(contaAEditar.id, contaToUpdate); // Usar `contaAEditar.id` para atualizar
       setShowCriarContaPagarModal(false);
+
       // Atualizar a lista de transações após a edição
-      const extratoAtualizado = await listarExtrato(contaPrincipal.id);
+      const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
 
       // Resetar os campos do formulário manualmente
@@ -342,6 +403,9 @@ const Conciliacao = () => {
         fornecedorId: '',
         descricao: '',
       });
+
+      // Resetar o estado da conta em edição após a atualização
+      setContaAEditar(null);
     } catch (error) {
       console.error('Erro ao atualizar conta a pagar:', error);
     }
@@ -360,11 +424,11 @@ const Conciliacao = () => {
     };
 
     try {
-      // Use contaSelecionada ao invés de contaSugerida para pegar o ID correto
-      await updateContaAReceber(contaSelecionada.id, contaToUpdate);
+      await updateContaAReceber(contaAEditar.id, contaToUpdate); // Usar `contaAEditar.id` para atualizar
       setShowCriarContaReceberModal(false);
+
       // Atualizar a lista de transações após a edição
-      const extratoAtualizado = await listarExtrato(contaPrincipal.id);
+      const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
 
       // Resetar os campos do formulário manualmente
@@ -375,25 +439,21 @@ const Conciliacao = () => {
         clienteId: '',
         descricao: '',
       });
+
+      // Resetar o estado da conta em edição após a atualização
+      setContaAEditar(null);
     } catch (error) {
       console.error('Erro ao atualizar conta a receber:', error);
     }
   };
 
-  // Mostrar modal de busca ao clicar em "Buscar ou Criar" transações
-  const handleBuscarOuCriar = (transacao) => {
-    setSelectedTransacao(transacao);
-    setShowBuscarModal(true); // Abre o modal de busca
-  };
-
-  // Função para conciliacao
+  // Função para confirmar a conciliação manual
   const handleConfirmConciliacao = async () => {
     if (!contaSelecionada || !selectedTransacao) {
       console.error('Erro: Conta ou transação não foram selecionadas corretamente.');
       setNotification({
         title: 'Erro',
         message: 'Erro ao realizar conciliação.',
-        secondaryMessage: 'Nenhum lançamento selecionado!',
         type: 'error',
         icon: AlertTriangle,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
@@ -402,14 +462,14 @@ const Conciliacao = () => {
     }
 
     const entidade = selectedTransacao.tipo === 'debito' ? 'contaAPagar' : 'contaAReceber';
-    const entidadeId = contaSelecionada.id;
+    const entidadeId = selectedContaConciliacao.id;
     const extratoId = selectedTransacao.id;
 
     try {
       await criarConciliacao({ entidade, entidadeId, extratoId });
 
       // Atualizar a lista de transações após conciliação
-      const extratoAtualizado = await listarExtrato(contaPrincipal.id);
+      const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
 
       setShowConfirmationModal(false);
@@ -419,7 +479,7 @@ const Conciliacao = () => {
     }
   };
 
-  // Função para abrir modal de confirmar aceitar conciliacao sugerida
+  // Função para abrir modal de confirmação de conciliação
   const handleOpenConfirmModal = (transacao, contaSugerida) => {
     setConfirmModalData({
       transacao,
@@ -428,7 +488,7 @@ const Conciliacao = () => {
     setShowAceiteModal(true); // Abre o modal de confirmação
   };
 
-  // Função para  confirmar a acao de aceitar sugestao de conciliacao
+  // Função para aceitar sugestão de conciliação
   const handleAceiteSugestao = async () => {
     if (!confirmModalData?.transacao) {
       console.error('Erro: Transação não selecionada corretamente.');
@@ -438,39 +498,18 @@ const Conciliacao = () => {
     const extratoId = confirmModalData.transacao.id;
 
     try {
-      // Chama a rota de aceitar conciliação
       await aceitarConciliacao({ extratoId });
 
       // Atualizar a lista de transações após aceitar a conciliação
-      const extratoAtualizado = await listarExtrato(contaPrincipal.id);
+      const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
 
-      // Fechar o modal de confirmação
       setShowConfirmationModal(false);
       setShowAceiteModal(false);
     } catch (error) {
       console.error('Erro ao aceitar conciliação:', error);
     }
   };
-
-  // Função para abrir modal de confirmar a recusa de sugestão
-  const handleOpenRecusarModal = (transacao) => {
-    const contaSugerida = contasAPagar.find(conta => conta.id === transacao.conciliacaoId)
-      || contasAReceber.find(conta => conta.id === transacao.conciliacaoId);
-
-    if (!contaSugerida) {
-      console.error('Erro: Não foi possível encontrar o lançamento correspondente à transação.');
-      return;
-    }
-
-    setRecusarModalData({
-      transacao,  // Verifique se transacao contém o extratoId correto
-      conta: contaSugerida,
-    });
-
-    setShowRecusarModal(true); // Abre o modal de confirmação de recusa
-  };
-
 
   // Função para recusar sugestão
   const handleRecusarConciliacao = async () => {
@@ -484,36 +523,22 @@ const Conciliacao = () => {
     try {
       await recusarConciliacao(extratoId);
 
-      const extratoAtualizado = await listarExtrato(contaPrincipal.id);
+      const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
 
-      // Fecha o modal de confirmação de recusa
       setShowRecusarModal(false);
     } catch (error) {
       console.error('Erro ao recusar conciliação:', error);
     }
   };
 
-
-
-  // Função para abrir o modal de confirmação de desfazer
-  const handleDesfazerClick = (extratoId) => {
-    setSelectedExtratoId(extratoId);
-    setShowDesfazerModal(true);
-  };
-
-  // Função para cancelar a ação de desfazer
-  const handleCancelDesfazer = () => {
-    setShowDesfazerModal(false);
-  };
-
-  // Função para confirmar a desfazer conciliação
+  // Função para desfazer conciliação
   const handleConfirmDesfazer = async () => {
     try {
       await desfazerConciliacao(selectedExtratoId);
 
       // Atualizar a lista de transações após desfazer conciliação
-      const extratoAtualizado = await listarExtrato(contaPrincipal.id);
+      const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
 
       setShowDesfazerModal(false);
@@ -522,7 +547,39 @@ const Conciliacao = () => {
     }
   };
 
-  // Nomes de tipo de conta
+  // Funções faltantes:
+  const handleOpenRecusarModal = (transacao) => {
+    const contaSugerida = contasAPagar.find(conta => conta.id === transacao.conciliacaoId)
+      || contasAReceber.find(conta => conta.id === transacao.conciliacaoId);
+
+    if (!contaSugerida) {
+      console.error('Erro: Não foi possível encontrar o lançamento correspondente à transação.');
+      return;
+    }
+
+    setRecusarModalData({
+      transacao,
+      conta: contaSugerida,
+    });
+    setShowRecusarModal(true);
+  };
+
+  const handleBuscarOuCriar = (transacao) => {
+    setSelectedTransacao(transacao);
+    setShowBuscarModal(true);
+  };
+
+  const handleDesfazerClick = (extratoId) => {
+    setSelectedExtratoId(extratoId);
+    setShowDesfazerModal(true);
+  };
+
+  // Função para lidar com a seleção de uma conta a pagar/receber durante a conciliação
+  const handleSelectContaConciliacao = (conta) => {
+    setSelectedContaConciliacao(conta); // Usar um estado separado para a conta de conciliação
+  };
+
+
   const renderTipoConta = (tipo) => {
     switch (tipo) {
       case 'meiosDePagamento':
@@ -542,16 +599,14 @@ const Conciliacao = () => {
     return transacoes
       .filter(transacao => transacao.conciliacaoStatus === 'naoConciliado' || transacao.conciliacaoStatus === 'sugestao')
       .map((transacao, index) => {
-        // Buscar a conta sugerida usando o conciliacaoId
         const contaSugerida = contasAPagar.find(conta => conta.id === transacao.conciliacaoId)
           || contasAReceber.find(conta => conta.id === transacao.conciliacaoId);
 
         return (
           <div className="conciliacao-row" key={index}>
-            {/* Transação do extrato */}
             <div className="conciliacao-card transacao-extrato">
               <div>
-                <img src={bancoLogos[contaPrincipal.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
+                <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
                 <div>
                   <p>{new Date(transacao.dataTransacao).toLocaleDateString()}</p>
                   <p className='descricao'>{transacao.descricao}</p>
@@ -560,7 +615,6 @@ const Conciliacao = () => {
               <h3 style={{ color: transacao.valor < 0 ? 'red' : 'green' }}>{`R$ ${transacao.valor.toFixed(2)}`}</h3>
             </div>
 
-            {/* Botão Conciliar/Aceitar */}
             <button
               className="desfazer-button"
               disabled={!transacao.conciliacaoSugeridaEm}
@@ -569,8 +623,6 @@ const Conciliacao = () => {
               {transacao.conciliacaoSugeridaEm ? "Aceitar" : "Conciliar"}
             </button>
 
-
-            {/* Renderiza o box da sugestão apenas para transações sugeridas */}
             {transacao.conciliacaoSugeridaEm && contaSugerida && (
               <div className="conciliacao-card sugestao-box">
                 <h4>Sugestão Encontrada no financeiro</h4>
@@ -585,7 +637,6 @@ const Conciliacao = () => {
               </div>
             )}
 
-            {/* Botão de Buscar/Criar se não for sugestão */}
             {!transacao.conciliacaoSugeridaEm && (
               <div className="conciliacao-card sugestao-contas">
                 <button className="buscar-ou-criar-button" onClick={() => handleBuscarOuCriar(transacao)}>
@@ -607,10 +658,9 @@ const Conciliacao = () => {
 
         return (
           <div className="conciliacao-row" key={index}>
-            {/* Transação do extrato */}
             <div className="conciliacao-card transacao-extrato">
               <div>
-                <img src={bancoLogos[contaPrincipal.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
+                <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
                 <div>
                   <p>{new Date(transacao.dataTransacao).toLocaleDateString()}</p>
                   <p className='descricao'>{transacao.descricao}</p>
@@ -623,7 +673,6 @@ const Conciliacao = () => {
               Desfazer
             </button>
 
-            {/* Conta a pagar ou a receber conciliada */}
             {contaConciliada ? (
               <div className="conciliacao-card transacao-conta">
                 <div>
@@ -646,7 +695,7 @@ const Conciliacao = () => {
       });
   };
 
-  if (!contaPrincipal) {
+  if (!contaSelecionada) {
     return (
       <div className="container">
         <Sidebar />
@@ -657,6 +706,7 @@ const Conciliacao = () => {
       </div>
     );
   }
+
 
   return (
     <div className="container">
@@ -669,20 +719,43 @@ const Conciliacao = () => {
 
           <div className="conciliacao-section">
             <div className="conta-info">
-              <div className="banco-logo-container">
-                <img src={bancoLogos[contaPrincipal.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
-              </div>
-              <div className="banco-detalhes">
-                <h3>{contaPrincipal.nomeBanco}</h3>
-                <div className="conta-identificadores">
-                  <span>{contaPrincipal.agencia}</span>
-                  <span>{`${contaPrincipal.numeroConta}-${contaPrincipal.contaDV}`}</span>
+              <div className='div-tipo-conta'>
+                <div className="banco-logo-container">
+                  <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
+                </div>
+                <div className="banco-detalhes">
+                  <h3>{contaSelecionada.nomeBanco}</h3>
+                  <div className="conta-identificadores">
+                    <p>{renderTipoConta(contaSelecionada.tipo)}</p>
+                  </div>
                 </div>
               </div>
-              <div className="icon-dropdown">
-                <p>{renderTipoConta(contaPrincipal.tipo)}</p>
-                <ArrowDown />
-              </div>
+              <select
+                className="icon-dropdown"
+                value={contaSelecionada?.id || ""}
+                onChange={async (e) => {
+                  const novaConta = todasContas.find(conta => conta.id === parseInt(e.target.value));
+                  setContaSelecionada(novaConta); // Atualiza a conta selecionada
+
+                  if (novaConta) {
+                    try {
+                      const extratoAtualizado = await listarExtrato(novaConta.id); // Carrega o extrato da nova conta
+                      setTransacoes(extratoAtualizado); // Atualiza as transações exibidas
+                    } catch (error) {
+                      console.error('Erro ao carregar o extrato da nova conta:', error);
+                    }
+                  }
+                }}
+
+              >
+                {todasContas.map(conta => (
+                  <option key={conta.id} value={conta.id}>
+                    {conta.nomeBanco} - {conta.agencia}/{`${conta.numeroConta}-${conta.contaDV}`}
+                  </option>
+                ))}
+              </select>
+
+
             </div>
 
             <div className="importar-extrato">
@@ -715,11 +788,11 @@ const Conciliacao = () => {
           <div className="lancamentos-importados">
             <h3>Lançamentos importados</h3>
             <div className="card-banco">
-              <img src={bancoLogos[contaPrincipal.codigoBanco] || bancoLogos['default']} alt="Banco do Brasil" className="banco-logo" />
+              <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco do Brasil" className="banco-logo" />
               <div className="banco-dados-conciliacao">
-                <p>{contaPrincipal.nomeBanco}</p>
-                <span>{contaPrincipal.agencia}</span>
-                <span>{`${contaPrincipal.numeroConta}-${contaPrincipal.contaDV}`}</span>
+                <p>{contaSelecionada.nomeBanco}</p>
+                <span>{contaSelecionada.agencia}</span>
+                <span>{`${contaSelecionada.numeroConta}-${contaSelecionada.contaDV}`}</span>
               </div>
             </div>
           </div>
@@ -756,25 +829,26 @@ const Conciliacao = () => {
 
           <div className="content-tabs">
             {activeTab === 'pendentes' ? (
-              <div className="trasacoes-pendentes">
-                {transacoes.filter(t => t.conciliacaoStatus === 'naoConciliado').length > 0 ? (
-                  renderTransacoesPendentes()
+              <div className="transacoes-pendentes">
+                {transacoes && transacoes.length > 0 ? (
+                  renderTransacoesPendentes() // Renderiza as transações pendentes da conta selecionada
                 ) : (
-                  <p>Nenhuma conciliação pendente</p>  // Mensagem se não houver transações pendentes
+                  <p>Nenhuma transação pendente para a conta selecionada.</p>  // Mensagem caso não haja transações pendentes
                 )}
               </div>
             ) : (
               <div className="conciliadas-container">
-                {transacoes.filter(t => t.conciliacaoStatus === 'conciliado').length > 0 ? (
-                  renderTransacoesConciliadas()
+                {transacoes && transacoes.length > 0 ? (
+                  renderTransacoesConciliadas() // Renderiza as transações conciliadas da conta selecionada
                 ) : (
-                  <p>Nenhuma transação conciliada</p>  // Mensagem se não houver transações conciliadas
+                  <p>Nenhuma transação conciliada para a conta selecionada.</p>  // Mensagem caso não haja transações conciliadas
                 )}
               </div>
             )}
           </div>
 
         </div>
+
 
 
         {/* Modal para buscar/criar conta */}
@@ -789,30 +863,29 @@ const Conciliacao = () => {
               {/* Dados da transação */}
               <div className="conciliacao-card transacao-extrato">
                 <div>
-                  <img src={bancoLogos[contaPrincipal.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
+                  <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
                   <div>
-                    <p>{contaPrincipal.nomeBanco}</p>
+                    <p>{contaSelecionada.nomeBanco}</p>
                     <p className='data'>{new Date(selectedTransacao?.dataTransacao).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <h3 style={{ color: selectedTransacao.valor < 0 ? 'red' : 'green' }}>{`R$ ${selectedTransacao?.valor.toFixed(2)}`}</h3>
               </div>
 
-              {/* Aqui irá a tabela de contas */}
+              {/* Tabela de contas */}
               <div className="buscar-conta-tabela">
                 <div className='container-button-add-conta'>
                   <h5>Buscar lançamento</h5>
                   <button onClick={() => {
-                    setShowBuscarModal(false); // Fecha o modal de busca
+                    setShowBuscarModal(false);
                     if (selectedTransacao.tipo === 'debito') {
-                      setShowCriarContaPagarModal(true); // Abre o modal de criar conta a pagar
+                      setShowCriarContaPagarModal(true);
                     } else {
-                      setShowCriarContaReceberModal(true); // Abre o modal de criar conta a receber
+                      setShowCriarContaReceberModal(true);
                     }
                   }}>
                     Criar novo
                   </button>
-
                 </div>
 
                 <div className='table-contas-conciliacao'>
@@ -829,7 +902,7 @@ const Conciliacao = () => {
                     <tbody>
                       {selectedTransacao?.tipo === 'debito'
                         ? contasAPagar
-                          .filter((conta) => conta.conciliacao.status !== 'conciliado') // Filtra contas conciliadas
+                          .filter((conta) => conta.conciliacao.status !== 'conciliado')
                           .map((conta) => (
                             <tr key={conta.id}>
                               <td>{new Date(conta.criadoEm).toLocaleDateString()}</td>
@@ -841,15 +914,13 @@ const Conciliacao = () => {
                                   type="radio"
                                   name="conta-selecionada"
                                   value={conta.id}
-                                  onChange={() => {
-                                    setContaSelecionada(conta); // Certifique-se de que está setando a conta selecionada
-                                  }}
+                                  onChange={() => handleSelectContaConciliacao(conta)} // Usar handleSelectContaConciliacao aqui
                                 />
                               </td>
                             </tr>
                           ))
                         : contasAReceber
-                          .filter((conta) => conta.conciliacao.status !== 'conciliado') // Filtra contas conciliadas
+                          .filter((conta) => conta.conciliacao.status !== 'conciliado')
                           .map((conta) => (
                             <tr key={conta.id}>
                               <td>{new Date(conta.criadoEm).toLocaleDateString()}</td>
@@ -861,9 +932,8 @@ const Conciliacao = () => {
                                   type="radio"
                                   name="conta-selecionada"
                                   value={conta.id}
-                                  onChange={() => {
-                                    setContaSelecionada(conta); // Certifique-se de que está setando a conta selecionada
-                                  }}
+                                  onChange={() => handleSelectContaConciliacao(conta)} // Usar handleSelectContaConciliacao aqui
+                                  
                                 />
                               </td>
                             </tr>
@@ -871,19 +941,23 @@ const Conciliacao = () => {
                     </tbody>
                   </table>
                 </div>
-
               </div>
-              <button className="conciliar-button" onClick={() => { setShowConfirmationModal(true) }}>
+
+              <button className="conciliar-button" onClick={() => setShowConfirmationModal(true)}>
                 Conciliar
               </button>
             </div>
           </Modal>
         )}
 
-        {/* Modal para Criar Conta a Pagar */}
+        {/* Renderização do modal de Conta a pagar */}
         {showCriarContaPagarModal && (
-          <Modal isOpen={showCriarContaPagarModal} onClose={() => setShowCriarContaPagarModal(false)} title={contaSelecionada ? "Editar conta a pagar" : "Nova conta a pagar"}>
-            <form onSubmit={contaSelecionada ? handleAtualizarContaPagar : handleCriarContaPagar}> {/* Condicional no onSubmit */}
+          <Modal
+            isOpen={showCriarContaPagarModal}
+            onClose={() => setShowCriarContaPagarModal(false)}
+            title={contaAEditar ? "Editar conta a pagar" : "Nova conta a pagar"} // Título condicional
+          >
+            <form onSubmit={contaAEditar ? handleAtualizarContaPagar : handleCriarContaPagar}>
               <div className="form-group">
                 <label htmlFor="valor">Valor</label>
                 <FormattedInput
@@ -935,7 +1009,6 @@ const Conciliacao = () => {
                     <option key={fornecedor.id} value={fornecedor.id}>{fornecedor.nomeFantasia}</option>
                   ))}
                 </select>
-
               </div>
               <div className="form-group">
                 <label htmlFor="descricao">Descrição (Opcional)</label>
@@ -952,10 +1025,14 @@ const Conciliacao = () => {
           </Modal>
         )}
 
-        {/* Modal para Criar Conta a Receber */}
+        {/* Renderização do modal de Conta a Receber */}
         {showCriarContaReceberModal && (
-          <Modal isOpen={showCriarContaReceberModal} onClose={() => setShowCriarContaReceberModal(false)} title={contaSelecionada ? "Editar conta a receber" : "Nova conta a receber"}>
-            <form onSubmit={contaSelecionada ? handleAtualizarContaReceber : handleCriarContaReceber}> {/* Condicional no onSubmit */}
+          <Modal
+            isOpen={showCriarContaReceberModal}
+            onClose={() => setShowCriarContaReceberModal(false)}
+            title={contaAEditar ? "Editar conta a receber" : "Nova conta a receber"} // Título condicional
+          >
+            <form onSubmit={contaAEditar ? handleAtualizarContaReceber : handleCriarContaReceber}>
               <div className="form-group">
                 <label htmlFor="valor">Valor</label>
                 <FormattedInput
@@ -998,7 +1075,7 @@ const Conciliacao = () => {
                 <select
                   id="clienteId"
                   name="clienteId"
-                  value={novaContaAReceber.clienteId} // Certifique-se de que está recebendo o valor correto do estado
+                  value={novaContaAReceber.clienteId}
                   onChange={(e) => setNovaContaAReceber({ ...novaContaAReceber, clienteId: e.target.value })}
                   required
                 >
@@ -1007,7 +1084,6 @@ const Conciliacao = () => {
                     <option key={cliente.id} value={cliente.id}>{cliente.nomeFantasia}</option>
                   ))}
                 </select>
-
               </div>
               <div className="form-group">
                 <label htmlFor="descricao">Descrição (Opcional)</label>
@@ -1023,29 +1099,28 @@ const Conciliacao = () => {
             </form>
           </Modal>
         )}
-
-        {/* Modal de Confirmação desfazer conciliacao */}
+        {/* Modal de Confirmação desfazer conciliação */}
         {showDesfazerModal && (
           <ConfirmationModal
-            title="Desfazer conciliação"
+            title="Desfazer Conciliação"
             message="Tem certeza que deseja realizar essa ação?"
             onConfirm={handleConfirmDesfazer}
-            onCancel={handleCancelDesfazer}
+            onCancel={() => setShowDesfazerModal(false)}
           />
         )}
 
-        {/* Modal de fonfirmar conciliacao manual */}
+        {/* Modal de confirmar conciliação manual */}
         {showConfirmationModal && (
           <ConfirmationModal
             title="Confirmar Conciliação"
             message={`Transação: Valor R$ ${selectedTransacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${new Date(selectedTransacao?.dataTransacao).toLocaleDateString() || 'Data não disponível'}`}
-            secondaryMessage={`Lançamento: Valor R$ ${contaSelecionada?.valor?.toFixed(2) || '0.00'} Vencimento: ${new Date(contaSelecionada?.vencimento).toLocaleDateString() || 'Data não disponível'}`}
+            secondaryMessage={`Lançamento: Valor R$ ${selectedContaConciliacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${new Date(selectedContaConciliacao?.vencimento).toLocaleDateString() || 'Data não disponível'}`}
             onConfirm={handleConfirmConciliacao}
             onCancel={() => setShowConfirmationModal(false)}
           />
         )}
 
-        {/* Modal de aceitar conciliacao sugerida */}
+        {/* Modal de aceitar conciliação sugerida */}
         {showAceiteModal && (
           <ConfirmationModal
             title="Aceitar Conciliação"
@@ -1059,15 +1134,13 @@ const Conciliacao = () => {
         {/* Modal de recusar conciliação sugerida */}
         {showRecusarModal && recusarModalData && (
           <ConfirmationModal
-            title="Recusar Sugestao"
+            title="Recusar Sugestão"
             message={`Transação: Valor R$ ${recusarModalData.transacao.valor.toFixed(2)} - Vencimento: ${new Date(recusarModalData.transacao.dataTransacao).toLocaleDateString()}`}
             secondaryMessage={`Lançamento: Valor R$ ${recusarModalData.conta?.valor.toFixed(2) || '0.00'} - Vencimento: ${new Date(recusarModalData.conta?.vencimento).toLocaleDateString() || 'Data não disponível'}`}
             onConfirm={handleRecusarConciliacao}
             onCancel={() => setShowRecusarModal(false)}
           />
         )}
-
-
 
         {/* Notificação */}
         {notification && (
