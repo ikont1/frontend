@@ -39,6 +39,7 @@ const CadastroContaBancaria = () => {
     '260': require('../../assets/imgs/nubanklogo.png'),
     '104': require('../../assets/imgs/caixalogo.png'),
     '403': require('../../assets/imgs/coraLogo.png'),
+    '077': require('../../assets/imgs/interLogo.png'),
   };
 
   // Usar useRef para evitar loop
@@ -207,6 +208,7 @@ const CadastroContaBancaria = () => {
                       <option value="260">Nubank</option>
                       <option value="403">Cora SCD</option>
                       <option value="104">Caixa Econômica</option>
+                      <option value="077">Inter</option>
                     </select>
                     {errors.codigoBanco && <span className="error">{errors.codigoBanco}</span>}
                   </div>

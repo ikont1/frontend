@@ -73,6 +73,8 @@ const Conciliacao = () => {
     '260': require('../../assets/imgs/nubanklogo.png'),
     '104': require('../../assets/imgs/caixalogo.png'),
     '403': require('../../assets/imgs/coraLogo.png'),
+    '077': require('../../assets/imgs/interLogo.png'),
+
   };
 
 
@@ -769,7 +771,7 @@ const Conciliacao = () => {
               <input
                 type="file"
                 id="upload-file"
-                style={{ display: 'none' }}
+                style={{ display: 'none', zIndex: 999 }}
                 onChange={handleFileChange}
                 accept=".ofx"
               />
