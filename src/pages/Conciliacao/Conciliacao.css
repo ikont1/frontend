@@ -25,9 +25,10 @@
   width: 100%;
   max-width: 500px;
   padding: 10px;
-  .div-tipo-conta {
-    display: flex;
-  }
+}
+
+.conta-info .div-tipo-conta {
+  display: flex;
 }
 
 .banco-logo-container {
@@ -43,6 +44,7 @@
 }
 
 .banco-detalhes {
+
   /* margin-left: -100px; */
   >span {
     background-color: #F8F5FA;
@@ -406,12 +408,13 @@
     }
   }
 
-  .sugestao-info{
+  .sugestao-info {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    >span{
+
+    >span {
       background-color: var(--secondary-error);
       padding: 2px 8px;
       border-radius: 20px;
