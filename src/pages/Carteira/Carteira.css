@@ -223,15 +223,19 @@
 
 .banco-dados-detalhes {
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
   font-size: 14px;
   color: var(--text-color);
   width: 300px;
   border-bottom: 1px solid #DEDEDE;
 
+  >div {
+    display: flex;
+    gap: 10px;
+  }
+
   >p {
     font-size: 18px;
-    margin-left: 100px;
     font-weight: 500;
   }
 }
@@ -307,7 +311,7 @@
 .status-conciliado>span,
 .status-naoConciliado>span,
 .status-sugestao>span,
-.valor-naoConciliado>span  {
+.valor-naoConciliado>span {
   padding: 6px 40px;
 }
 

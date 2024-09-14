@@ -14,7 +14,7 @@ const Carteira = () => {
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedContaId, setSelectedContaId] = useState(null);
-  const [modalAction, setModalAction] = useState(null); // 'desativar' ou 'reativar'
+  const [modalAction, setModalAction] = useState(null);
   const navigate = useNavigate();
 
 

@@ -120,7 +120,7 @@ const RedefinirSenha = () => {
             <Link to='https://www.instagram.com/ikont1/' target="_blank" rel="noopener noreferrer">
               <FaInstagram aria-hidden="true" className="i-sociais" />
             </Link>
-            <Link to='https://app.ikont1.com.br/login' target="_blank" rel="noopener noreferrer">
+            <Link to='https://api.whatsapp.com/send/?phone=5586994530553&text&type=phone_number&app_absent=0' target="_blank" rel="noopener noreferrer">
               <FaWhatsapp aria-hidden="true" className="i-sociais" />
             </Link>
             <Link to='https://www.facebook.com/profile.php?id=61560873020631' target="_blank" rel="noopener noreferrer">

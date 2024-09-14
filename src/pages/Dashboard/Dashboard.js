@@ -10,9 +10,11 @@ import { useFinance } from '../../context/FinanceContext';
 
 
 const Dashboard = () => {
-  const { listarContas } = useWallet();
+  const { listarContas, listarExtrato } = useWallet();
   const { fetchContasAReceber, fetchContasAPagar, contasAPagar, contasAReceber } = useFinance();
   const [contas, setContas] = useState([]);
+  const [conciliadas, setConciliadas] = useState(0);
+  const [pendentes, setPendentes] = useState(0);
 
   const bancoLogos = {
     '001': require('../../assets/imgs/bbLogo.png'),
@@ -53,14 +55,41 @@ const Dashboard = () => {
     }
   }, [fetchContasAPagar]);
 
+  // Contagem de transações conciliadas e pendentes
+  const contarTransacoes = useCallback(async () => {
+    try {
+      const todasContas = await listarContas();
+      let totalConciliadas = 0;
+      let totalPendentes = 0;
+
+      // Iterar sobre cada conta para buscar os extratos
+      for (const conta of todasContas) {
+        const extrato = await listarExtrato(conta.id);
+        totalConciliadas += extrato.filter(transacao => transacao.conciliacaoStatus === 'conciliado').length;
+        totalPendentes += extrato.filter(transacao => transacao.conciliacaoStatus === 'naoConciliado').length;
+      }
+
+      setConciliadas(totalConciliadas);
+      setPendentes(totalPendentes);
+
+    } catch (error) {
+      console.error('Erro ao contar transações:', error);
+    }
+  }, [listarContas, listarExtrato]);
+
   useEffect(() => {
     const fetchAndSortContas = async () => {
       await fetchContas();
       await fetchAReceber();
       await fetchAPagar();
+      await contarTransacoes(); // Contar transações ao carregar a página
     };
     fetchAndSortContas();
-  }, [fetchContas, fetchAReceber, fetchAPagar]);
+  }, [fetchContas, fetchAReceber, fetchAPagar, contarTransacoes]);
+
+  // Calcular a proporção das transações para o gráfico
+  const conciliadasPercent = conciliadas + pendentes > 0 ? (conciliadas / (conciliadas + pendentes)) * 100 : 0;
+
 
   // Mostra as ontas recentes
   const sortedContasAReceber = [...contasAReceber].sort((a, b) => new Date(b.vencimento) - new Date(a.vencimento));
@@ -69,19 +98,19 @@ const Dashboard = () => {
   // Conta dias em atraso
   const calculateDaysOverdue = (vencimento, status) => {
     if (status === 'pago') return null;
-  
+
     const today = new Date();
     const dueDate = new Date(vencimento);
     const timeDiff = today - dueDate;
-  
+
     if (timeDiff > 0) {
       const daysOverdue = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
       return daysOverdue;
     }
-  
+
     return null;
   };
-  
+
 
 
   return (
@@ -138,13 +167,14 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <div className='grafico'>
-                    <div className='conciliadas'></div>
-                    <div className='pendentes'></div>
+                  <div className='grafico'
+                    style={{
+                      background: `conic-gradient(rgb(1, 221, 1, 1) 0% ${conciliadasPercent}%, rgb(235, 0, 0, 0.8) ${conciliadasPercent}% 100%)`
+                    }}>
                   </div>
                 </div>
 
-                <Link to='/conciliacao'>Ver todas as pendentes <ArrowRightCircle className='icon' /></Link>
+                <Link to='/conciliacao-financeira'>Ver todas as pendentes <ArrowRightCircle className='icon' /></Link>
               </div>
 
 
@@ -154,7 +184,7 @@ const Dashboard = () => {
               <div className='card-areceber'>
                 <h4><BiWallet className='icon' />A receber <Link to='/contas-receber' className='i'><ArrowRightCircle /></Link></h4>
                 <div className='conteudo'>
-                {sortedContasAReceber.length > 0 ? (
+                  {sortedContasAReceber.length > 0 ? (
                     sortedContasAReceber.slice(0, 3).map(conta => {
                       const daysOverdue = calculateDaysOverdue(conta.vencimento, conta.status);
                       return (
@@ -185,7 +215,7 @@ const Dashboard = () => {
               <div className='card-apagar'>
                 <h4><BiWallet className='icon' />A pagar <Link to='/contas-pagar' className='i'><ArrowRightCircle /></Link></h4>
                 <div className='conteudo'>
-                {sortedContasAPagar.length > 0 ? (
+                  {sortedContasAPagar.length > 0 ? (
                     sortedContasAPagar.slice(0, 3).map(conta => {
                       const daysOverdue = calculateDaysOverdue(conta.vencimento, conta.status);
                       return (

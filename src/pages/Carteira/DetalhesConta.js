@@ -107,9 +107,11 @@ const DetalhesConta = () => {
             <div className="banco-info-detalhes">
               <h3>{conta.nomeBanco}</h3>
               <div className="banco-dados-detalhes">
-                <span className="agencia">{conta.agencia}</span>
-                <span className="conta">{`${conta.numeroConta}-${conta.contaDV}`}</span>
-                <p>R${conta.saldoInicial}</p>
+                <div>
+                  <span className="agencia">{conta.agencia}</span>
+                  <span className="conta">{`${conta.numeroConta}-${conta.contaDV}`}</span>
+                </div>
+                <p>R${parseFloat(conta.saldoInicial).toLocaleString()}</p>
               </div>
             </div>
 
@@ -118,7 +120,7 @@ const DetalhesConta = () => {
 
           <div className="saldo-atual">
             <span>Saldo atual</span>
-            <h2>R${conta.saldoInicial}</h2>
+            <h2>R${parseFloat(conta.saldoInicial).toLocaleString()}</h2>
           </div>
 
           <div className='content content-table table-extrato'>

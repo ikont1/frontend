@@ -12,6 +12,8 @@ import ConfirmationModal from '../../components/Modal/confirmationModal';
 import Modal from '../../components/Modal/Modal';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import Notification from '../../components/Notification/Notification';
+import FilterBarConciliacao from '../../components/FilterConciliacao/FilterBarConciliacao';
+
 
 
 const Conciliacao = () => {
@@ -38,6 +40,12 @@ const Conciliacao = () => {
   const [recusarModalData, setRecusarModalData] = useState(null);
   const [showRecusarModal, setShowRecusarModal] = useState(null);
   const [confirmModalData, setConfirmModalData] = useState(null);
+
+  // Adicionar estados para os filtros
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
+  const [descricaoFiltro, setDescricaoFiltro] = useState('');
 
   const [activeTab, setActiveTab] = useState('pendentes');
 
@@ -75,6 +83,45 @@ const Conciliacao = () => {
     '403': require('../../assets/imgs/coraLogo.png'),
     '077': require('../../assets/imgs/interLogo.png'),
 
+  };
+
+  // Função para lidar com a mudança dos filtros
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+
+    // Atualizar os filtros conforme o campo alterado
+    if (name === 'startDate') setStartDate(value); // Data inicial
+    if (name === 'endDate') setEndDate(value); // Data final
+    if (name === 'categoria') setCategoriaSelecionada(value); // Categoria (a Pagar ou a Receber)
+    if (name === 'descricao') setDescricaoFiltro(value); // Descrição (Cliente, Fornecedor ou Descrição)
+  };
+
+  // Função para aplicar os filtros nas transações
+  const filtrarTransacoes = () => {
+    return transacoes.filter((transacao) => {
+      // Filtro por data
+      const dataTransacao = new Date(transacao.dataTransacao);
+      const dataInicioValida = !startDate || dataTransacao >= new Date(startDate);
+      const dataFimValida = !endDate || dataTransacao <= new Date(endDate);
+
+      // Filtro por categoria
+      const categoriaValida = !categoriaSelecionada || (
+        (categoriaSelecionada === 'a Pagar' && transacao.tipo === 'debito') ||
+        (categoriaSelecionada === 'a Receber' && transacao.tipo === 'credito')
+      );
+
+      // Filtro por descrição
+      const descricaoTransacaoValida = !descricaoFiltro || transacao.descricao.toLowerCase().includes(descricaoFiltro.toLowerCase());
+
+      // Verificar se existe uma conta conciliada (aPagar ou aReceber)
+      const contaConciliada = buscarContaConciliada(transacao.conciliacaoId, transacao.conciliadoCom);
+
+      // Filtro por descrição de conta conciliada
+      const descricaoContaValida = !descricaoFiltro || (contaConciliada && contaConciliada.descricao.toLowerCase().includes(descricaoFiltro.toLowerCase()));
+
+      // O item será incluído se as datas, a categoria e uma das descrições (transação ou conta) forem válidas
+      return dataInicioValida && dataFimValida && categoriaValida && (descricaoTransacaoValida || descricaoContaValida);
+    });
   };
 
 
@@ -566,6 +613,7 @@ const Conciliacao = () => {
     setShowRecusarModal(true);
   };
 
+
   const handleBuscarOuCriar = (transacao) => {
     setSelectedTransacao(transacao);
     setShowBuscarModal(true);
@@ -596,9 +644,10 @@ const Conciliacao = () => {
   };
 
 
-  // Função para renderizar as transações pendentes
+  // Renderizar transações pendentes aplicando os filtros
   const renderTransacoesPendentes = () => {
-    return transacoes
+    const transacoesFiltradas = filtrarTransacoes(); // Aplicar a filtragem
+    return transacoesFiltradas
       .filter(transacao => transacao.conciliacaoStatus === 'naoConciliado' || transacao.conciliacaoStatus === 'sugestao')
       .map((transacao, index) => {
         const contaSugerida = contasAPagar.find(conta => conta.id === transacao.conciliacaoId)
@@ -651,9 +700,11 @@ const Conciliacao = () => {
       });
   };
 
-  // Função para renderizar as transações conciliadas
+
+  // Renderizar transações conciliadas aplicando os filtros
   const renderTransacoesConciliadas = () => {
-    return transacoes
+    const transacoesFiltradas = filtrarTransacoes(); // Aplicar a filtragem
+    return transacoesFiltradas
       .filter(transacao => transacao.conciliacaoStatus === 'conciliado')
       .map((transacao, index) => {
         const contaConciliada = buscarContaConciliada(transacao.conciliacaoId, transacao.conciliadoCom);
@@ -696,6 +747,7 @@ const Conciliacao = () => {
         );
       });
   };
+
 
   if (!contaSelecionada) {
     return (
@@ -829,6 +881,17 @@ const Conciliacao = () => {
             </button>
           </div>
 
+          {/* Barra de filtros */}
+          <FilterBarConciliacao
+            categorias={categorias}
+            startDate={startDate}
+            endDate={endDate}
+            categoriaSelecionada={categoriaSelecionada}
+            descricaoFiltro={descricaoFiltro}
+            onFilterChange={handleFilterChange}
+          />
+
+
           <div className="content-tabs">
             {activeTab === 'pendentes' ? (
               <div className="transacoes-pendentes">
@@ -935,7 +998,7 @@ const Conciliacao = () => {
                                   name="conta-selecionada"
                                   value={conta.id}
                                   onChange={() => handleSelectContaConciliacao(conta)} // Usar handleSelectContaConciliacao aqui
-                                  
+
                                 />
                               </td>
                             </tr>

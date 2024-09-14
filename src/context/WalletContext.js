@@ -127,6 +127,7 @@ export const WalletProvider = ({ children }) => {
   const listarExtrato = async (id) => {
     try {
       const response = await api.get(`/conta-bancaria/${id}/extrato`);
+      console.log(response.data.dada)
       return response.data.data.dados;
     } catch (error) {
       // Trata especificamente o erro 404
