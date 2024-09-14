@@ -802,7 +802,9 @@ const Conciliacao = () => {
                 }}
 
               >
-                {todasContas.map(conta => (
+                {todasContas
+                .filter(contas => contas.status === 'ativo')
+                .map(conta => (
                   <option key={conta.id} value={conta.id}>
                     {conta.nomeBanco} - {conta.agencia}/{`${conta.numeroConta}-${conta.contaDV}`}
                   </option>
