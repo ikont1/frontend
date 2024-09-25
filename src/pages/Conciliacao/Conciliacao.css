@@ -100,8 +100,22 @@
 }
 
 .upload-status {
-  width: 100%;
-  text-align: right;
+  position: relative;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  margin-right: 50px;
+}
+
+.upload-status::before {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  width: 45px; /* Tamanho do buraco */
+  height: 45px; /* Tamanho do buraco */
+  background-color: white; /* Cor do buraco, ajuste conforme necessário */
+  border-radius: 50%; /* Faz o buraco ser circular */
+  z-index: 1;
 }
 
 /* segunda sessão */

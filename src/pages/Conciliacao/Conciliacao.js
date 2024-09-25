@@ -13,7 +13,8 @@ import Modal from '../../components/Modal/Modal';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import Notification from '../../components/Notification/Notification';
 import FilterBarConciliacao from '../../components/FilterConciliacao/FilterBarConciliacao';
-
+import Lottie from 'react-lottie';
+import animationData from '../../lottieflow-scrolling-01-1-ffffff-easey.json'; // Animação Lottie
 
 
 const Conciliacao = () => {
@@ -23,7 +24,6 @@ const Conciliacao = () => {
   const { fetchClientes, clientes, fetchFornecedores, fornecedores } = useClientSupplier();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState("");
   const [todasContas, setTodasContas] = useState([]);
   const [transacoes, setTransacoes] = useState([]);
   const [contaSelecionada, setContaSelecionada] = useState(null);
@@ -83,6 +83,16 @@ const Conciliacao = () => {
     '403': require('../../assets/imgs/coraLogo.png'),
     '077': require('../../assets/imgs/interLogo.png'),
 
+  };
+
+  // Configuração do Lottie
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice',
+    },
   };
 
   // Função para lidar com a mudança dos filtros
@@ -226,13 +236,12 @@ const Conciliacao = () => {
         message: 'Nenhum arquivo selecionado ou conta não selecionada.',
         type: 'error',
         icon: AlertTriangle,
-        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+        buttons: [{ label: 'Ok', onClick: () => setNotification(null) }]
       });
       return;
     }
 
     setIsLoading(true);
-    setUploadStatus("Enviando arquivo...");
 
     try {
       const signedData = await getSignedUrl();
@@ -244,31 +253,19 @@ const Conciliacao = () => {
         message: 'Arquivo OFX enviado com sucesso.',
         type: 'success',
         icon: ThumbsUp,
-        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+        buttons: [{ label: 'Ok', onClick: () => setNotification(null) }]
       });
 
-      // Atualiza a página automaticamente após o envio do arquivo
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
       setTransacoes(extratoAtualizado);
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.error === "O extrato importado não pertence a conta informada") {
-        setNotification({
-          title: 'Erro',
-          message: 'O extrato importado não pertence à conta selecionada. Verifique se o arquivo OFX está correto.',
-          type: 'error',
-          icon: AlertTriangle,
-          buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
-        });
-      } else {
-        console.error('Erro durante o upload:', error);
-        setNotification({
-          title: 'Erro',
-          message: 'Erro ao enviar o arquivo. Tente novamente.',
-          type: 'error',
-          icon: AlertTriangle,
-          buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
-        });
-      }
+      setNotification({
+        title: 'Erro',
+        message: 'Erro ao enviar o arquivo. Tente novamente.',
+        type: 'error',
+        icon: AlertTriangle,
+        buttons: [{ label: 'Ok', onClick: () => setNotification(null) }]
+      });
     } finally {
       setIsLoading(false);
     }
@@ -803,40 +800,41 @@ const Conciliacao = () => {
 
               >
                 {todasContas
-                .filter(contas => contas.status === 'ativo')
-                .map(conta => (
-                  <option key={conta.id} value={conta.id}>
-                    {conta.nomeBanco} - {conta.agencia}/{`${conta.numeroConta}-${conta.contaDV}`}
-                  </option>
-                ))}
+                  .filter(contas => contas.status === 'ativo')
+                  .map(conta => (
+                    <option key={conta.id} value={conta.id}>
+                      {conta.nomeBanco} - {conta.agencia}/{`${conta.numeroConta}-${conta.contaDV}`}
+                    </option>
+                  ))}
               </select>
 
 
             </div>
 
-            <div className="importar-extrato">
-              <label htmlFor="upload-file" className="importar-link">
-                <Upload />
-                <div>
-                  <span>Importar extrato</span>
-                  <p>selecione o arquivo .ofx</p>
-                </div>
-              </label>
-              <input
-                type="file"
-                id="upload-file"
-                style={{ display: 'none', zIndex: 999 }}
-                onChange={handleFileChange}
-                accept=".ofx"
-              />
-            </div>
+            {!isLoading ? (
+              <div className="importar-extrato">
+                <label htmlFor="upload-file" className="importar-link">
+                  <Upload />
+                  <div>
+                    <span>Importar extrato</span>
+                    <p>selecione o arquivo .ofx</p>
+                  </div>
+                </label>
+                <input
+                  type="file"
+                  id="upload-file"
+                  style={{ display: 'none', zIndex: 999 }}
+                  onChange={handleFileChange}
+                  accept=".ofx"
+                />
+              </div>
+            ) : (
+              <div className="upload-status">
+                <Lottie options={defaultOptions} height={50} width={50} />
+              </div>
+            )}
           </div>
 
-          {isLoading && (
-            <div className="upload-status">
-              <p>{uploadStatus}</p>
-            </div>
-          )}
 
         </div>
 
