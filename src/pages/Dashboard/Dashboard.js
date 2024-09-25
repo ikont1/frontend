@@ -125,45 +125,48 @@ const Dashboard = () => {
             <div className='cards-left'>
               <h4><BiWallet className='icon' />Conta e carteira <Link to='/carteira' className='i'><ArrowRightCircle /></Link></h4>
 
-              {contas.length > 0 ? (
-                contas.filter(conta => conta.contaPrincipal === true)
-                  .map(conta => (
-                    <div className="card-conta" key={conta.id}>
-                      <div className="card-header">
-                        <img src={bancoLogos[conta.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo" />
-                        <div className="banco-info">
-                          {conta.status === 'inativo' && <span className="flag-inativa">Conta inativa</span>}
-                          <h3>{conta.nomeBanco}</h3>
-                          <div className="banco-dados">
-                            <span className="agencia">{conta.agencia}</span>
-                            <span className="conta">{`${conta.numeroConta}-${conta.contaDV}`}</span>
+              <div className="card-conta">
+                {contas.length > 0 ? (
+                  contas
+                    .filter(conta => conta.contaPrincipal === true)
+                    .map(conta => (
+                      <div key={conta.id}>
+                        <div className="card-header">
+                          <img src={bancoLogos[conta.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo" />
+                          <div className="banco-info">
+                            {conta.status === 'inativo' && <span className="flag-inativa">Conta inativa</span>}
+                            <h3>{conta.nomeBanco}</h3>
+                            <div className="banco-dados">
+                              <span className="agencia">{conta.agencia}</span>
+                              <span className="conta">{`${conta.numeroConta}-${conta.contaDV}`}</span>
+                            </div>
+                          </div>
+                          <div className="saldo saldo-tooltip">
+                            <span className="saldo-label">R$ {parseFloat(conta.saldoInicial).toLocaleString()}</span>
                           </div>
                         </div>
-                        <div className='saldo saldo-tooltip'>
-                          <span className="saldo-label">R$ {parseFloat(conta.saldoInicial).toLocaleString()}</span>
+                        <div className="card-footer">
+                          <div className="saldo-total">
+                            <span>Saldo total</span>
+                            <span className="span-total">R$ {parseFloat(conta.saldoInicial).toLocaleString()}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="card-footer">
-                        <div className="saldo-total">
-                          <span>Saldo total</span>
-                          <span className='span-total'>R${parseFloat(conta.saldoInicial).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <p>Nenhuma conta cadastrada.</p>
-              )}
+                    ))
+                ) : (
+                  <p>Nenhuma conta cadastrada.</p>
+                )}
+              </div>
 
               <div className='card-conciliacao'>
                 <h4><BiBarChartAlt className='icon' /> Status das conciliações</h4>
                 <div className='grafico-conciliacao'>
                   <div className='legenda'>
                     <div className='legenda-item'>
-                      <span className='dot conciliadas-dot'></span> Conciliadas
+                      <span className='dot conciliadas-dot'></span> {conciliadas} Conciliadas
                     </div>
                     <div className='legenda-item'>
-                      <span className='dot pendentes-dot'></span> Pendentes
+                      <span className='dot pendentes-dot'></span> {pendentes} Pendentes
                     </div>
                   </div>
 
@@ -176,7 +179,6 @@ const Dashboard = () => {
 
                 <Link to='/conciliacao-financeira'>Ver todas as pendentes <ArrowRightCircle className='icon' /></Link>
               </div>
-
 
             </div>
 

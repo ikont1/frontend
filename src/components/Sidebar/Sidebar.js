@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FileText, DollarSign, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle} from 'react-feather';
+import { FileText, DollarSign, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle, Award } from 'react-feather';
 import './Sidebar.css';
 import logo from '../../assets/imgs/logosvg.svg';
 import { useAuth } from '../../context/AuthContext';
@@ -8,10 +8,14 @@ import { useAuth } from '../../context/AuthContext';
 const Sidebar = () => {
   const { logout } = useAuth(); // Obtendo a função de logout do contexto
   const [isConciliacaoOpen, setIsConciliacaoOpen] = useState(false);
+  const [isConfiguracaoOpen, setIsConfiguracaoOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleConciliacao = () => {
     setIsConciliacaoOpen(!isConciliacaoOpen);
+  };
+  const toggleConfiguracao = () => {
+    setIsConfiguracaoOpen(!isConfiguracaoOpen);
   };
 
   const toggleSidebar = () => {
@@ -40,7 +44,7 @@ const Sidebar = () => {
                 </NavLink>
               </li>
               <li onClick={toggleConciliacao} className={isConciliacaoOpen ? "submenu-open" : ""}>
-                <div className="menu-item">
+                <div style={{paddingLeft: '20px'}} className="menu-item">
                   <BarChart2 className="icon" /> Conciliação
                 </div>
                 {isConciliacaoOpen && (
@@ -84,15 +88,31 @@ const Sidebar = () => {
                 </NavLink>
               </li> */}
               <li className="divider"></li>
+
               <li>
                 <NavLink style={{ fontWeight: 100 }} to="/minha-empresa" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                   <Briefcase style={{ color: 'var(--highlight-color)' }} className="icon" /> Minha Empresa
                 </NavLink>
               </li>
-              <li>
-                <NavLink style={{ fontWeight: 100 }} to="/configuracoes" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+
+              <li onClick={toggleConfiguracao} className={isConfiguracaoOpen ? "submenu-open" : ""}>
+                <div style={{paddingLeft: '20px'}} className="menu-item">
                   <Settings style={{ color: 'var(--highlight-color)' }} className="icon" /> Configurações
-                </NavLink>
+                </div>
+                {isConfiguracaoOpen && (
+                  <ul className="submenu">
+                    <li>
+                      <NavLink to="/certificado" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                        <Award className="icon" /> Certificado Digital
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                        <Settings className="icon" /> Outras Configurações
+                      </NavLink>
+                    </li>
+                  </ul>
+                )}
               </li>
             </ul>
           </nav>

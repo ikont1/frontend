@@ -13,6 +13,8 @@ import RedefinirSenha from "../pages/Login/redefinirSenha.js";
 import DetalhesConta from "../pages/Carteira/DetalhesConta.js";
 import CadastroContaBancaria from '../pages/Carteira/CadastroContaBancaria.js';
 import Conciliacao from "../pages/Conciliacao/Conciliacao.js";
+import Assinatura from "../pages/Assinatura/Assinatura.js";
+import Certificado from "../pages/Certificado/Certificado.js";
 
 
 function RoutesApp() {
@@ -22,6 +24,7 @@ function RoutesApp() {
       <Route path="/login" element={<Login />} />
       <Route path="/recuperar-senha" element={<RecuperarSenha />} />
       <Route path="/nova-senha" element={<RedefinirSenha />} />
+      <Route path="/assinatura" element={<Assinatura />} />
 
       {/* Rotas bloqueadas */}
       <Route element={<ProtectedRoute />}>
@@ -35,6 +38,7 @@ function RoutesApp() {
         <Route path="/conta/:id" element={<DetalhesConta />} />
         <Route path="/cadastro-conta-bancaria" element={<CadastroContaBancaria />} />
         <Route path="/conciliacao-financeira" element={<Conciliacao />} />
+        <Route path="/certificado" element={<Certificado />} />
       </Route>
     </Routes >
   );

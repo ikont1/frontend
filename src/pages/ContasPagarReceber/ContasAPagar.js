@@ -63,8 +63,9 @@ const ContasAPagar = () => {
   }, [fetchContasAPagar, fetchCategorias, fetchFornecedores]);
 
   const filterContas = useCallback(() => {
-    const { status2, period, month } = selectedFilters;
+    const { categorias = [], status2, fornecedorId, period, month } = selectedFilters;
     const currentMonth = new Date();
+
     const filtered = contasAPagar.filter(conta => {
       const contaVencimento = new Date(conta.vencimento);
 
@@ -72,7 +73,12 @@ const ContasAPagar = () => {
         contaVencimento.getFullYear() === currentMonth.getFullYear();
       const isOverdue = conta.status.toLowerCase() === 'vencido';
 
+      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
+
+      // Verificar se o fornecedor é compatível
+      const matchesFornecedor = !fornecedorId || (conta.fornecedor && String(conta.fornecedor.id) === String(fornecedorId));
+
       const matchesPeriod = (period.start && period.end &&
         contaVencimento >= new Date(period.start) &&
         contaVencimento <= new Date(period.end));
@@ -80,8 +86,7 @@ const ContasAPagar = () => {
         (month && (contaVencimento >= startOfMonth(new Date(month)) &&
           contaVencimento <= endOfMonth(new Date(month))));
 
-
-      return matchesStatus && (matchesPeriod || matchesMonth);
+      return matchesCategoria && matchesStatus && matchesFornecedor && (matchesPeriod || matchesMonth);
     });
 
     // Ordenar as contas vencidas no topo
@@ -102,25 +107,36 @@ const ContasAPagar = () => {
     }
   }, [contasAPagar, selectedFilters, filterContas]);
 
-
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
-
+  
     setSelectedFilters(prevFilters => {
       const updatedFilters = { ...prevFilters };
-
-      if (name === 'status2') {
+  
+      // Verificar se a propriedade categorias existe e, se não, inicializar como array vazio
+      if (!updatedFilters.categorias) {
+        updatedFilters.categorias = [];
+      }
+  
+      if (name === 'categoria') {
+        if (checked) {
+          updatedFilters.categorias.push(value); // Adicionar categoria se selecionada
+        } else {
+          updatedFilters.categorias = updatedFilters.categorias.filter(cat => cat !== value); // Remover categoria se desmarcada
+        }
+      } else if (name === 'status2') {
         if (checked) {
           updatedFilters.status2.push(value);
         } else {
           updatedFilters.status2 = updatedFilters.status2.filter(stat => stat !== value);
         }
+      } else if (name === 'fornecedor') {
+        updatedFilters.fornecedorId = checked ? value : null;
       } else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
-
         // Resetar filtro de mês ao selecionar um período
         updatedFilters.month = null;
       } else if (name === 'month') {
@@ -131,13 +147,11 @@ const ContasAPagar = () => {
           end: null,
         };
       }
-
+  
       return updatedFilters;
     });
   };
-
-
-
+  
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ");
@@ -398,11 +412,16 @@ const ContasAPagar = () => {
           onAdd={handleAdd}
           titleButton='Conta a pagar'
           filterConfig={{
+            categoria: true,
             status2: true,
+            fornecedor: true,
+            exibirFaturas: true,
             buttonAdd: true,
             buttonPeriod: true,
             buttonMeses: true,
           }}
+          categorias={categorias}
+          fornecedores={fornecedores}
           onFilterChange={handleFilterChange}
         />
 
@@ -445,7 +464,7 @@ const ContasAPagar = () => {
                         </div>
                       )}
                     </td>
-                    <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'pago' ? 'received' : ''}`}>
+                    <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'pago' ? 'received' : conta.status === 'vencido' ? 'overdue' : ''}`}>
                       <ThumbsUp />
                     </td>
                   </tr>

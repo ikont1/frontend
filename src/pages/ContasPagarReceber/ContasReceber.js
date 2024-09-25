@@ -65,8 +65,9 @@ const ContasReceber = () => {
   }, [fetchContasAReceber, fetchCategoriasAReceber, fetchClientes]);
 
   const filterContas = useCallback(() => {
-    const { categorias, status, clienteId, period, month } = selectedFilters;
+    const { categorias = [], status = [], clienteId, period, month } = selectedFilters;
     const currentMonth = new Date();
+
     const filtered = contasAReceber.filter(conta => {
       const contaVencimento = parseISO(conta.vencimento);
 
@@ -76,19 +77,19 @@ const ContasReceber = () => {
 
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
-      const matchesCliente = !clienteId || conta.clienteId === clienteId;
-      const matchesPeriod = (period.start && period.end &&
+      const matchesCliente = !clienteId || (conta.cliente && String(conta.cliente.id) === String(clienteId));
+
+      const matchesPeriod = (period?.start && period?.end &&
         contaVencimento >= new Date(period.start) &&
         contaVencimento <= new Date(period.end));
       const matchesMonth = (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
         (month && (contaVencimento >= startOfMonth(new Date(month)) &&
           contaVencimento <= endOfMonth(new Date(month))));
 
-
       return matchesCategoria && matchesStatus && matchesCliente && (matchesPeriod || matchesMonth);
     });
 
-    // Ordena as contas vencidas no topo
+    // Ordenar as contas vencidas no topo
     const sortedFiltered = filtered.sort((a, b) => {
       if (a.status === 'vencido' && b.status !== 'vencido') return -1;
       if (a.status !== 'vencido' && b.status === 'vencido') return 1;
@@ -97,9 +98,6 @@ const ContasReceber = () => {
 
     setFilteredContasAReceber(sortedFiltered);
   }, [contasAReceber, selectedFilters]);
-
-
-
 
   // Atualizar contas a receber filtradas quando contasAReceber ou filtros mudarem
   useEffect(() => {
@@ -149,8 +147,6 @@ const ContasReceber = () => {
       return updatedFilters;
     });
   };
-
-
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -483,7 +479,7 @@ const ContasReceber = () => {
                       </div>
                     )}
                   </td>
-                  <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'recebido' ? 'received' : ''}`}>
+                  <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'recebido' ? 'received' : conta.status === 'vencido' ? 'overdue' : ''}`}>
                     <ThumbsUp />
                   </td>
                 </tr>

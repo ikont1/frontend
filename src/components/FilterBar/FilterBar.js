@@ -9,7 +9,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 // Registrar a localização em português
 registerLocale('pt-BR', ptBR);
 
-const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onFilterChange }) => {
+const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, fornecedores, onFilterChange,selectedFilters }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -18,11 +18,15 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [searchCliente, setSearchCliente] = useState('');
   const [filteredClientes, setFilteredClientes] = useState(clientes || []);
+  const [searchfornecedor, setSearchFornecedor] = useState('');
+  const [filteredFornecedores, setFilteredFornecedores] = useState(fornecedores || []);
 
-  // Atualizar clientes filtrados quando a lista de clientes mudar
+  // Atualizar clientes/fornecedor filtrados quando a lista de clientes mudar
   useEffect(() => {
-    setFilteredClientes(clientes);
-  }, [clientes]);
+    setFilteredClientes(clientes || []);
+    setFilteredFornecedores(fornecedores || []);
+  }, [clientes, fornecedores]);
+  
 
   // Alternar exibição dos filtros
   const toggleFilters = () => {
@@ -87,15 +91,30 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
     setEndDate(null);
   };
 
+  // Filtrar fornecedor com base no texto digitado
+  const handleFornecedorSearch = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    setSearchFornecedor(searchTerm);
+
+    const filtered = (fornecedores || []).filter(fornecedor =>
+      fornecedor.nomeFantasia.toLowerCase().includes(searchTerm)
+    );
+
+    setFilteredFornecedores(filtered);
+  };
+
   // Filtrar clientes com base no texto digitado
   const handleClientSearch = (e) => {
     const searchTerm = e.target.value.toLowerCase();
     setSearchCliente(searchTerm);
-    const filtered = clientes.filter(cliente =>
+
+    const filtered = (clientes || []).filter(cliente =>
       cliente.nomeFantasia.toLowerCase().includes(searchTerm)
     );
+
     setFilteredClientes(filtered);
   };
+
 
   return (
     <div className='filter-bar-container'>
@@ -211,43 +230,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
             </div>
           )}
 
-
-          {/* Filtro por cliente */}
-          {filterConfig.cliente && (
-            <div className="form-group">
-              <h5>Cliente</h5>
-              <button onClick={() => toggleModal('cliente')}>
-                Todos <ArrowDown />
-              </button>
-              {activeModal === 'cliente' && (
-                <div className="modal-filter">
-                  <h5>Escolha o cliente</h5>
-                  <input type="text" placeholder="Digite" value={searchCliente} onChange={handleClientSearch} />
-                  <ul>
-                    {filteredClientes.map(cliente => (
-                      <li key={cliente.id}>
-                        <label>
-                          <input type="checkbox" name="cliente" onChange={onFilterChange} value={cliente.id} />
-                          {cliente.nomeFantasia}
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Filtro para exibir somente faturas */}
-          {filterConfig.exibirFaturas && (
-            <div className="form-group input-checkbox">
-              <label>
-                <input type="checkbox" name="faturas" onChange={onFilterChange} />
-                Exibir somente faturas
-              </label>
-            </div>
-          )}
-
           {/* Filtro por status (contas a pagar) */}
           {filterConfig.status2 && (
             <div className="form-group">
@@ -292,6 +274,68 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, onF
                   </ul>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Filtro por cliente */}
+          {filterConfig.cliente && (
+            <div className="form-group">
+              <h5>Cliente</h5>
+              <button onClick={() => toggleModal('cliente')}>
+                Todos <ArrowDown />
+              </button>
+              {activeModal === 'cliente' && (
+                <div className="modal-filter">
+                  <h5>Escolha o cliente</h5>
+                  <input type="text" placeholder="Digite" value={searchCliente} onChange={handleClientSearch} />
+                  <ul>
+                    {(filteredClientes || []).map(cliente => (
+                      <li key={cliente.id}>
+                        <label>
+                          <input type="checkbox" name="cliente" onChange={onFilterChange} value={cliente.id} />
+                          {cliente.nomeFantasia}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Filtro por cliente */}
+          {filterConfig.fornecedor && (
+            <div className="form-group">
+              <h5>fornecedor</h5>
+              <button onClick={() => toggleModal('fornecedor')}>
+                Todos <ArrowDown />
+              </button>
+              {activeModal === 'fornecedor' && (
+                <div className="modal-filter">
+                  <h5>Escolha o fornecedor</h5>
+                  <input type="text" placeholder="Digite" value={searchfornecedor} onChange={handleFornecedorSearch} />
+                  <ul>
+                    {(filteredFornecedores || []).map(fornecedor => (
+                      <li key={fornecedor.id}>
+                        <label>
+                          <input type="checkbox" name="fornecedor" onChange={onFilterChange} value={fornecedor.id} />
+                          {fornecedor.nomeFantasia}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Filtro para exibir somente faturas */}
+          {filterConfig.exibirFaturas && (
+            <div className="form-group input-checkbox">
+              <label>
+                <input type="checkbox" name="faturas" onChange={onFilterChange} />
+                Exibir somente faturas
+              </label>
             </div>
           )}
 

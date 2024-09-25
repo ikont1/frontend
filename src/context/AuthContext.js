@@ -5,6 +5,7 @@ import api from '../services/api';
 import Notification from '../components/Notification/Notification';
 import { AlertTriangle } from 'react-feather';
 
+
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);

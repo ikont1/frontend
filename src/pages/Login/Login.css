@@ -2,6 +2,7 @@
   display: flex;
   height: 100vh;
   background-color: #fff;
+  overflow-y: auto;
 }
 
 .login-image {
@@ -83,12 +84,12 @@
 }
 
 .login-form .div-botton {
-  position: absolute;
+  /* position: absolute; */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 40px;
-  bottom: 40px;
+  margin-top: 100px;
 }
 
 .div-botton .register-link {

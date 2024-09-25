@@ -23,7 +23,6 @@ export const WalletProvider = ({ children }) => {
     
       return response.data.data.contas;
     } catch (error) {
-      console.error('Erro ao listar contas:', error);
       throw error;
     }
   };
@@ -127,16 +126,14 @@ export const WalletProvider = ({ children }) => {
   const listarExtrato = async (id) => {
     try {
       const response = await api.get(`/conta-bancaria/${id}/extrato`);
-      console.log(response.data.dada)
+      console.log(response.data.data.dados)
       return response.data.data.dados;
     } catch (error) {
       // Trata especificamente o erro 404
       if (error.response && error.response.status === 404) {
-        console.warn(`Nenhum extrato encontrado para a conta ${id}.`);
         return []; // Retorna uma lista vazia caso não haja extrato
       } else {
-        // Loga os outros tipos de erro
-        console.error('Erro ao listar extrato:', error);
+      // Loga os outros tipos de erro
         throw error;
       }
     }

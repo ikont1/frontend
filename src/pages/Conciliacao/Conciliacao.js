@@ -755,7 +755,7 @@ const Conciliacao = () => {
         <Sidebar />
         <div className="main-content">
           <Header />
-          <p>Carregando conta principal...</p>
+          <p>Nenhuma conta cadastrada...</p>
         </div>
       </div>
     );
