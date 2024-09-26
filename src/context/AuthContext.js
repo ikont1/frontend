@@ -101,20 +101,18 @@ export const AuthProvider = ({ children }) => {
     setError(null); // Limpa o erro anterior
     setLoading(true); // Inicia o estado de carregamento
     try {
-      // Envia a requisição para redefinir a senha
+      // Envia a requisição para redefinir ou criar a senha
       await api.post('/usuario/redefinir-senha', { token, senha, senha2 });
   
       const tempLogin = localStorage.getItem('tempLogin');
       if (tempLogin) {
         // Se o login temporário existir, tenta realizar o login automaticamente
         await login(tempLogin, senha);
+        navigate('/'); // Redireciona para a home após login bem-sucedido
+      } else {
+        // Se o tempLogin não existir, redireciona para login
+        navigate('/login');
       }
-  
-      // Remove o login temporário, independentemente do resultado
-      localStorage.removeItem('tempLogin');
-  
-      // Redireciona o usuário após sucesso
-      navigate('/'); // Redireciona para a home após login bem-sucedido
     } catch (error) {
       console.log('setPassword error response:', error.response?.data);
       // Define a mensagem de erro recebida ou uma mensagem padrão
@@ -123,6 +121,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false); // Finaliza o estado de carregamento
     }
   };
+  
   
   
 
