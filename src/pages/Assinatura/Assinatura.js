@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Assinatura.css';
 import { useAssinatura } from '../../context/AssinaturaContext';
 import { useLocation } from 'react-router-dom';
@@ -11,6 +12,8 @@ import animationData from '../../lottieflow-scrolling-01-1-ffffff-easey.json';
 const Assinatura = () => {
   const { criarAssinatura } = useAssinatura();
   const location = useLocation();
+  const navigate = useNavigate();
+
 
   // Garante que o token nunca seja null
   const token = new URLSearchParams(location.search).get('token') || '';
@@ -145,14 +148,14 @@ const Assinatura = () => {
 
     setIsLoading(true); // Inicia o estado de carregamento
 
-    // Espera por 4 segundos antes de enviar os dados
+    // Espera por 3 segundos antes de enviar os dados
     setTimeout(async () => {
       const payload = {
         token: token, // Usa o token extraído da URL
         ciclo: formData.ciclo, // Envia o ciclo selecionado (mensal ou anual)
         cartaoCredito: {
           holderName: formData.holderName,
-          number: formData.number.replace(/\s/g, ''), // Remove espaços antes de enviar
+          number: formData.number.replace(/\s/g, ''),
           expiryMonth: formData.expiryMonth,
           expiryYear: formData.expiryYear,
           ccv: formData.ccv
@@ -171,10 +174,11 @@ const Assinatura = () => {
       try {
         await criarAssinatura(payload);
         setIsLoading(false); // Finaliza o estado de carregamento
+        navigate('/login'); // Redireciona para a rota /login
       } catch (error) {
         setIsLoading(false); // Finaliza o estado de carregamento em caso de erro
       }
-    }, 4000); // Espera 4 segundos antes de submeter os dados
+    }, 3000); // Espera 3 segundos antes de submeter os dados
   };
 
   return (

@@ -7,9 +7,8 @@ import { FaWhatsapp, FaInstagram, FaFacebook, FaLinkedin } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 
-
 const RedefinirSenha = () => {
-  const { setPassword, login, loading, error } = useAuth();
+  const { setPassword, loading, error } = useAuth();
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmeNovaSenha, setConfirmeNovaSenha] = useState('');
   const [inputError, setInputError] = useState({});
@@ -19,6 +18,7 @@ const RedefinirSenha = () => {
 
   useEffect(() => {
     if (error) {
+      setErrorMessage(error);
       setInputError({ novaSenha: true, confirmeNovaSenha: true });
     } else {
       setInputError({});
@@ -32,18 +32,30 @@ const RedefinirSenha = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (novaSenha !== confirmeNovaSenha) {
       setErrorMessage('As senhas não coincidem. Por favor, verifique e tente novamente.');
       return;
     }
+
     const token = getTokenFromUrl();
-    await setPassword(token, novaSenha, confirmeNovaSenha);
-    if (!error) {
-      const tempLogin = localStorage.getItem('tempLogin');
-      if (tempLogin) {
-        await login(tempLogin, novaSenha);
-        setSuccess(true);
+
+    try {
+      // Limpa os erros antes de tentar a redefinição de senha
+      setErrorMessage('');
+      await setPassword(token, novaSenha, confirmeNovaSenha);
+
+      // Verifica se houve sucesso ou erro
+      if (!error) {
+        setSuccess(true);  // Se tudo ocorrer bem, o estado de sucesso é definido
+      } else {
+        // Exibe a mensagem de erro do contexto
+        setErrorMessage('Erro ao redefinir a senha. Por favor, tente novamente.');
       }
+    } catch (err) {
+      // Captura erros inesperados
+      console.error('Erro ao redefinir/criar a senha:', err);
+      setErrorMessage('Erro inesperado ao processar sua solicitação. Tente novamente mais tarde.');
     }
   };
 
@@ -101,7 +113,6 @@ const RedefinirSenha = () => {
                 />
               </div>
             </div>
-            {error && <p className="error-message">{error}</p>}
             {errorMessage && <p className="error-message">{errorMessage}</p>}
 
             <div className="container-reset-submit">
