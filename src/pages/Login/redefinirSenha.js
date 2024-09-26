@@ -32,32 +32,31 @@ const RedefinirSenha = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (novaSenha !== confirmeNovaSenha) {
       setErrorMessage('As senhas não coincidem. Por favor, verifique e tente novamente.');
       return;
     }
-
+  
     const token = getTokenFromUrl();
-
+  
     try {
-      // Limpa os erros antes de tentar a redefinição de senha
       setErrorMessage('');
       await setPassword(token, novaSenha, confirmeNovaSenha);
-
-      // Verifica se houve sucesso ou erro
-      if (!error) {
-        setSuccess(true);  // Se tudo ocorrer bem, o estado de sucesso é definido
-      } else {
-        // Exibe a mensagem de erro do contexto
-        setErrorMessage('Erro ao redefinir a senha. Por favor, tente novamente.');
-      }
+  
+      // Exibe a mensagem de sucesso e aguarda 2 segundos antes de redirecionar
+      setSuccess(true);
+  
+      setTimeout(() => {
+        navigate('/'); // Redireciona após 2 segundos para a home
+      }, 2000);
+      
     } catch (err) {
-      // Captura erros inesperados
       console.error('Erro ao redefinir/criar a senha:', err);
       setErrorMessage('Erro inesperado ao processar sua solicitação. Tente novamente mais tarde.');
     }
   };
+  
 
   return (
     <div className="login-container">
