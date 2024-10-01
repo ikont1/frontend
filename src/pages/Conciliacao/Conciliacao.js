@@ -960,7 +960,7 @@ const Conciliacao = () => {
               disabled={paginaAtual === 1}
               className="botao-paginacao"
             >
-              Página Anterior
+              <ArrowLeft/>
             </button>
             <span>{`Página ${paginaAtual} de ${totalPaginas}`}</span>
             <button
@@ -968,7 +968,7 @@ const Conciliacao = () => {
               disabled={paginaAtual === totalPaginas}
               className="botao-paginacao"
             >
-              Próxima Página
+              <ArrowRight/>
             </button>
           </div>
 
