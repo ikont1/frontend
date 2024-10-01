@@ -47,6 +47,11 @@ const Conciliacao = () => {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [descricaoFiltro, setDescricaoFiltro] = useState('');
 
+  // Paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+
+
   const [activeTab, setActiveTab] = useState('pendentes');
 
   const [selectedExtratoId, setSelectedExtratoId] = useState(null);
@@ -104,7 +109,11 @@ const Conciliacao = () => {
     if (name === 'endDate') setEndDate(value); // Data final
     if (name === 'categoria') setCategoriaSelecionada(value); // Categoria (a Pagar ou a Receber)
     if (name === 'descricao') setDescricaoFiltro(value); // Descrição (Cliente, Fornecedor ou Descrição)
+
+    // Resetar para a primeira página quando um filtro for alterado
+    setPaginaAtual(1);
   };
+
 
   // Função para aplicar os filtros nas transações
   const filtrarTransacoes = () => {
@@ -493,6 +502,25 @@ const Conciliacao = () => {
     }
   };
 
+  // UseEffect para carregar as transações ao selecionar uma conta
+  useEffect(() => {
+  if (contaSelecionada) {
+    const fetchTransactions = async () => {
+      try {
+        const response = await listarExtrato(contaSelecionada.id, paginaAtual, 100);
+        const { dados, paginas } = response;
+
+        setTransacoes(dados); // Define as transações da página atual
+        setTotalPaginas(paginas); // Define o total de páginas para a navegação
+      } catch (error) {
+        console.error('Erro ao buscar transações:', error);
+      }
+    };
+
+    fetchTransactions();
+  }
+}, [contaSelecionada, paginaAtual, listarExtrato]);
+
   // Função para confirmar a conciliação manual
   const handleConfirmConciliacao = async () => {
     if (!contaSelecionada || !selectedTransacao) {
@@ -624,6 +652,19 @@ const Conciliacao = () => {
   // Função para lidar com a seleção de uma conta a pagar/receber durante a conciliação
   const handleSelectContaConciliacao = (conta) => {
     setSelectedContaConciliacao(conta); // Usar um estado separado para a conta de conciliação
+  };
+
+  // Paginação
+  const handleProximaPagina = () => {
+    if (paginaAtual < totalPaginas) {
+      setPaginaAtual((prevPagina) => prevPagina + 1);
+    }
+  };
+
+  const handlePaginaAnterior = () => {
+    if (paginaAtual > 1) {
+      setPaginaAtual((prevPagina) => prevPagina - 1);
+    }
   };
 
 
@@ -866,6 +907,7 @@ const Conciliacao = () => {
         </div>
 
         <div className="transacoes-container">
+
           <div className={`transacoes-header ${activeTab === 'conciliadas' ? 'conciliadas-active' : 'default'}`}>
             <button
               className={`pendentes ${activeTab === 'pendentes' ? 'active' : ''}`}
@@ -911,6 +953,25 @@ const Conciliacao = () => {
               </div>
             )}
           </div>
+
+          <div className="paginacao-container">
+            <button
+              onClick={handlePaginaAnterior}
+              disabled={paginaAtual === 1}
+              className="botao-paginacao"
+            >
+              Página Anterior
+            </button>
+            <span>{`Página ${paginaAtual} de ${totalPaginas}`}</span>
+            <button
+              onClick={handleProximaPagina}
+              disabled={paginaAtual === totalPaginas}
+              className="botao-paginacao"
+            >
+              Próxima Página
+            </button>
+          </div>
+
 
         </div>
 
