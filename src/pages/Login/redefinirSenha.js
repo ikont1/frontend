@@ -47,10 +47,6 @@ const RedefinirSenha = () => {
       // Exibe a mensagem de sucesso e aguarda 2 segundos antes de redirecionar
       setSuccess(true);
   
-      setTimeout(() => {
-        navigate('/'); // Redireciona após 2 segundos para a home
-      }, 2000);
-      
     } catch (err) {
       console.error('Erro ao redefinir/criar a senha:', err);
       setErrorMessage('Erro inesperado ao processar sua solicitação. Tente novamente mais tarde.');
