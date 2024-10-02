@@ -1,7 +1,7 @@
 import React from 'react';
 import './FilterBarConciliacao.css'
 
-const FilterBarConciliacao = ({ categorias, startDate, endDate, categoriaSelecionada, descricaoFiltro, onFilterChange }) => {
+const FilterBarConciliacao = ({ startDate, endDate, categoriaSelecionada, descricaoFiltro, onFilterChange, isConciliadas }) => {
   return (
     <div className="filter-bar-conciliacao">
       <div className="filter-item">
@@ -28,8 +28,8 @@ const FilterBarConciliacao = ({ categorias, startDate, endDate, categoriaSelecio
         <label>Categoria</label>
         <select name="categoria" value={categoriaSelecionada || ''} onChange={onFilterChange}>
           <option value="">Todas</option>
-          <option value="a Pagar">Contas a Pagar</option>
-          <option value="a Receber">Contas a Receber</option>
+          <option value="a Pagar">{isConciliadas ? 'Contas Pagas' : 'Contas a Pagar'}</option>
+          <option value="a Receber">{isConciliadas ? 'Contas Recebidas' : 'Contas a Receber'}</option>
         </select>
       </div>
 

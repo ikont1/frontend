@@ -859,6 +859,7 @@ const Conciliacao = () => {
 
             </div>
 
+            {/* Iportar extrato */}
             {!isLoading ? (
               <div className="importar-extrato">
                 <label htmlFor="upload-file" className="importar-link">
@@ -938,6 +939,7 @@ const Conciliacao = () => {
             categoriaSelecionada={categoriaSelecionada}
             descricaoFiltro={descricaoFiltro}
             onFilterChange={handleFilterChange}
+            isConciliadas={activeTab === 'conciliadas'}
           />
 
 
