@@ -123,26 +123,21 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
-  const listarExtrato = async (id, pagina = 1, itensPorPagina = 100) => {
+  const listarExtrato = async (id) => {
     try {
-      const response = await api.get(`/conta-bancaria/${id}/extrato`, {
-        params: {
-          pagina,
-          itensPorPagina,
-        },
-      });
-      return response.data.data;
+      const response = await api.get(`/conta-bancaria/${id}/extrato`);
+      console.log(response.data.data.dados)
+      return response.data.data.dados;
     } catch (error) {
       // Trata especificamente o erro 404
       if (error.response && error.response.status === 404) {
-        return { dados: [], total: 0, paginas: 0 }; // Retorna estrutura vazia caso não haja extrato
+        return []; // Retorna uma lista vazia caso não haja extrato
       } else {
-        // Loga os outros tipos de erro
+      // Loga os outros tipos de erro
         throw error;
       }
     }
   };
-  
   
 
   return (
