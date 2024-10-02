@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Conciliacao.css';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
@@ -46,6 +46,15 @@ const Conciliacao = () => {
   const [endDate, setEndDate] = useState(null);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [descricaoFiltro, setDescricaoFiltro] = useState('');
+
+  // Estados para a paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [itensPorPagina, setItensPorPagina] = useState(10);
+  const [todasTransacoes, setTodasTransacoes] = useState([]);
+  const [itensPaginados, setItensPaginados] = useState([]);
+
+
 
   const [activeTab, setActiveTab] = useState('pendentes');
 
@@ -100,56 +109,11 @@ const Conciliacao = () => {
     const { name, value } = e.target;
 
     // Atualizar os filtros conforme o campo alterado
-    if (name === 'startDate') setStartDate(value); // Data inicial
-    if (name === 'endDate') setEndDate(value); // Data final
-    if (name === 'categoria') setCategoriaSelecionada(value); // Categoria (a Pagar ou a Receber)
-    if (name === 'descricao') setDescricaoFiltro(value); // Descrição (Cliente, Fornecedor ou Descrição)
+    if (name === 'startDate') setStartDate(value);
+    if (name === 'endDate') setEndDate(value);
+    if (name === 'categoria') setCategoriaSelecionada(value);
+    if (name === 'descricao') setDescricaoFiltro(value);
   };
-
-  // Função para aplicar os filtros nas transações
-  const filtrarTransacoes = () => {
-    return transacoes.filter((transacao) => {
-      // Filtro por data
-      const dataTransacao = new Date(transacao.dataTransacao);
-      const dataInicioValida = !startDate || dataTransacao >= new Date(startDate);
-      const dataFimValida = !endDate || dataTransacao <= new Date(endDate);
-
-      // Filtro por categoria
-      const categoriaValida = !categoriaSelecionada || (
-        (categoriaSelecionada === 'a Pagar' && transacao.tipo === 'debito') ||
-        (categoriaSelecionada === 'a Receber' && transacao.tipo === 'credito')
-      );
-
-      // Filtro por descrição
-      const descricaoTransacaoValida = !descricaoFiltro || transacao.descricao.toLowerCase().includes(descricaoFiltro.toLowerCase());
-
-      // Verificar se existe uma conta conciliada (aPagar ou aReceber)
-      const contaConciliada = buscarContaConciliada(transacao.conciliacaoId, transacao.conciliadoCom);
-
-      // Filtro por descrição de conta conciliada
-      const descricaoContaValida = !descricaoFiltro || (contaConciliada && contaConciliada.descricao.toLowerCase().includes(descricaoFiltro.toLowerCase()));
-
-      // O item será incluído se as datas, a categoria e uma das descrições (transação ou conta) forem válidas
-      return dataInicioValida && dataFimValida && categoriaValida && (descricaoTransacaoValida || descricaoContaValida);
-    });
-  };
-
-
-  // Limpar o formulário de criar conta a pagar quando o modal for fechado
-  useEffect(() => {
-    if (!showCriarContaPagarModal) {
-      setNovaContaAPagar({
-        valor: '',
-        vencimento: '',
-        categoria: '',
-        fornecedorId: '',
-        descricao: '',
-        estaPago: false
-      });
-      // Removido o setContaSelecionada(null)
-    }
-  }, [showCriarContaPagarModal]);
-
 
   // Limpar o formulário de criar conta a receber quando o modal for fechado
   useEffect(() => {
@@ -172,7 +136,7 @@ const Conciliacao = () => {
     fetchFornecedores();
     fetchClientes();
 
-    // Agora, vamos usar as funções `fetchContasAReceber` e `fetchContasAPagar` para carregar as contas ao montar o componente.
+    // para carregar as contas ao montar o componente.
     const carregarContas = async () => {
       try {
         await fetchContasAReceber();
@@ -209,22 +173,23 @@ const Conciliacao = () => {
   // Atualizar as transações ao mudar a conta selecionada
   useEffect(() => {
     if (contaSelecionada) {
-
       listarExtrato(contaSelecionada.id)
         .then((extratoAtualizado) => {
-          if (extratoAtualizado.length === 0) {
-          }
-          setTransacoes(extratoAtualizado); // Atualiza as transações da conta selecionada
+          setTodasTransacoes(extratoAtualizado); // Armazena todas as transações
+          setTotalPaginas(Math.ceil(extratoAtualizado.length / itensPorPagina)); // Calcula o total de páginas
+          setPaginaAtual(1); // Reseta para a primeira página
+          paginarItens(extratoAtualizado, 1, itensPorPagina); // Pagina a primeira página
         })
         .catch((error) => {
           if (error.response && error.response.status === 404) {
-            setTransacoes([]); // Define transações como vazio quando o extrato não é encontrado
+            setTodasTransacoes([]);
+            setItensPaginados([]);
           } else {
             console.error("Erro ao listar o extrato:", error);
           }
         });
     }
-  }, [contaSelecionada, listarExtrato]);
+  }, [contaSelecionada, listarExtrato, itensPorPagina]);
 
   // Função para capturar o arquivo selecionado e iniciar o upload automaticamente
   const handleFileChange = async (e) => {
@@ -332,14 +297,15 @@ const Conciliacao = () => {
   }
 
   // Função para buscar a conta conciliada
-  const buscarContaConciliada = (conciliacaoId, conciliadoCom) => {
+  const buscarContaConciliada = useCallback((conciliacaoId, conciliadoCom) => {
     if (conciliadoCom === 'contaAPagar') {
       return contasAPagar.find(conta => conta.id === conciliacaoId);
     } else if (conciliadoCom === 'contaAReceber') {
       return contasAReceber.find(conta => conta.id === conciliacaoId);
     }
     return null;
-  };
+  }, [contasAPagar, contasAReceber]);
+
 
   // Função para lidar com a submissão de uma nova conta a pagar
   const handleCriarContaPagar = async (e) => {
@@ -626,6 +592,91 @@ const Conciliacao = () => {
     setSelectedContaConciliacao(conta); // Usar um estado separado para a conta de conciliação
   };
 
+  // Função para aplicar os filtros nas transações com base na aba ativa
+  const filtrarTransacoes = useCallback(() => {
+    let transacoesFiltradas = transacoes;
+
+    // Filtrar com base na aba ativa
+    if (activeTab === 'conciliadas') {
+      transacoesFiltradas = transacoes.filter(transacao => transacao.conciliacaoStatus === 'conciliado');
+    } else if (activeTab === 'pendentes') {
+      transacoesFiltradas = transacoes.filter(transacao => transacao.conciliacaoStatus === 'naoConciliado' || transacao.conciliacaoStatus === 'sugestao');
+    }
+
+    return transacoesFiltradas.filter((transacao) => {
+      const dataTransacao = new Date(transacao.dataTransacao);
+      const dataInicioValida = !startDate || dataTransacao >= new Date(startDate);
+      const dataFimValida = !endDate || dataTransacao <= new Date(endDate);
+      const categoriaValida = !categoriaSelecionada || (
+        (categoriaSelecionada === 'a Pagar' && transacao.tipo === 'debito') ||
+        (categoriaSelecionada === 'a Receber' && transacao.tipo === 'credito')
+      );
+      const descricaoTransacaoValida = !descricaoFiltro || transacao.descricao.toLowerCase().includes(descricaoFiltro.toLowerCase());
+
+      // Verificar se existe uma conta conciliada (aPagar ou aReceber)
+      const contaConciliada = buscarContaConciliada(transacao.conciliacaoId, transacao.conciliadoCom);
+      const descricaoContaValida = !descricaoFiltro || (contaConciliada && contaConciliada.descricao.toLowerCase().includes(descricaoFiltro.toLowerCase()));
+
+      return dataInicioValida && dataFimValida && categoriaValida && (descricaoTransacaoValida || descricaoContaValida);
+    });
+  }, [transacoes, startDate, endDate, categoriaSelecionada, descricaoFiltro, activeTab, buscarContaConciliada]);
+
+  // Aplicar os filtros nas transações e atualizar a paginação
+  useEffect(() => {
+    const transacoesFiltradas = filtrarTransacoes();
+    setTodasTransacoes(transacoesFiltradas);
+    setTotalPaginas(Math.ceil(transacoesFiltradas.length / itensPorPagina));
+    setPaginaAtual(1); // Sempre redefinir para a primeira página ao filtrar
+    paginarItens(transacoesFiltradas, 1, itensPorPagina);
+  }, [filtrarTransacoes, itensPorPagina, activeTab]);
+
+  // Alterar a página e recarregar os itens paginados
+  const handleProximaPagina = () => {
+    if (paginaAtual < totalPaginas) {
+      const novaPagina = paginaAtual + 1;
+      setPaginaAtual(novaPagina);
+      paginarItens(todasTransacoes, novaPagina, itensPorPagina);
+    }
+  };
+
+  const handlePaginaAnterior = () => {
+    if (paginaAtual > 1) {
+      const novaPagina = paginaAtual - 1;
+      setPaginaAtual(novaPagina);
+      paginarItens(todasTransacoes, novaPagina, itensPorPagina);
+    }
+  };
+
+  // Atualize a função paginarItens para alterar diretamente a visualização dos itens paginados
+  const paginarItens = (itens, pagina, itensPorPagina) => {
+    const inicio = (pagina - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const paginados = itens.slice(inicio, fim);
+    setItensPaginados(paginados); // Atualiza itensPaginados para renderizar os itens da página atual
+  };
+
+  // Função para mudar a aba e resetar filtros
+  const handleChangeTab = (tab) => {
+    setActiveTab(tab);
+    setPaginaAtual(1); // Sempre definir para a página 1 ao mudar a aba
+
+    // Resetar filtros ao mudar de aba
+    setStartDate(null);
+    setEndDate(null);
+    setCategoriaSelecionada('');
+    setDescricaoFiltro('');
+
+    if (tab === 'conciliadas') {
+      const transacoesConciliadas = todasTransacoes.filter(transacao => transacao.conciliacaoStatus === 'conciliado');
+      setTotalPaginas(Math.ceil(transacoesConciliadas.length / itensPorPagina));
+      paginarItens(transacoesConciliadas, 1, itensPorPagina);
+    } else if (tab === 'pendentes') {
+      const transacoesPendentes = todasTransacoes.filter(transacao => transacao.conciliacaoStatus === 'naoConciliado' || transacao.conciliacaoStatus === 'sugestao');
+      setTotalPaginas(Math.ceil(transacoesPendentes.length / itensPorPagina));
+      paginarItens(transacoesPendentes, 1, itensPorPagina);
+    }
+  };
+
 
   const renderTipoConta = (tipo) => {
     switch (tipo) {
@@ -640,11 +691,9 @@ const Conciliacao = () => {
     }
   };
 
-
   // Renderizar transações pendentes aplicando os filtros
   const renderTransacoesPendentes = () => {
-    const transacoesFiltradas = filtrarTransacoes(); // Aplicar a filtragem
-    return transacoesFiltradas
+    return itensPaginados
       .filter(transacao => transacao.conciliacaoStatus === 'naoConciliado' || transacao.conciliacaoStatus === 'sugestao')
       .map((transacao, index) => {
         const contaSugerida = contasAPagar.find(conta => conta.id === transacao.conciliacaoId)
@@ -700,8 +749,7 @@ const Conciliacao = () => {
 
   // Renderizar transações conciliadas aplicando os filtros
   const renderTransacoesConciliadas = () => {
-    const transacoesFiltradas = filtrarTransacoes(); // Aplicar a filtragem
-    return transacoesFiltradas
+    return itensPaginados
       .filter(transacao => transacao.conciliacaoStatus === 'conciliado')
       .map((transacao, index) => {
         const contaConciliada = buscarContaConciliada(transacao.conciliacaoId, transacao.conciliadoCom);
@@ -866,16 +914,17 @@ const Conciliacao = () => {
         </div>
 
         <div className="transacoes-container">
+          {/* Tabs para pendentes e conciliadas */}
           <div className={`transacoes-header ${activeTab === 'conciliadas' ? 'conciliadas-active' : 'default'}`}>
             <button
               className={`pendentes ${activeTab === 'pendentes' ? 'active' : ''}`}
-              onClick={() => setActiveTab('pendentes')}
+              onClick={() => handleChangeTab('pendentes')}
             >
               Pendentes
             </button>
             <button
               className={`conciliadas ${activeTab === 'conciliadas' ? 'active' : ''}`}
-              onClick={() => setActiveTab('conciliadas')}
+              onClick={() => handleChangeTab('conciliadas')}
             >
               Conciliadas
             </button>
@@ -895,21 +944,61 @@ const Conciliacao = () => {
           <div className="content-tabs">
             {activeTab === 'pendentes' ? (
               <div className="transacoes-pendentes">
-                {transacoes && transacoes.length > 0 ? (
-                  renderTransacoesPendentes() // Renderiza as transações pendentes da conta selecionada
+                {itensPaginados.length > 0 ? (
+                  renderTransacoesPendentes()
                 ) : (
-                  <p>Nenhuma transação pendente para a conta selecionada.</p>  // Mensagem caso não haja transações pendentes
+                  <p>Nenhuma transação pendente para mostrar</p>
                 )}
               </div>
             ) : (
               <div className="conciliadas-container">
-                {transacoes && transacoes.length > 0 ? (
-                  renderTransacoesConciliadas() // Renderiza as transações conciliadas da conta selecionada
+                {itensPaginados.length > 0 ? (
+                  renderTransacoesConciliadas()
                 ) : (
-                  <p>Nenhuma transação conciliada para a conta selecionada.</p>  // Mensagem caso não haja transações conciliadas
+                  <p>Nenhuma transação conciliada para mostrar</p>
                 )}
               </div>
             )}
+          </div>
+
+
+          {/* Controle de paginação */}
+          <div className="paginacao-container">
+            <div className="paginacao-texto">
+              <span>Transações por página:</span>
+              <select
+                value={itensPorPagina}
+                onChange={(e) => {
+                  const novosItensPorPagina = parseInt(e.target.value);
+                  setItensPorPagina(novosItensPorPagina);
+                  setTotalPaginas(Math.ceil(todasTransacoes.length / novosItensPorPagina));
+                  paginarItens(todasTransacoes, 1, novosItensPorPagina);
+                }}
+                className="itens-por-pagina"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+            <div className="paginacao-detalhes">
+              <button
+                onClick={handlePaginaAnterior}
+                disabled={paginaAtual === 1}
+                className="botao-paginacao"
+              >
+                <ArrowLeft className="seta-icon" />
+              </button>
+              <span>{`${paginaAtual} de ${totalPaginas}`}</span>
+              <button
+                onClick={handleProximaPagina}
+                disabled={paginaAtual === totalPaginas}
+                className="botao-paginacao"
+              >
+                <ArrowRight className="seta-icon" />
+              </button>
+            </div>
           </div>
 
         </div>
@@ -1164,6 +1253,7 @@ const Conciliacao = () => {
             </form>
           </Modal>
         )}
+
         {/* Modal de Confirmação desfazer conciliação */}
         {showDesfazerModal && (
           <ConfirmationModal

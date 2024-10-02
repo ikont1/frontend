@@ -5,7 +5,7 @@ import FilterBar from '../../components/FilterBar/FilterBar';
 import Modal from '../../components/Modal/Modal';
 import Notification from '../../components/Notification/Notification';
 import './ContasPagarReceber.css';
-import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
+import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp, ArrowLeft, ArrowRight } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
 import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns';
@@ -54,6 +54,13 @@ const ContasAPagar = () => {
     },
     month: null,
   });
+
+  // Estados de paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [itensPorPagina, setItensPorPagina] = useState(10);
+  const [itensPaginados, setItensPaginados] = useState([]);
+
 
   // Buscar dados iniciais
   useEffect(() => {
@@ -107,17 +114,23 @@ const ContasAPagar = () => {
     }
   }, [contasAPagar, selectedFilters, filterContas]);
 
+  useEffect(() => {
+    setTotalPaginas(Math.ceil(filteredContasAPagar.length / itensPorPagina));
+    paginarItens(filteredContasAPagar, 1, itensPorPagina);
+  }, [filteredContasAPagar, itensPorPagina]);
+
+
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
-  
+
     setSelectedFilters(prevFilters => {
       const updatedFilters = { ...prevFilters };
-  
+
       // Verificar se a propriedade categorias existe e, se não, inicializar como array vazio
       if (!updatedFilters.categorias) {
         updatedFilters.categorias = [];
       }
-  
+
       if (name === 'categoria') {
         if (checked) {
           updatedFilters.categorias.push(value); // Adicionar categoria se selecionada
@@ -147,11 +160,11 @@ const ContasAPagar = () => {
           end: null,
         };
       }
-  
+
       return updatedFilters;
     });
   };
-  
+
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ");
@@ -402,6 +415,32 @@ const ContasAPagar = () => {
   };
 
 
+  // Função para paginar itens
+  const paginarItens = (itens, pagina, itensPorPagina) => {
+    const inicio = (pagina - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const paginados = itens.slice(inicio, fim);
+    setItensPaginados(paginados);
+  };
+
+  // Funções para lidar com a paginação
+  const handleProximaPagina = () => {
+    if (paginaAtual < totalPaginas) {
+      const novaPagina = paginaAtual + 1;
+      setPaginaAtual(novaPagina);
+      paginarItens(filteredContasAPagar, novaPagina, itensPorPagina);
+    }
+  };
+
+  const handlePaginaAnterior = () => {
+    if (paginaAtual > 1) {
+      const novaPagina = paginaAtual - 1;
+      setPaginaAtual(novaPagina);
+      paginarItens(filteredContasAPagar, novaPagina, itensPorPagina);
+    }
+  };
+
+
   return (
     <div className="container">
       <Sidebar />
@@ -441,8 +480,8 @@ const ContasAPagar = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredContasAPagar.length > 0 ? (
-                filteredContasAPagar.map((conta, index) => (
+              {itensPaginados.length > 0 ? (
+                itensPaginados.map((conta, index) => (
                   <tr key={index}>
                     <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
                     <td data-label="Categoria">{conta.categoria}</td>
@@ -476,6 +515,44 @@ const ContasAPagar = () => {
               )}
             </tbody>
           </table>
+        </div>
+        {/* Controle de paginação */}
+        <div className="paginacao-container">
+          <div className="paginacao-texto">
+            <span>Contas por página:</span>
+            <select
+              value={itensPorPagina}
+              onChange={(e) => {
+                const novosItensPorPagina = parseInt(e.target.value);
+                setItensPorPagina(novosItensPorPagina);
+                setTotalPaginas(Math.ceil(filteredContasAPagar.length / novosItensPorPagina));
+                paginarItens(filteredContasAPagar, 1, novosItensPorPagina);
+              }}
+              className="itens-por-pagina"
+            >
+              <option value={1}>10</option>
+              <option value={2}>20</option>
+              <option value={5}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+          <div className="paginacao-detalhes">
+            <button
+              onClick={handlePaginaAnterior}
+              disabled={paginaAtual === 1}
+              className="botao-paginacao"
+            >
+              <ArrowLeft className="seta-icon" />
+            </button>
+            <span>{`${paginaAtual} de ${totalPaginas}`}</span>
+            <button
+              onClick={handleProximaPagina}
+              disabled={paginaAtual === totalPaginas}
+              className="botao-paginacao"
+            >
+              <ArrowRight className="seta-icon" />
+            </button>
+          </div>
         </div>
 
         {/* Totais */}

@@ -5,7 +5,7 @@ import FilterBar from '../../components/FilterBar/FilterBar';
 import Modal from '../../components/Modal/Modal';
 import Notification from '../../components/Notification/Notification';
 import './ContasPagarReceber.css';
-import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp } from 'react-feather';
+import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp, ArrowLeft, ArrowRight  } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
 import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns'; // Adicione startOfMonth e endOfMonth
@@ -57,6 +57,12 @@ const ContasReceber = () => {
     month: null,
   });
 
+  // Estados de paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [itensPorPagina, setItensPorPagina] = useState(10);
+  const [itensPaginados, setItensPaginados] = useState([]);
+
   // Buscar dados iniciais
   useEffect(() => {
     fetchContasAReceber();
@@ -106,7 +112,10 @@ const ContasReceber = () => {
     }
   }, [contasAReceber, selectedFilters, filterContas]);
 
-
+  useEffect(() => {
+    setTotalPaginas(Math.ceil(filteredContasAReceber.length / itensPorPagina));
+    paginarItens(filteredContasAReceber, 1, itensPorPagina);
+  }, [filteredContasAReceber, itensPorPagina]);
 
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
@@ -415,6 +424,31 @@ const ContasReceber = () => {
     }
   };
 
+  // Função para paginar itens
+  const paginarItens = (itens, pagina, itensPorPagina) => {
+    const inicio = (pagina - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const paginados = itens.slice(inicio, fim);
+    setItensPaginados(paginados);
+  };
+
+  // Funções para lidar com a paginação
+  const handleProximaPagina = () => {
+    if (paginaAtual < totalPaginas) {
+      const novaPagina = paginaAtual + 1;
+      setPaginaAtual(novaPagina);
+      paginarItens(filteredContasAReceber, novaPagina, itensPorPagina);
+    }
+  };
+
+  const handlePaginaAnterior = () => {
+    if (paginaAtual > 1) {
+      const novaPagina = paginaAtual - 1;
+      setPaginaAtual(novaPagina);
+      paginarItens(filteredContasAReceber, novaPagina, itensPorPagina);
+    }
+  };
+
   return (
     <div className="container">
       <Sidebar />
@@ -455,8 +489,9 @@ const ContasReceber = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredContasAReceber.map((conta, index) => (
-                <tr key={index}>
+            {itensPaginados.length > 0 ? (
+                itensPaginados.map((conta, index) => (
+                 <tr key={index}>
                   <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
                   <td data-label="Categoria">
                     {conta.categoria} <span className="nf-badge">{`NF ${conta.nf || 'N/A'}`}</span>
@@ -483,9 +518,53 @@ const ContasReceber = () => {
                     <ThumbsUp />
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan='8'>Nenhum dado a ser mostrado</td>
+              </tr>
+            )}
             </tbody>
           </table>
+        </div>
+
+        {/* Controle de paginação */}
+        <div className="paginacao-container">
+          <div className="paginacao-texto">
+            <span>Contas por página:</span>
+            <select
+              value={itensPorPagina}
+              onChange={(e) => {
+                const novosItensPorPagina = parseInt(e.target.value);
+                setItensPorPagina(novosItensPorPagina);
+                setTotalPaginas(Math.ceil(filteredContasAReceber.length / novosItensPorPagina));
+                paginarItens(filteredContasAReceber, 1, novosItensPorPagina);
+              }}
+              className="itens-por-pagina"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+          <div className="paginacao-detalhes">
+            <button
+              onClick={handlePaginaAnterior}
+              disabled={paginaAtual === 1}
+              className="botao-paginacao"
+            >
+              <ArrowLeft className="seta-icon" />
+            </button>
+            <span>{`${paginaAtual} de ${totalPaginas}`}</span>
+            <button
+              onClick={handleProximaPagina}
+              disabled={paginaAtual === totalPaginas}
+              className="botao-paginacao"
+            >
+              <ArrowRight className="seta-icon" />
+            </button>
+          </div>
         </div>
 
         {/* Soma totais */}

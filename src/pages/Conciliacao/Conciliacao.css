@@ -504,13 +504,3 @@
   opacity: 0.6;
 }
 
-.paginacao-container{
-  display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-}
-.paginacao-container button{
-  padding: 0;
-  background-color: transparent;
-  color: var(--highlight-color);
-}
