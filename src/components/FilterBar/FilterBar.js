@@ -9,7 +9,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 // Registrar a localização em português
 registerLocale('pt-BR', ptBR);
 
-const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, fornecedores, onFilterChange,selectedFilters }) => {
+const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, fornecedores, onFilterChange, showExportButton }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -180,9 +180,11 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
         <button className="filter-button" onClick={toggleFilters}>
           <Filter /> Filtrar
         </button>
+        {showExportButton && (
         <button className="export-button">
           <Download /> Exportar
         </button>
+      )}
       </div>
 
       {/* Filtros avançados */}

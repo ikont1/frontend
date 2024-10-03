@@ -462,6 +462,7 @@ const ContasAPagar = () => {
             categorias={categorias}
             fornecedores={fornecedores}
             onFilterChange={handleFilterChange}
+            showExportButton={true}
           />
 
         <div className='content content-table'>

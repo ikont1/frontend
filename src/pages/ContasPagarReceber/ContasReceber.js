@@ -470,6 +470,7 @@ const ContasReceber = () => {
           categorias={categoriasAReceber}
           clientes={clientes}
           onFilterChange={handleFilterChange}
+          showExportButton={true}
         />
 
 
