@@ -73,8 +73,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
         newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
       }
     }
-    if (!formData.inscricalEstadual) newErrors.inscricalEstadual = 'Inscrição estadual é obrigatória';
-    if (!formData.inscricalMunicipal) newErrors.inscricalMunicipal = 'Inscrição municipal é obrigatória';
+
     if (!formData.razaoSocial) newErrors.razaoSocial = 'Razão Social é obrigatória';
     if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
     if (!formData.celular) newErrors.celular = 'Celular é obrigatório';
@@ -99,11 +98,31 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     const validationErrorsStep1 = validateStep1();
     const validationErrorsStep2 = validateStep2();
     const validationErrors = { ...validationErrorsStep1, ...validationErrorsStep2 };
-
+  
     if (Object.keys(validationErrors).length === 0) {
+      // Copiar o formData para um novo objeto
+      const dataToSubmit = { ...formData };
+  
+      // Remover campos vazios
+      if (!dataToSubmit.inscricalMunicipal) {
+        delete dataToSubmit.inscricalMunicipal;
+      }
+      if (!dataToSubmit.inscricalEstadual) {
+        delete dataToSubmit.inscricalEstadual;
+      }
+  
+      // Remover campos vazios do endereço
+      const cleanedEndereco = { ...dataToSubmit.endereco };
+      Object.keys(cleanedEndereco).forEach(key => {
+        if (cleanedEndereco[key] === '') {
+          delete cleanedEndereco[key];
+        }
+      });
+      dataToSubmit.endereco = cleanedEndereco;
+   
       try {
         if (initialData.id) {
-          await updateCliente(initialData.id, formData);
+          await updateCliente(initialData.id, dataToSubmit);
           setNotification({
             title: 'Tudo certo!',
             message: 'As informações do Cliente foram atualizadas.',
@@ -112,7 +131,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
           });
         } else {
-          await addCliente(formData);
+          await addCliente(dataToSubmit);
           setNotification({
             title: 'Cliente cadastrado com sucesso!',
             message: 'Oba! Seu cadastro foi bem-sucedido!',
@@ -135,6 +154,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
       setErrors(validationErrors);
     }
   };
+  
 
   return (
     <>
@@ -196,21 +216,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group">
               <label htmlFor="inscricalMunicipal">Inscrição Municipal</label>
               <input type="text" id="inscricalMunicipal" name="inscricalMunicipal" value={formData.inscricalMunicipal} onChange={handleChange} />
-              {errors.inscricalMunicipal ? (
-                <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalMunicipal}</span>
-              ) : (
-                <span>A Inscrição Municipal deve ter entre 2 e 100 caracteres alfanuméricos.</span>
-              )}
             </div>
 
             <div className='form-group'>
               <label htmlFor="inscricalEstadual">Inscrição Estadual</label>
               <input type="text" id="inscricalEstadual" name="inscricalEstadual" value={formData.inscricalEstadual} onChange={handleChange} />
-              {errors.inscricalEstadual ? (
-                <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalEstadual}</span>
-              ) : (
-                <span>A Inscrição Estadual deve ter entre 2 e 100 caracteres alfanuméricos.</span>
-              )}
             </div>
 
             <div className="form-group-modal">
@@ -274,7 +284,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
             <div className="form-group">
               <label htmlFor="complemento">Complemento (obrigatório)</label>
-              <input type="text" id="complemento" name="complemento" value={formData.endereco.complemento} onChange={handleChange} />
+              <input type="text" id="complemento" name="complemento" value={formData.endereco.complemento} onChange={handleChange} required/>
               {errors.complemento ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.complemento}</span>
               ) : (

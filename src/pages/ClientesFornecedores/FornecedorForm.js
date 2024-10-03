@@ -44,8 +44,6 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
       }
     }
     if (!formData.razaoSocial) newErrors.razaoSocial = 'Razão Social é obrigatória';
-    if (!formData.inscricalMunicipal) newErrors.inscricalMunicipal = 'Inscrição municipal é obrigatória';
-    if (!formData.inscricalEstadual) newErrors.inscricalEstadual = 'Inscrição estadual é obrigatória';
     if (!formData.email) newErrors.email = 'E-mail é obrigatório';
     if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
     return newErrors;
@@ -58,10 +56,21 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
       setErrors(validationErrors);
       return;
     }
+  
+    // Copiar o formData para um novo objeto
+    const dataToSubmit = { ...formData };
+  
+    // Remover campos vazios
+    if (!dataToSubmit.inscricalMunicipal) {
+      delete dataToSubmit.inscricalMunicipal;
+    }
+    if (!dataToSubmit.inscricalEstadual) {
+      delete dataToSubmit.inscricalEstadual;
+    }
 
     try {
       if (initialData.id) {
-        await updateFornecedor(initialData.id, formData);
+        await updateFornecedor(initialData.id, dataToSubmit);
         setNotification({
           title: 'Tudo certo!',
           message: 'As informações do fornecedor foram atualizadas.',
@@ -70,7 +79,7 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
         });
       } else {
-        await addFornecedor(formData);
+        await addFornecedor(dataToSubmit);
         setNotification({
           title: 'Fornecedor cadastrado com sucesso!',
           message: 'Oba! Seu cadastro foi bem-sucedido!',
@@ -90,7 +99,7 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
       });
     }
   };
-
+  
   return (
     <>
       <form onSubmit={handleSubmit}>
@@ -122,7 +131,7 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="inscricalMunicipal">Inscrição municipal (Obrigatório)</label>
+          <label htmlFor="inscricalMunicipal">Inscrição municipal (Opcional)</label>
           <input type="text" id="inscricalMunicipal" name="inscricalMunicipal" value={formData.inscricalMunicipal} onChange={handleChange} />
           {errors.inscricalMunicipal ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalMunicipal}</span>
@@ -131,13 +140,8 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="inscricalEstadual">Inscrição estadual (Obrigatório)</label>
+          <label htmlFor="inscricalEstadual">Inscrição estadual (Opcional)</label>
           <input type="text" id="inscricalEstadual" name="inscricalEstadual" value={formData.inscricalEstadual} onChange={handleChange} />
-          {errors.inscricalEstadual ? (
-            <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalEstadual}</span>
-          ) : (
-            <span>a Inscrição estadual deve ter entre 2 e 100 caracteres.</span>
-          )}
         </div>
         <div className="form-group">
           <label htmlFor="email">E-mail (Obrigatório)</label>

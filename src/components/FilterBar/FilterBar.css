@@ -105,10 +105,24 @@
   color: var(--highlight-color);
   font-size: 16px;
   font-weight: 500;
+  padding: 0;
 }
 
-.filter-button svg {
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: transparent;
+  /* border: 1px solid var(--highlight-color); */
   color: var(--highlight-color);
+  font-size: 16px;
+  font-weight: 500;
+  padding: 4px 20px;
+}
+
+.filter-button svg, .export-button svg {
+  color: var(--highlight-color);
+  width: 20px;
 }
 
 .filters {
@@ -134,9 +148,8 @@
 
 .container-filtrar-pesquisar {
   display: flex;
-  .pesquisar-button svg {
-    width: 20px;
-  }
+  
+  padding: 10px;
 }
 
 .container-pesquisar {

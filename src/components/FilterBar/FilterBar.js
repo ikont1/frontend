@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './FilterBar.css';
-import { Calendar, PlusCircle, Filter, ArrowDown, ChevronLeft, ChevronRight } from 'react-feather';
+import { Calendar, PlusCircle, Filter, ArrowDown, ChevronLeft, ChevronRight, Download } from 'react-feather';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { addMonths, subMonths, format } from 'date-fns';
@@ -179,6 +179,9 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
       <div className='container-filtrar-pesquisar'>
         <button className="filter-button" onClick={toggleFilters}>
           <Filter /> Filtrar
+        </button>
+        <button className="export-button">
+          <Download /> Exportar
         </button>
       </div>
 

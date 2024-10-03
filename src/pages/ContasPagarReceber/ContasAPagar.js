@@ -447,22 +447,22 @@ const ContasAPagar = () => {
       <div className="main-content">
         <Header />
 
-        <FilterBar
-          onAdd={handleAdd}
-          titleButton='Conta a pagar'
-          filterConfig={{
-            categoria: true,
-            status2: true,
-            fornecedor: true,
-            exibirFaturas: true,
-            buttonAdd: true,
-            buttonPeriod: true,
-            buttonMeses: true,
-          }}
-          categorias={categorias}
-          fornecedores={fornecedores}
-          onFilterChange={handleFilterChange}
-        />
+          <FilterBar
+            onAdd={handleAdd}
+            titleButton='Conta a pagar'
+            filterConfig={{
+              categoria: true,
+              status2: true,
+              fornecedor: true,
+              exibirFaturas: true,
+              buttonAdd: true,
+              buttonPeriod: true,
+              buttonMeses: true,
+            }}
+            categorias={categorias}
+            fornecedores={fornecedores}
+            onFilterChange={handleFilterChange}
+          />
 
         <div className='content content-table'>
           <h1 className='h1-search'>Contas a pagar <SearchBar onSearch={handleSearch} placeholder='Categoria/descrição' /></h1>
