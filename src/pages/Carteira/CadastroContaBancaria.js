@@ -220,7 +220,7 @@ const CadastroContaBancaria = () => {
 
                   <div className='form-group-agencia-conta'>
                     <div className="form-group">
-                      <label>Agência</label>
+                      <label>Agência e Dígito</label>
                       <input type="text" name="agencia" value={formData.agencia} onChange={handleChange} required />
                       {errors.agencia && <span className="error">{errors.agencia}</span>}
                     </div>
