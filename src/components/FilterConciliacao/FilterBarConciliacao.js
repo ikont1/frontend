@@ -28,8 +28,8 @@ const FilterBarConciliacao = ({ startDate, endDate, categoriaSelecionada, descri
         <label>Categoria</label>
         <select name="categoria" value={categoriaSelecionada || ''} onChange={onFilterChange}>
           <option value="">Todas</option>
-          <option value="a Pagar">{isConciliadas ? 'Contas Pagas' : 'Contas a Pagar'}</option>
-          <option value="a Receber">{isConciliadas ? 'Contas Recebidas' : 'Contas a Receber'}</option>
+          <option value="a Pagar">{isConciliadas ? 'Pagos' : 'Contas a Pagar'}</option>
+          <option value="a Receber">{isConciliadas ? 'Recebidos' : 'Contas a Receber'}</option>
         </select>
       </div>
 
