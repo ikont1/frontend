@@ -120,9 +120,9 @@ const Sidebar = () => {
         <div className="bottom-links">
           <ul>
             <li>
-              <NavLink style={{ fontWeight: 100 }} to="/ajuda" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <a style={{ fontWeight: 100 }} href='https://api.whatsapp.com/send/?phone=5586994530553&text&type=phone_number&app_absent=0' target='_blanck'>
                 <HelpCircle className="icon" /> Ajuda
-              </NavLink>
+              </a>
             </li>
             <li>
               <button className='logout-button' onClick={handleLogout}>
