@@ -20,6 +20,7 @@ const Certificado = () => {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showModalAlterar, setShowModalAlterar] = useState(false);
 
   const handleNotificationClose = () => {
     setNotification(null);
@@ -196,6 +197,7 @@ const Certificado = () => {
       console.error('Erro ao remover certificado', error);
     } finally {
       closeConfirmationModal();
+      closeConfirmationModalAlterar();
     }
   };
 
@@ -209,9 +211,18 @@ const Certificado = () => {
     setShowModal(true);
   };
 
+  // Função para abrir o modal de alterar certificado
+  const openConfirmationModalAlterar = () => {
+    setShowModalAlterar(true);
+  };
+
   // Função para fechar o modal de confirmação
   const closeConfirmationModal = () => {
     setShowModal(false);
+  };
+  // Função para fechar o modal de confirmação
+  const closeConfirmationModalAlterar = () => {
+    setShowModalAlterar(false);
   };
 
 
@@ -264,10 +275,8 @@ const Certificado = () => {
                     </p>
 
                     <div className="botoes-certificado">
-                      {/* <button className="botao-alterar">Alterar certificado</button> */}
-                      <button className="botao-remover" onClick={openConfirmationModal}>
-                        Remover...
-                      </button>
+                      <button className="botao-alterar" onClick={openConfirmationModalAlterar}>Alterar certificado</button>
+                      <button className="botao-remover" onClick={openConfirmationModal}> Remover... </button>
                     </div>
                   </div>
                 ) : (
@@ -343,6 +352,16 @@ const Certificado = () => {
           secondaryMessage="Esta ação não pode ser desfeita."
           onConfirm={handleRemoverCertificado}
           onCancel={closeConfirmationModal}
+        />
+      )}
+
+      {showModalAlterar && (
+        <ConfirmationModal
+          title="Alterar certificado"
+          message="Você tem certeza que deseja alterar Certificado?"
+          secondaryMessage="O certificado atual será excluído"
+          onConfirm={handleRemoverCertificado}
+          onCancel={closeConfirmationModalAlterar}
         />
       )}
     </div>
