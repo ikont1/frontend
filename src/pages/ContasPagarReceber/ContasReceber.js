@@ -14,7 +14,7 @@ import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ContasReceber = () => {
   const { fetchClientes, clientes } = useClientSupplier();
-  const { contasAReceber, fetchContasAReceber, addContaAReceber, updateContaAReceber, deleteContaAReceber, informRecebimento, desfazerRecebimento, categoriasAReceber, fetchCategoriasAReceber } = useFinance();
+  const { contasAReceber, fetchContasAReceber, addContaAReceber, updateContaAReceber, deleteContaAReceber, informRecebimento, desfazerRecebimento, categoriasAReceber, fetchCategoriasAReceber, exportarContasAReceber } = useFinance();
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -424,6 +424,71 @@ const ContasReceber = () => {
     }
   };
 
+  // função para exportar conta
+  const handleExport = async () => {
+    const { categorias, status, clienteId, period, month } = selectedFilters;
+  
+    // Construir o filtro consolidado
+    const filtroArray = [];
+  
+    if (categorias.length > 0) {
+      filtroArray.push(`categoria:${categorias.join(',')}`);
+    }
+    if (status.length > 0) {
+      filtroArray.push(`status:${status.join(',')}`);
+    }
+    if (clienteId) {
+      filtroArray.push(`cliente:${clienteId}`);
+    }
+  
+    // Montar os filtros finais
+    const filtros = {
+      itensPorPagina: 2000, // Grande número para garantir exportação completa
+      pagina: 1,
+      ordem: 'ASC',
+      filtro: filtroArray.length > 0 ? filtroArray.join(';') : undefined, // Unir tudo no campo filtro
+      periodo: period.start && period.end
+        ? `${formatDate(period.start)}:${formatDate(period.end)}`
+        : month
+        ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
+        : undefined,
+    };
+  
+    // Filtrar apenas parâmetros válidos
+    const filtrosValidos = Object.fromEntries(
+      Object.entries(filtros).filter(([_, v]) => v !== undefined && v !== '')
+    );
+  
+    // Console para verificar os parâmetros enviados
+    console.log('Filtros enviados para a API:', filtrosValidos);
+  
+    try {
+      const data = await exportarContasAReceber(filtrosValidos); // Chamada para o contexto
+  
+      // Criar o link para download do Excel
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'contas-a-receber.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      setNotificationData({
+        title: 'Erro',
+        message: error.message || 'Falha ao exportar contas a receber.',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+      });
+      setShowNotification(true);
+    }
+  };
+  
+  
+
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {
     const inicio = (pagina - 1) * itensPorPagina;
@@ -471,6 +536,7 @@ const ContasReceber = () => {
           clientes={clientes}
           onFilterChange={handleFilterChange}
           showExportButton={true}
+          onExport={handleExport}
         />
 
 
