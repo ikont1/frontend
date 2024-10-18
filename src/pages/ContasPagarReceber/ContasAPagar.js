@@ -14,7 +14,7 @@ import SearchBar from '../../components/SearchBar/SearchBar';
 
 const ContasAPagar = () => {
   const { fetchFornecedores, fornecedores } = useClientSupplier();
-  const { contasAPagar, fetchContasAPagar, addContaAPagar, updateContaAPagar, deleteContaAPagar, informPagamento, desfazerPagamento, categorias, fetchCategorias } = useFinance();
+  const { contasAPagar, fetchContasAPagar, addContaAPagar, updateContaAPagar, deleteContaAPagar, informPagamento, desfazerPagamento, categorias, fetchCategorias, exportarContasAPagar } = useFinance();
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -414,6 +414,78 @@ const ContasAPagar = () => {
     }
   };
 
+  // Funça para exportar conta 
+  const handleExport = async () => {
+    const { categorias, status2, fornecedorId, period, month } = selectedFilters;
+
+    // Construir o filtro consolidado
+    const filtroArray = [];
+
+    if (categorias.length > 0) {
+      filtroArray.push(`categoria:${categorias.join(',')}`);
+    }
+    if (status2.length > 0) {
+      filtroArray.push(`status:${status2.join(',')}`);
+    }
+    if (fornecedorId) {
+      filtroArray.push(`fornecedor:${fornecedorId}`);
+    }
+
+    // Montar os filtros finais
+    const filtros = {
+      itensPorPagina: 2000, // Grande número para exportação completa
+      pagina: 1,
+      ordem: 'ASC',
+      filtro: filtroArray.length > 0 ? filtroArray.join(';') : undefined,
+      periodo: period.start && period.end
+        ? `${formatDate(period.start)}:${formatDate(period.end)}`
+        : month
+          ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
+          : undefined,
+    };
+
+    // Filtrar apenas parâmetros válidos
+    const filtrosValidos = Object.fromEntries(
+      Object.entries(filtros).filter(([_, v]) => v !== undefined && v !== '')
+    );
+
+    console.log('Filtros enviados para a API:', filtrosValidos);
+
+    try {
+      const data = await exportarContasAPagar(filtrosValidos); // Chamada para o contexto
+
+      // Criar o link para download do Excel
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'contas-a-pagar.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Exibir notificação de sucesso
+      setNotificationData({
+        title: 'Exportação Concluída',
+        message: 'As contas a pagar foram exportadas com sucesso!',
+        type: 'success',
+        icon: ThumbsUp,
+        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+      });
+      setShowNotification(true);
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      setNotificationData({
+        title: 'Erro',
+        message: error.message || 'Falha ao exportar contas a pagar.',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+      });
+      setShowNotification(true);
+    }
+  };
+
 
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {
@@ -447,23 +519,24 @@ const ContasAPagar = () => {
       <div className="main-content">
         <Header />
 
-          <FilterBar
-            onAdd={handleAdd}
-            titleButton='Conta a pagar'
-            filterConfig={{
-              categoria: true,
-              status2: true,
-              fornecedor: true,
-              exibirFaturas: true,
-              buttonAdd: true,
-              buttonPeriod: true,
-              buttonMeses: true,
-            }}
-            categorias={categorias}
-            fornecedores={fornecedores}
-            onFilterChange={handleFilterChange}
-            showExportButton={true}
-          />
+        <FilterBar
+          onAdd={handleAdd}
+          titleButton='Conta a pagar'
+          filterConfig={{
+            categoria: true,
+            status2: true,
+            fornecedor: true,
+            exibirFaturas: true,
+            buttonAdd: true,
+            buttonPeriod: true,
+            buttonMeses: true,
+          }}
+          categorias={categorias}
+          fornecedores={fornecedores}
+          onFilterChange={handleFilterChange}
+          showExportButton={true}
+          onExport={handleExport}
+        />
 
         <div className='content content-table'>
           <h1 className='h1-search'>Contas a pagar <SearchBar onSearch={handleSearch} placeholder='Categoria/descrição' /></h1>

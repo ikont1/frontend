@@ -34,6 +34,25 @@ export const FinanceProvider = ({ children }) => {
     }
   }, []);
 
+  const exportarContasAPagar = useCallback(
+    async (filtros) => {
+      try {
+        const response = await api.get('/contas-a-receber/exportar', {
+          params: filtros, // Passa os filtros aqui
+          responseType: 'blob', // Blob para download do Excel
+        });
+  
+    
+  
+        return response.data;
+      } catch (error) {
+        console.error('Erro na exportação:', error);
+        throw error; // Repassa o erro para ser tratado no componente
+      }
+    },
+    []
+  );
+
   const fetchCategorias = useCallback(async () => {
     setLoading(true);
     try {
@@ -380,6 +399,7 @@ export const FinanceProvider = ({ children }) => {
       contasAReceber,
       categoriasAReceber,
       fetchContasAPagar,
+      exportarContasAPagar,
       fetchCategorias,
       addContaAPagar,
       updateContaAPagar,

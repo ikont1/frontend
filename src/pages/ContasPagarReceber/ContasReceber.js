@@ -474,6 +474,16 @@ const ContasReceber = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
+
+      // Exibir notificação de sucesso
+    setNotificationData({
+      title: 'Exportação Concluída',
+      message: 'As contas foram exportadas com sucesso!',
+      type: 'success',
+      icon: ThumbsUp,
+      buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+    });
+    setShowNotification(true);
     } catch (error) {
       console.error('Erro ao exportar:', error);
       setNotificationData({
