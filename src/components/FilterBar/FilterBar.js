@@ -9,7 +9,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 // Registrar a localização em português
 registerLocale('pt-BR', ptBR);
 
-const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, fornecedores, onFilterChange, showExportButton, onExport }) => {
+const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, fornecedores, onFilterChange, showExportButton, onExport, selectedFilters }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -36,6 +36,10 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
   // Alternar exibição dos modais
   const toggleModal = (modal) => {
     setActiveModal(activeModal === modal ? null : modal);
+  };
+
+  const handleModalSelect = (modal) => {
+    setActiveModal(null); // Fechar o modal após a seleção
   };
 
   // Navegar para o mês anterior
@@ -196,19 +200,33 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Categoria</h5>
               <button onClick={() => toggleModal('categoria')}>
-                Todos <ArrowDown />
+                {selectedFilters?.categorias && selectedFilters.categorias.length > 0
+                  ? 'Filtradas' // Exibe as categorias selecionadas separadas por vírgula
+                  : 'Todos'} {/* Caso nenhuma categoria esteja selecionada */}
+                <ArrowDown />
               </button>
+
               {activeModal === 'categoria' && (
                 <div className="modal-filter">
                   <ul>
                     {categorias.map(categoria => (
                       <li key={categoria}>
                         <label>
-                          <input type="checkbox" name="categoria" onChange={onFilterChange} value={categoria} />
+                          <input
+                            type="checkbox"
+                            name="categoria"
+                            onChange={(e) => {
+                              onFilterChange(e);
+                              handleModalSelect('categoria'); // Fechar modal ao selecionar
+                            }}
+                            value={categoria}
+                            checked={selectedFilters.categorias.includes(categoria)}
+                          />
                           {categoria}
                         </label>
                       </li>
                     ))}
+
                   </ul>
                 </div>
               )}
@@ -220,15 +238,57 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Status</h5>
               <button onClick={() => toggleModal('status')}>
-                Todos <ArrowDown />
+                {selectedFilters?.status && selectedFilters.status.length > 0
+                  ? 'Filtradas'
+                  : 'Todos'}
+                <ArrowDown />
               </button>
               {activeModal === 'status' && (
                 <div className="modal-filter">
                   <h5>Status</h5>
                   <ul>
-                    <li><label><input type="checkbox" name="status" onChange={onFilterChange} value="areceber" /> A receber</label></li>
-                    <li><label><input type="checkbox" name="status" onChange={onFilterChange} value="recebido" /> Recebido</label></li>
-                    <li><label><input type="checkbox" name="status" onChange={onFilterChange} value="vencido" /> Vencido</label></li>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="status"
+                          onChange={(e) => {
+                            onFilterChange(e);
+                            handleModalSelect('status'); // Fecha o modal após selecionar
+                          }}
+                          value="areceber"
+                          checked={selectedFilters?.status?.includes('areceber')}
+                        /> A receber
+                      </label>
+                    </li>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="status"
+                          onChange={(e) => {
+                            onFilterChange(e);
+                            handleModalSelect('status');
+                          }}
+                          value="recebido"
+                          checked={selectedFilters?.status?.includes('recebido')}
+                        /> Recebido
+                      </label>
+                    </li>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="status"
+                          onChange={(e) => {
+                            onFilterChange(e);
+                            handleModalSelect('status');
+                          }}
+                          value="vencido"
+                          checked={selectedFilters?.status?.includes('vencido')}
+                        /> Vencido
+                      </label>
+                    </li>
                   </ul>
                 </div>
               )}
@@ -240,11 +300,13 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Status</h5>
               <button onClick={() => toggleModal('status2')}>
-                Todos <ArrowDown />
+                {selectedFilters?.status2 && selectedFilters.status2.length > 0
+                  ? 'Filtradas'
+                  : 'Todos'}
+                <ArrowDown />
               </button>
               {activeModal === 'status2' && (
                 <div className="modal-filter">
-                  <h5>Status</h5>
                   <ul>
                     <li>
                       <label>
@@ -252,7 +314,11 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           type="checkbox"
                           name="status2"
                           value="apagar"
-                          onChange={onFilterChange}
+                          onChange={(e) => {
+                            onFilterChange(e);
+                            handleModalSelect('status2');
+                          }}
+                          checked={selectedFilters?.status2?.includes('apagar')}
                         /> A pagar
                       </label>
                     </li>
@@ -262,7 +328,11 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           type="checkbox"
                           name="status2"
                           value="pago"
-                          onChange={onFilterChange}
+                          onChange={(e) => {
+                            onFilterChange(e);
+                            handleModalSelect('status2');
+                          }}
+                          checked={selectedFilters?.status2?.includes('pago')}
                         /> Pago
                       </label>
                     </li>
@@ -272,7 +342,11 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           type="checkbox"
                           name="status2"
                           value="vencido"
-                          onChange={onFilterChange}
+                          onChange={(e) => {
+                            onFilterChange(e);
+                            handleModalSelect('status2');
+                          }}
+                          checked={selectedFilters?.status2?.includes('vencido')}
                         /> Vencido
                       </label>
                     </li>
@@ -282,22 +356,40 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             </div>
           )}
 
+
           {/* Filtro por cliente */}
           {filterConfig.cliente && (
             <div className="form-group">
               <h5>Cliente</h5>
               <button onClick={() => toggleModal('cliente')}>
-                Todos <ArrowDown />
+                {selectedFilters?.clienteId
+                  ? clientes.find((cliente) => cliente.id === parseInt(selectedFilters.clienteId))?.nomeFantasia || 'Cliente não encontrado'
+                  : 'Todos'}
+                <ArrowDown />
               </button>
               {activeModal === 'cliente' && (
                 <div className="modal-filter">
                   <h5>Escolha o cliente</h5>
-                  <input type="text" placeholder="Digite" value={searchCliente} onChange={handleClientSearch} />
+                  <input
+                    type="text"
+                    placeholder="Digite"
+                    value={searchCliente}
+                    onChange={handleClientSearch}
+                  />
                   <ul>
-                    {(filteredClientes || []).map(cliente => (
+                    {filteredClientes.map((cliente) => (
                       <li key={cliente.id}>
                         <label>
-                          <input type="checkbox" name="cliente" onChange={onFilterChange} value={cliente.id} />
+                          <input
+                            type="checkbox"
+                            name="cliente"
+                            onChange={(e) => {
+                              onFilterChange(e);
+                              handleModalSelect('cliente');
+                            }}
+                            value={cliente.id}
+                            checked={selectedFilters.clienteId === String(cliente.id)}
+                          />
                           {cliente.nomeFantasia}
                         </label>
                       </li>
@@ -308,22 +400,39 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             </div>
           )}
 
-          {/* Filtro por cliente */}
+          {/* Filtro por fornecedor */}
           {filterConfig.fornecedor && (
             <div className="form-group">
-              <h5>fornecedor</h5>
+              <h5>Fornecedor</h5>
               <button onClick={() => toggleModal('fornecedor')}>
-                Todos <ArrowDown />
+                {selectedFilters?.fornecedorId
+                  ? fornecedores.find(fornecedor => fornecedor.id === parseInt(selectedFilters.fornecedorId))?.nomeFantasia || 'Fornecedor não encontrado'
+                  : 'Todos'}
+                <ArrowDown />
               </button>
               {activeModal === 'fornecedor' && (
                 <div className="modal-filter">
                   <h5>Escolha o fornecedor</h5>
-                  <input type="text" placeholder="Digite" value={searchfornecedor} onChange={handleFornecedorSearch} />
+                  <input
+                    type="text"
+                    placeholder="Digite"
+                    value={searchfornecedor}
+                    onChange={handleFornecedorSearch}
+                  />
                   <ul>
-                    {(filteredFornecedores || []).map(fornecedor => (
+                    {filteredFornecedores.map(fornecedor => (
                       <li key={fornecedor.id}>
                         <label>
-                          <input type="checkbox" name="fornecedor" onChange={onFilterChange} value={fornecedor.id} />
+                          <input
+                            type="checkbox"
+                            name="fornecedor"
+                            onChange={(e) => {
+                              onFilterChange(e);
+                              handleModalSelect('fornecedor');
+                            }}
+                            value={fornecedor.id}
+                            checked={selectedFilters.fornecedorId === String(fornecedor.id)}
+                          />
                           {fornecedor.nomeFantasia}
                         </label>
                       </li>
@@ -333,6 +442,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
               )}
             </div>
           )}
+
 
           {/* Filtro para exibir somente faturas */}
           {filterConfig.exibirFaturas && (

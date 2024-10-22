@@ -122,20 +122,20 @@ const ContasAPagar = () => {
 
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
-
-    setSelectedFilters(prevFilters => {
+  
+    setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
-
-      // Verificar se a propriedade categorias existe e, se não, inicializar como array vazio
+  
+      // Inicializar categorias como array, se necessário
       if (!updatedFilters.categorias) {
         updatedFilters.categorias = [];
       }
-
+  
       if (name === 'categoria') {
         if (checked) {
-          updatedFilters.categorias.push(value); // Adicionar categoria se selecionada
+          updatedFilters.categorias.push(value);
         } else {
-          updatedFilters.categorias = updatedFilters.categorias.filter(cat => cat !== value); // Remover categoria se desmarcada
+          updatedFilters.categorias = updatedFilters.categorias.filter(cat => cat !== value);
         }
       } else if (name === 'status2') {
         if (checked) {
@@ -150,20 +150,16 @@ const ContasAPagar = () => {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
-        // Resetar filtro de mês ao selecionar um período
         updatedFilters.month = null;
       } else if (name === 'month') {
         updatedFilters.month = value;
-        // Resetar período ao selecionar um mês
-        updatedFilters.period = {
-          start: null,
-          end: null,
-        };
+        updatedFilters.period = { start: null, end: null };
       }
-
+  
       return updatedFilters;
     });
   };
+  
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -524,8 +520,8 @@ const ContasAPagar = () => {
           titleButton='Conta a pagar'
           filterConfig={{
             categoria: true,
-            status2: true,
-            fornecedor: true,
+            status2: true, // Status específico para Contas a Pagar
+            fornecedor: true, // Filtro por fornecedor
             exibirFaturas: true,
             buttonAdd: true,
             buttonPeriod: true,
@@ -533,10 +529,12 @@ const ContasAPagar = () => {
           }}
           categorias={categorias}
           fornecedores={fornecedores}
-          onFilterChange={handleFilterChange}
+          selectedFilters={selectedFilters} // Passar os filtros selecionados
+          onFilterChange={handleFilterChange} // Lidar com mudanças nos filtros
           showExportButton={true}
           onExport={handleExport}
         />
+
 
         <div className='content content-table'>
           <h1 className='h1-search'>Contas a pagar <SearchBar onSearch={handleSearch} placeholder='Categoria/descrição' /></h1>

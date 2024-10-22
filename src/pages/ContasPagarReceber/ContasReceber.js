@@ -5,7 +5,7 @@ import FilterBar from '../../components/FilterBar/FilterBar';
 import Modal from '../../components/Modal/Modal';
 import Notification from '../../components/Notification/Notification';
 import './ContasPagarReceber.css';
-import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp, ArrowLeft, ArrowRight  } from 'react-feather';
+import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp, ArrowLeft, ArrowRight } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
 import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns'; // Adicione startOfMonth e endOfMonth
@@ -119,43 +119,41 @@ const ContasReceber = () => {
 
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
-
-    setSelectedFilters(prevFilters => {
+  
+    setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
-
+  
       if (name === 'categoria') {
-        if (checked) {
+        if (checked && !updatedFilters.categorias.includes(value)) {
           updatedFilters.categorias.push(value);
         } else {
-          updatedFilters.categorias = updatedFilters.categorias.filter(cat => cat !== value);
+          updatedFilters.categorias = updatedFilters.categorias.filter((cat) => cat !== value);
         }
       } else if (name === 'status') {
-        if (checked) {
+        if (checked && !updatedFilters.status.includes(value)) {
           updatedFilters.status.push(value);
         } else {
-          updatedFilters.status = updatedFilters.status.filter(stat => stat !== value);
+          updatedFilters.status = updatedFilters.status.filter((stat) => stat !== value);
         }
       } else if (name === 'cliente') {
+        // Verificar se o cliente já está selecionado e atualizar corretamente
         updatedFilters.clienteId = checked ? value : null;
       } else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
-        // Resetar filtro de mês ao selecionar um período
-        updatedFilters.month = null;
+        updatedFilters.month = null; // Limpar filtro de mês ao definir período
       } else if (name === 'month') {
         updatedFilters.month = value;
-        // Resetar período ao selecionar um mês
-        updatedFilters.period = {
-          start: null,
-          end: null,
-        };
+        updatedFilters.period = { start: null, end: null }; // Limpar período ao definir mês
       }
-
+  
       return updatedFilters;
     });
   };
+  
+
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -427,45 +425,45 @@ const ContasReceber = () => {
   // função para exportar conta
   const handleExport = async () => {
     const { categorias, status, clienteId, period, month } = selectedFilters;
-  
-    // Construir o filtro consolidado
+
+    // Construir o filtro concatenado com cliente vindo primeiro
     const filtroArray = [];
-  
+
+    if (clienteId) {
+      filtroArray.push(`cliente:${clienteId}`);
+    }
     if (categorias.length > 0) {
       filtroArray.push(`categoria:${categorias.join(',')}`);
     }
     if (status.length > 0) {
       filtroArray.push(`status:${status.join(',')}`);
     }
-    if (clienteId) {
-      filtroArray.push(`cliente:${clienteId}`);
-    }
-  
-    // Montar os filtros finais
+
+    // Unir os filtros corretamente com '&' SEM codificação extra
+    const filtroString = filtroArray.join('&');
+    console.log('Filtro enviado sem codificar:', filtroString);
+
     const filtros = {
-      itensPorPagina: 2000, // Grande número para garantir exportação completa
+      itensPorPagina: 2000,
       pagina: 1,
       ordem: 'ASC',
-      filtro: filtroArray.length > 0 ? filtroArray.join(';') : undefined, // Unir tudo no campo filtro
+      filtro: filtroString,  // Cliente sempre primeiro
       periodo: period.start && period.end
         ? `${formatDate(period.start)}:${formatDate(period.end)}`
         : month
-        ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
-        : undefined,
+          ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
+          : undefined,
     };
-  
-    // Filtrar apenas parâmetros válidos
+
+    console.log('Parâmetros finais antes da requisição:', filtros);
+
     const filtrosValidos = Object.fromEntries(
       Object.entries(filtros).filter(([_, v]) => v !== undefined && v !== '')
     );
-  
-    // Console para verificar os parâmetros enviados
-    console.log('Filtros enviados para a API:', filtrosValidos);
-  
+
     try {
-      const data = await exportarContasAReceber(filtrosValidos); // Chamada para o contexto
-  
-      // Criar o link para download do Excel
+      const data = await exportarContasAReceber(filtrosValidos);
+
       const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -475,17 +473,18 @@ const ContasReceber = () => {
       link.click();
       link.remove();
 
-      // Exibir notificação de sucesso
-    setNotificationData({
-      title: 'Exportação Concluída',
-      message: 'As contas foram exportadas com sucesso!',
-      type: 'success',
-      icon: ThumbsUp,
-      buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
-    });
-    setShowNotification(true);
+      setNotificationData({
+        title: 'Exportação Concluída',
+        message: 'As contas a receber foram exportadas com sucesso!',
+        type: 'success',
+        icon: ThumbsUp,
+        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+      });
+      setShowNotification(true);
     } catch (error) {
       console.error('Erro ao exportar:', error);
+      console.error('Resposta completa:', error.response);
+
       setNotificationData({
         title: 'Erro',
         message: error.message || 'Falha ao exportar contas a receber.',
@@ -496,8 +495,7 @@ const ContasReceber = () => {
       setShowNotification(true);
     }
   };
-  
-  
+
 
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {
@@ -544,6 +542,7 @@ const ContasReceber = () => {
           }}
           categorias={categoriasAReceber}
           clientes={clientes}
+          selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
           showExportButton={true}
           onExport={handleExport}
@@ -566,41 +565,41 @@ const ContasReceber = () => {
               </tr>
             </thead>
             <tbody>
-            {itensPaginados.length > 0 ? (
+              {itensPaginados.length > 0 ? (
                 itensPaginados.map((conta, index) => (
-                 <tr key={index}>
-                  <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
-                  <td data-label="Categoria">
-                    {conta.categoria} <span className="nf-badge">{`NF ${conta.nf || 'N/A'}`}</span>
-                  </td>
-                  <td data-label="Cliente">{conta.cliente ? conta.cliente.nomeFantasia : 'Cliente não encontrado'}</td>
-                  <td data-label="Descrição">{conta.descricao}</td>
-                  <td data-label="Status">
-                    <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aReceber' ? 'a receber' : conta.status}</span>
-                  </td>
-                  <td data-label="Valor">R${formatValue(conta.valor)}</td>
-                  <td data-label="Ações" className="actions">
-                    <button onClick={() => handleActionsClick(index)}>...</button>
-                    {activeTooltip === index && (
-                      <div className="tooltip">
-                        <ul>
-                          <li onClick={() => handleEdit(conta)}>Editar</li>
-                          <li onClick={() => handleView(conta)}>Visualizar</li>
-                          <li onClick={() => handleDelete(conta)} className="remove">Remover</li>
-                        </ul>
-                      </div>
-                    )}
-                  </td>
-                  <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'recebido' ? 'received' : conta.status === 'vencido' ? 'overdue' : ''}`}>
-                    <ThumbsUp />
-                  </td>
+                  <tr key={index}>
+                    <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
+                    <td data-label="Categoria">
+                      {conta.categoria} <span className="nf-badge">{`NF ${conta.nf || 'N/A'}`}</span>
+                    </td>
+                    <td data-label="Cliente">{conta.cliente ? conta.cliente.nomeFantasia : 'Cliente não encontrado'}</td>
+                    <td data-label="Descrição">{conta.descricao}</td>
+                    <td data-label="Status">
+                      <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aReceber' ? 'a receber' : conta.status}</span>
+                    </td>
+                    <td data-label="Valor">R${formatValue(conta.valor)}</td>
+                    <td data-label="Ações" className="actions">
+                      <button onClick={() => handleActionsClick(index)}>...</button>
+                      {activeTooltip === index && (
+                        <div className="tooltip">
+                          <ul>
+                            <li onClick={() => handleEdit(conta)}>Editar</li>
+                            <li onClick={() => handleView(conta)}>Visualizar</li>
+                            <li onClick={() => handleDelete(conta)} className="remove">Remover</li>
+                          </ul>
+                        </div>
+                      )}
+                    </td>
+                    <td onClick={() => handleConfirm(conta)} className={`svg-like ${conta.status === 'recebido' ? 'received' : conta.status === 'vencido' ? 'overdue' : ''}`}>
+                      <ThumbsUp />
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan='8'>Nenhum dado a ser mostrado</td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan='8'>Nenhum dado a ser mostrado</td>
-              </tr>
-            )}
+              )}
             </tbody>
           </table>
         </div>
