@@ -240,7 +240,7 @@
   }
 }
 
-.integrar-button {
+.integrada-button {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -252,6 +252,20 @@
   >.icon {
     font-size: 20px;
     color: var(--primary-color);
+  }
+}
+.integrar-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--primary-color);
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 1px;
+
+  >.icon {
+    font-size: 20px;
+    color: #fff;
   }
 }
 
@@ -278,7 +292,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: -20px 10px 0 0;
+  margin: 20px 10px 0 0;
   background: none;
   border: 1px solid var(--highlight-color);
   color: var(--highlight-color);

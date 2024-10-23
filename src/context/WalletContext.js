@@ -20,7 +20,7 @@ export const WalletProvider = ({ children }) => {
   const listarContas = async () => {
     try {
       const response = await api.get('/conta-bancaria');
-    
+      console.log(response.data.data.contas);
       return response.data.data.contas;
     } catch (error) {
       throw error;
@@ -74,7 +74,7 @@ export const WalletProvider = ({ children }) => {
       });
     }
   };
-  
+
   const desativarConta = async (id) => {
     try {
       await api.patch(`/conta-bancaria/${id}/desativar`);
@@ -126,19 +126,74 @@ export const WalletProvider = ({ children }) => {
   const listarExtrato = async (id) => {
     try {
       const response = await api.get(`/conta-bancaria/${id}/extrato`);
-      console.log(response.data.data.dados)
       return response.data.data.dados;
     } catch (error) {
       // Trata especificamente o erro 404
       if (error.response && error.response.status === 404) {
         return []; // Retorna uma lista vazia caso não haja extrato
       } else {
-      // Loga os outros tipos de erro
+        // Loga os outros tipos de erro
         throw error;
       }
     }
   };
-  
+
+  // conectar conta bb
+  const integrarConta = async (id, { clientId, clientSecret }) => {
+    try {
+      await api.post(`/conta-bancaria/${id}/conectar`, {
+        clientId,
+        clientSecret,
+      });
+
+      showNotification({
+        title: 'Integração Bem-Sucedida',
+        message: 'Conta conectada com sucesso! Monitoramento iniciado.',
+        type: 'success',
+        icon: ThumbsUp,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(null) }],
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Erro ao integrar conta:', error);
+
+      showNotification({
+        title: 'Erro na Integração',
+        message: 'Verifique as credenciais e tente novamente.',
+        secondaryMessage: error.response?.data?.message || 'Falha ao conectar a conta.',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(null) }],
+      });
+
+      return false; // Retorna falha
+    }
+  };
+
+  const desconectarConta = async (id) => {
+    try {
+      await api.patch(`/conta-bancaria/${id}/desconectar`);
+      showNotification({
+        title: 'Sucesso',
+        message: 'Conta desconectada com sucesso!',
+        type: 'success',
+        icon: ThumbsUp,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
+    } catch (error) {
+      console.error('Erro ao desconectar conta:', error);
+      showNotification({
+        title: 'Erro',
+        message: 'Falha ao desconectar a conta. Tente novamente mais tarde.',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
+    }
+  };
+
+
 
   return (
     <WalletContext.Provider value={{
@@ -147,7 +202,9 @@ export const WalletProvider = ({ children }) => {
       excluirConta,
       reativarConta,
       desativarConta,
-      listarExtrato
+      listarExtrato,
+      integrarConta,
+      desconectarConta
     }}>
       {children}
 

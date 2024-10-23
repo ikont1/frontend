@@ -237,8 +237,6 @@ export const FinanceProvider = ({ children }) => {
     []
   );
   
-  
-
   const fetchCategoriasAReceber = useCallback(async () => {
     setLoading(true);
     try {

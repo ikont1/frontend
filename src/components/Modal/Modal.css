@@ -141,7 +141,7 @@ button:hover {
 .modal-integracao-content {
   width: 750px;
   max-width: inherit;
-  min-height: 500px;
+  min-height: 400px;
 }
 
 .modal-integracao-header {
@@ -179,4 +179,10 @@ button:hover {
       width: 20px;
     }
   }
+}
+.banco-dados-detalhes>div span{
+  background-color: #ddd;
+  height: 20px;
+  padding: 0 2px;
+  border-radius: 4px;
 }

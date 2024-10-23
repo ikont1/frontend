@@ -3,9 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import './Carteira.css';
-import { BiWallet, BiSolidZap, BiLike } from 'react-icons/bi';
+import { BiWallet, BiSolidZap, BiLike, } from 'react-icons/bi';
+import { ArrowLeft, ArrowRight } from 'react-feather';
 import { useWallet } from '../../context/WalletContext';
 import IntegracaoModal from '../../components/Modal/integracaoModal';
+import ConfirmationModal from '../../components/Modal/confirmationModal';
 
 const bancoLogos = {
   '001': require('../../assets/imgs/bbLogo.png'),
@@ -15,16 +17,18 @@ const bancoLogos = {
   '104': require('../../assets/imgs/caixalogo.png'),
   '403': require('../../assets/imgs/coraLogo.png'),
   '077': require('../../assets/imgs/interLogo.png'),
-
 };
 
 const DetalhesConta = () => {
-  const { id } = useParams();  // Pega o ID da conta da URL
-  const { listarContas, listarExtrato } = useWallet();
+  const { id } = useParams();
+  const { listarContas, listarExtrato, desconectarConta } = useWallet();
 
   const [conta, setConta] = useState(null);
   const [extrato, setExtrato] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [itensPorPagina, setItensPorPagina] = useState(10);
 
   useEffect(() => {
     const fetchConta = async () => {
@@ -65,6 +69,38 @@ const DetalhesConta = () => {
     // Lógica de confirmação de integração
     console.log('Integração confirmada');
     setIsModalOpen(false);
+  };
+
+  const handleDesconectarClick = () => {
+    setIsConfirmModalOpen(true); // Abrir modal de confirmação
+  };
+
+  const handleConfirmDesconectar = async () => {
+    try {
+      await desconectarConta(id);
+      setIsConfirmModalOpen(false);
+      setConta(prev => ({ ...prev, conectada: false }));
+    } catch (error) {
+      console.error('Erro ao desconectar conta:', error);
+    }
+  }
+
+  // Paginacao
+  const paginarItens = (itens, pagina, itensPorPagina) => {
+    const inicio = (pagina - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    return itens.slice(inicio, fim);
+  };
+
+  const itensPaginados = paginarItens(extrato, paginaAtual, itensPorPagina);
+  const totalPaginas = Math.ceil(extrato.length / itensPorPagina);
+
+  const handleProximaPagina = () => {
+    if (paginaAtual < totalPaginas) setPaginaAtual(paginaAtual + 1);
+  };
+
+  const handlePaginaAnterior = () => {
+    if (paginaAtual > 1) setPaginaAtual(paginaAtual - 1);
   };
 
   // visualizacao da tabela
@@ -115,7 +151,12 @@ const DetalhesConta = () => {
               </div>
             </div>
 
-            <button className="integrar-button" onClick={handleIntegrarClick}><BiSolidZap className='icon' /> Integrar</button>
+            {conta.integrado ?
+              (
+                <button className="integrada-button" onClick={handleDesconectarClick} ><BiSolidZap className='icon' /> Integrada</button>
+              ) : (
+                <button className="integrar-button" onClick={handleIntegrarClick}><BiSolidZap className='icon' /> Integrar</button>
+              )}
           </div>
 
           <div className="saldo-atual">
@@ -135,8 +176,8 @@ const DetalhesConta = () => {
                 </tr>
               </thead>
               <tbody>
-                {extrato.length > 0 ? (
-                  extrato.map((transacao, index) => (
+                {itensPaginados.length > 0 ? (
+                  itensPaginados.map((transacao, index) => (
                     <tr key={index}>
                       <td className='td-transacao-extrato' data-label="Últimas transações">{transacao.descricao}</td>
                       <td
@@ -168,12 +209,52 @@ const DetalhesConta = () => {
                 )}
               </tbody>
             </table>
+
+            <Link to="/conciliacao-financeira">
+              <button className="resolv-conciliacao"><BiLike className='icon' /> Resolver conciliações</button>
+            </Link>
+          </div>
+
+          {/* Controle de paginação */}
+          <div className="paginacao-container">
+            <div className="paginacao-texto">
+              <span>Itens por página:</span>
+              <select
+                value={itensPorPagina}
+                onChange={(e) => {
+                  const novosItensPorPagina = parseInt(e.target.value);
+                  setItensPorPagina(novosItensPorPagina);
+                  setPaginaAtual(1); // Reiniciar para a primeira página
+                }}
+                className="itens-por-pagina"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+            <div className="paginacao-detalhes">
+              <button
+                onClick={handlePaginaAnterior}
+                disabled={paginaAtual === 1}
+                className="botao-paginacao"
+              >
+                <ArrowLeft className="seta-icon" />
+              </button>
+              <span>{`${paginaAtual} de ${totalPaginas}`}</span>
+              <button
+                onClick={handleProximaPagina}
+                disabled={paginaAtual === totalPaginas}
+                className="botao-paginacao"
+              >
+                <ArrowRight className="seta-icon" />
+              </button>
+            </div>
           </div>
 
         </div>
-        <Link to="/conciliacao-financeira">
-          <button className="resolv-conciliacao"><BiLike className='icon' /> Resolver conciliações</button>
-        </Link>
+
       </div>
 
       {/* Modal de integração */}
@@ -183,6 +264,18 @@ const DetalhesConta = () => {
         conta={conta}
         onConfirm={handleConfirmIntegracao}
       />
+      {/* Modal de Confirmação */}
+      {
+        isConfirmModalOpen && (
+          <ConfirmationModal
+            title="Confirmação de Desconexão"
+            message="Tem certeza de que deseja desconectar esta conta?"
+            secondaryMessage="Essa ação interromperá a integração automática."
+            onConfirm={handleConfirmDesconectar}
+            onCancel={() => setIsConfirmModalOpen(false)}
+          />
+        )
+      }
     </div >
   );
 };

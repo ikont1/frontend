@@ -47,13 +47,16 @@ const ContasAPagar = () => {
   const [expandSection, setExpandSection] = useState(false);
   const [filteredContasAPagar, setFilteredContasAPagar] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
+    categorias: [],
     status2: [],
+    fornecedorId: [],
     period: {
       start: null,
       end: null
     },
     month: null,
   });
+  
 
   // Estados de paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -70,42 +73,54 @@ const ContasAPagar = () => {
   }, [fetchContasAPagar, fetchCategorias, fetchFornecedores]);
 
   const filterContas = useCallback(() => {
-    const { categorias = [], status2, fornecedorId, period, month } = selectedFilters;
+    const { categorias = [], status2 = [], fornecedorId = [], period, month } = selectedFilters;
     const currentMonth = new Date();
-
+  
     const filtered = contasAPagar.filter(conta => {
       const contaVencimento = new Date(conta.vencimento);
-
-      const isCurrentMonth = contaVencimento.getMonth() === currentMonth.getMonth() &&
+  
+      const isCurrentMonth = 
+        contaVencimento.getMonth() === currentMonth.getMonth() &&
         contaVencimento.getFullYear() === currentMonth.getFullYear();
       const isOverdue = conta.status.toLowerCase() === 'vencido';
-
+  
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
-
-      // Verificar se o fornecedor é compatível
-      const matchesFornecedor = !fornecedorId || (conta.fornecedor && String(conta.fornecedor.id) === String(fornecedorId));
-
-      const matchesPeriod = (period.start && period.end &&
+  
+      // Verificar se o fornecedor está em fornecedorId
+      const matchesFornecedor = 
+        fornecedorId.length === 0 || 
+        fornecedorId.includes(String(conta.fornecedor?.id));
+  
+      const matchesPeriod = 
+        period.start && period.end &&
         contaVencimento >= new Date(period.start) &&
-        contaVencimento <= new Date(period.end));
-      const matchesMonth = (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
-        (month && (contaVencimento >= startOfMonth(new Date(month)) &&
-          contaVencimento <= endOfMonth(new Date(month))));
-
-      return matchesCategoria && matchesStatus && matchesFornecedor && (matchesPeriod || matchesMonth);
+        contaVencimento <= new Date(period.end);
+  
+      const matchesMonth = 
+        (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
+        (month && contaVencimento >= startOfMonth(new Date(month)) &&
+          contaVencimento <= endOfMonth(new Date(month)));
+  
+      // Verificar se a conta atende aos filtros
+      return (
+        matchesCategoria &&
+        matchesStatus &&
+        matchesFornecedor &&
+        (matchesPeriod || matchesMonth)
+      );
     });
-
+  
     // Ordenar as contas vencidas no topo
     const sortedFiltered = filtered.sort((a, b) => {
       if (a.status === 'vencido' && b.status !== 'vencido') return -1;
       if (a.status !== 'vencido' && b.status === 'vencido') return 1;
       return new Date(a.vencimento) - new Date(b.vencimento);
     });
-
+  
     setFilteredContasAPagar(sortedFiltered);
   }, [contasAPagar, selectedFilters]);
-
+  
 
   // Atualizar contas a pagar filtradas quando contasAPagar ou filtros mudarem
   useEffect(() => {
@@ -119,17 +134,16 @@ const ContasAPagar = () => {
     paginarItens(filteredContasAPagar, 1, itensPorPagina);
   }, [filteredContasAPagar, itensPorPagina]);
 
-
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
   
     setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
   
-      // Inicializar categorias como array, se necessário
-      if (!updatedFilters.categorias) {
-        updatedFilters.categorias = [];
-      }
+      // Inicializar arrays como necessário
+      if (!updatedFilters.categorias) updatedFilters.categorias = [];
+      if (!updatedFilters.status2) updatedFilters.status2 = [];
+      if (!updatedFilters.fornecedorId) updatedFilters.fornecedorId = [];
   
       if (name === 'categoria') {
         if (checked) {
@@ -144,7 +158,16 @@ const ContasAPagar = () => {
           updatedFilters.status2 = updatedFilters.status2.filter(stat => stat !== value);
         }
       } else if (name === 'fornecedor') {
-        updatedFilters.fornecedorId = checked ? value : null;
+        if (checked) {
+          updatedFilters.fornecedorId = [...(prevFilters.fornecedorId || []), value];
+        } else {
+          updatedFilters.fornecedorId = prevFilters.fornecedorId.filter(id => id !== value);
+        }
+  
+        // Resetar o filtro se nenhum fornecedor estiver selecionado
+        if (updatedFilters.fornecedorId.length === 0) {
+          delete updatedFilters.fornecedorId; // Remove a chave para o estado inicial
+        }
       } else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
@@ -160,7 +183,7 @@ const ContasAPagar = () => {
     });
   };
   
-
+  
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ");
@@ -325,7 +348,7 @@ const ContasAPagar = () => {
       vencimento: novaConta.vencimento,
       categoria: novaConta.categoria,
       fornecedorId: novaConta.fornecedorId,
-      descricao: novaConta.descricao,
+      ...(novaConta.descricao && { descricao: novaConta.descricao }),
     };
 
     try {
@@ -429,10 +452,10 @@ const ContasAPagar = () => {
 
     // Montar os filtros finais
     const filtros = {
-      itensPorPagina: 2000, // Grande número para exportação completa
+      itensPorPagina: 10000, // Grande número para exportação completa
       pagina: 1,
       ordem: 'ASC',
-      filtro: filtroArray.length > 0 ? filtroArray.join(';') : undefined,
+      filtro: filtroArray.length > 0 ? filtroArray.join(',') : undefined,
       periodo: period.start && period.end
         ? `${formatDate(period.start)}:${formatDate(period.end)}`
         : month

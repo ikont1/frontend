@@ -49,13 +49,13 @@ const ContasReceber = () => {
   const [selectedFilters, setSelectedFilters] = useState({
     categorias: [],
     status: [],
-    clienteId: null,
+    clienteId: [],
     period: {
       start: null,
       end: null
     },
     month: null,
-  });
+  });  
 
   // Estados de paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -71,46 +71,53 @@ const ContasReceber = () => {
   }, [fetchContasAReceber, fetchCategoriasAReceber, fetchClientes]);
 
   const filterContas = useCallback(() => {
-    const { categorias = [], status = [], clienteId, period, month } = selectedFilters;
+    const { categorias = [], status = [], clienteId = [], period, month } = selectedFilters;
     const currentMonth = new Date();
-
-    const filtered = contasAReceber.filter(conta => {
-      const contaVencimento = parseISO(conta.vencimento);
-
-      const isCurrentMonth = contaVencimento.getMonth() === currentMonth.getMonth() &&
+  
+    const filtered = contasAReceber.filter((conta) => {
+      const contaVencimento = new Date(conta.vencimento);
+  
+      const isCurrentMonth =
+        contaVencimento.getMonth() === currentMonth.getMonth() &&
         contaVencimento.getFullYear() === currentMonth.getFullYear();
       const isOverdue = conta.status.toLowerCase() === 'vencido';
-
+  
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
-      const matchesCliente = !clienteId || (conta.cliente && String(conta.cliente.id) === String(clienteId));
-
-      const matchesPeriod = (period?.start && period?.end &&
+  
+      const matchesCliente =
+        clienteId.length === 0 || clienteId.includes(String(conta.cliente?.id));
+  
+      const matchesPeriod =
+        period.start && period.end &&
         contaVencimento >= new Date(period.start) &&
-        contaVencimento <= new Date(period.end));
-      const matchesMonth = (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
-        (month && (contaVencimento >= startOfMonth(new Date(month)) &&
-          contaVencimento <= endOfMonth(new Date(month))));
-
+        contaVencimento <= new Date(period.end);
+  
+      const matchesMonth =
+        (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
+        (month &&
+          contaVencimento >= startOfMonth(new Date(month)) &&
+          contaVencimento <= endOfMonth(new Date(month)));
+  
       return matchesCategoria && matchesStatus && matchesCliente && (matchesPeriod || matchesMonth);
     });
-
-    // Ordenar as contas vencidas no topo
+  
     const sortedFiltered = filtered.sort((a, b) => {
       if (a.status === 'vencido' && b.status !== 'vencido') return -1;
       if (a.status !== 'vencido' && b.status === 'vencido') return 1;
       return new Date(a.vencimento) - new Date(b.vencimento);
     });
-
+  
     setFilteredContasAReceber(sortedFiltered);
   }, [contasAReceber, selectedFilters]);
-
+  
   // Atualizar contas a receber filtradas quando contasAReceber ou filtros mudarem
   useEffect(() => {
     if (contasAReceber && Array.isArray(contasAReceber)) {
       filterContas();
     }
   }, [contasAReceber, selectedFilters, filterContas]);
+ 
 
   useEffect(() => {
     setTotalPaginas(Math.ceil(filteredContasAReceber.length / itensPorPagina));
@@ -123,27 +130,40 @@ const ContasReceber = () => {
     setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
   
+      // Inicializar arrays conforme necessário
+      if (!updatedFilters.categorias) updatedFilters.categorias = [];
+      if (!updatedFilters.status) updatedFilters.status = [];
+      if (!updatedFilters.clienteId) updatedFilters.clienteId = [];
+  
       if (name === 'categoria') {
-        if (checked && !updatedFilters.categorias.includes(value)) {
+        if (checked) {
           updatedFilters.categorias.push(value);
         } else {
           updatedFilters.categorias = updatedFilters.categorias.filter((cat) => cat !== value);
         }
       } else if (name === 'status') {
-        if (checked && !updatedFilters.status.includes(value)) {
+        if (checked) {
           updatedFilters.status.push(value);
         } else {
           updatedFilters.status = updatedFilters.status.filter((stat) => stat !== value);
         }
       } else if (name === 'cliente') {
-        // Verificar se o cliente já está selecionado e atualizar corretamente
-        updatedFilters.clienteId = checked ? value : null;
+        if (checked) {
+          updatedFilters.clienteId = [...(prevFilters.clienteId || []), value];
+        } else {
+          updatedFilters.clienteId = prevFilters.clienteId.filter((id) => id !== value);
+        }
+  
+        // Resetar o filtro se nenhum cliente estiver selecionado
+        if (updatedFilters.clienteId.length === 0) {
+          delete updatedFilters.clienteId;
+        }
       } else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
-        updatedFilters.month = null; // Limpar filtro de mês ao definir período
+        updatedFilters.month = null; // Limpar mês ao definir um período
       } else if (name === 'month') {
         updatedFilters.month = value;
         updatedFilters.period = { start: null, end: null }; // Limpar período ao definir mês
@@ -153,7 +173,6 @@ const ContasReceber = () => {
     });
   };
   
-
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -319,7 +338,7 @@ const ContasReceber = () => {
       vencimento: novaConta.vencimento,
       categoria: novaConta.categoria,
       clienteId: novaConta.clienteId,
-      descricao: novaConta.descricao,
+      ...(novaConta.descricao && { descricao: novaConta.descricao }),
     };
 
     try {
@@ -444,7 +463,7 @@ const ContasReceber = () => {
     console.log('Filtro enviado sem codificar:', filtroString);
 
     const filtros = {
-      itensPorPagina: 2000,
+      itensPorPagina: 10000,
       pagina: 1,
       ordem: 'ASC',
       filtro: filtroString,  // Cliente sempre primeiro

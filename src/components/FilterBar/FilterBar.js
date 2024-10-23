@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './FilterBar.css';
 import { Calendar, PlusCircle, Filter, ArrowDown, ChevronLeft, ChevronRight, Download } from 'react-feather';
 import DatePicker, { registerLocale } from 'react-datepicker';
@@ -20,6 +20,8 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
   const [filteredClientes, setFilteredClientes] = useState(clientes || []);
   const [searchfornecedor, setSearchFornecedor] = useState('');
   const [filteredFornecedores, setFilteredFornecedores] = useState(fornecedores || []);
+  
+  const filterBarRef = useRef(null);
 
   // Atualizar clientes/fornecedor filtrados quando a lista de clientes mudar
   useEffect(() => {
@@ -27,6 +29,21 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
     setFilteredFornecedores(fornecedores || []);
   }, [clientes, fornecedores]);
 
+  // Função para detectar clique fora e fechar modal
+  const handleClickOutside = (event) => {
+    if (filterBarRef.current && !filterBarRef.current.contains(event.target)) {
+      setActiveModal(null); // Fecha o modal ao clicar fora
+    }
+  };
+
+  useEffect(() => {
+    // Adicionar o event listener ao montar o componente
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      // Remover o event listener ao desmontar o componente
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Alternar exibição dos filtros
   const toggleFilters = () => {
@@ -121,7 +138,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
 
 
   return (
-    <div className='filter-bar-container'>
+    <div ref={filterBarRef}  className='filter-bar-container'>
       <div className="filter-bar">
 
         {/* Botão para adicionar nova conta */}
@@ -177,6 +194,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
               <button onClick={applyPeriodFilter}>Aplicar</button>
             </div>
           )}
+
         </div>
       </div>
 
@@ -362,14 +380,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Cliente</h5>
               <button onClick={() => toggleModal('cliente')}>
-                {selectedFilters?.clienteId
-                  ? clientes.find((cliente) => cliente.id === parseInt(selectedFilters.clienteId))?.nomeFantasia || 'Cliente não encontrado'
+                {selectedFilters?.clienteId?.length > 0
+                  ? 'Filtrados'
                   : 'Todos'}
                 <ArrowDown />
               </button>
               {activeModal === 'cliente' && (
                 <div className="modal-filter">
-                  <h5>Escolha o cliente</h5>
+                  <h5>Escolha os clientes</h5>
                   <input
                     type="text"
                     placeholder="Digite"
@@ -384,11 +402,11 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                             type="checkbox"
                             name="cliente"
                             onChange={(e) => {
-                              onFilterChange(e);
-                              handleModalSelect('cliente');
+                              onFilterChange(e); // Chama a função de filtro
+                              handleModalSelect('cliente'); // Fecha o modal após selecionar/deselecionar
                             }}
                             value={cliente.id}
-                            checked={selectedFilters.clienteId === String(cliente.id)}
+                            checked={selectedFilters.clienteId?.includes(String(cliente.id))}
                           />
                           {cliente.nomeFantasia}
                         </label>
@@ -405,14 +423,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Fornecedor</h5>
               <button onClick={() => toggleModal('fornecedor')}>
-                {selectedFilters?.fornecedorId
-                  ? fornecedores.find(fornecedor => fornecedor.id === parseInt(selectedFilters.fornecedorId))?.nomeFantasia || 'Fornecedor não encontrado'
+                {selectedFilters?.fornecedorId?.length > 0
+                  ? 'Filtrados'
                   : 'Todos'}
                 <ArrowDown />
               </button>
               {activeModal === 'fornecedor' && (
                 <div className="modal-filter">
-                  <h5>Escolha o fornecedor</h5>
+                  <h5>Escolha os fornecedores</h5>
                   <input
                     type="text"
                     placeholder="Digite"
@@ -420,18 +438,18 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                     onChange={handleFornecedorSearch}
                   />
                   <ul>
-                    {filteredFornecedores.map(fornecedor => (
+                    {filteredFornecedores.map((fornecedor) => (
                       <li key={fornecedor.id}>
                         <label>
                           <input
                             type="checkbox"
                             name="fornecedor"
                             onChange={(e) => {
-                              onFilterChange(e);
-                              handleModalSelect('fornecedor');
+                              onFilterChange(e); // Chama a função de filtro
+                              handleModalSelect('fornecedor'); // Fecha o modal após selecionar/deselecionar
                             }}
                             value={fornecedor.id}
-                            checked={selectedFilters.fornecedorId === String(fornecedor.id)}
+                            checked={selectedFilters.fornecedorId?.includes(String(fornecedor.id))}
                           />
                           {fornecedor.nomeFantasia}
                         </label>
@@ -440,17 +458,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                   </ul>
                 </div>
               )}
-            </div>
-          )}
-
-
-          {/* Filtro para exibir somente faturas */}
-          {filterConfig.exibirFaturas && (
-            <div className="form-group input-checkbox">
-              <label>
-                <input type="checkbox" name="faturas" onChange={onFilterChange} />
-                Exibir somente faturas
-              </label>
             </div>
           )}
 
