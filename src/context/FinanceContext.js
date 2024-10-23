@@ -26,6 +26,7 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-pagar');
+      console.log(response.data.data.contas);
       setContasAPagar(response.data.data.contas);
     } catch (error) {
       setError(error);
@@ -36,22 +37,29 @@ export const FinanceProvider = ({ children }) => {
 
   const exportarContasAPagar = useCallback(
     async (filtros) => {
-      try {
-        const response = await api.get('/contas-a-receber/exportar', {
-          params: filtros, // Passa os filtros aqui
-          responseType: 'blob', // Blob para download do Excel
-        });
+      console.log('Chamando API com filtros:', filtros);
   
-    
+      try {
+        const response = await api.get('/contas-a-pagar/exportar', {
+          params: filtros,
+          paramsSerializer: (params) => {
+            // Serializar apenas se necessário
+            const queryString = new URLSearchParams(params).toString();
+            console.log('Query string serializada:', queryString);
+            return queryString;
+          },
+          responseType: 'blob', // Para garantir que o Excel seja recebido corretamente
+        });
   
         return response.data;
       } catch (error) {
         console.error('Erro na exportação:', error);
-        throw error; // Repassa o erro para ser tratado no componente
+        throw error;
       }
     },
     []
   );
+  
 
   const fetchCategorias = useCallback(async () => {
     setLoading(true);
@@ -220,22 +228,32 @@ export const FinanceProvider = ({ children }) => {
 
   const exportarContasAReceber = useCallback(
     async (filtros) => {
+      console.log('Chamando API com filtros:', filtros);
+  
       try {
         const response = await api.get('/contas-a-receber/exportar', {
-          params: filtros, // Passa os filtros aqui
-          responseType: 'blob', // Blob para download do Excel
+          params: filtros,
+          paramsSerializer: (params) => {
+            return Object.entries(params)
+              .map(([key, value]) =>
+                Array.isArray(value)
+                  ? value.map((v) => `${encodeURIComponent(key)}=${encodeURIComponent(v)}`).join('&')
+                  : `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+              )
+              .join('&');
+          },
+          responseType: 'blob',
         });
-  
-    
   
         return response.data;
       } catch (error) {
         console.error('Erro na exportação:', error);
-        throw error; // Repassa o erro para ser tratado no componente
+        throw error;
       }
     },
     []
   );
+  
   
   const fetchCategoriasAReceber = useCallback(async () => {
     setLoading(true);

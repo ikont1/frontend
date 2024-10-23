@@ -74,54 +74,55 @@ const ContasAPagar = () => {
 
   const filterContas = useCallback(() => {
     const { categorias = [], status2 = [], fornecedorId = [], period, month } = selectedFilters;
-    const currentMonth = new Date();
+    const currentDate = new Date(); // Data atual
+    
+    const firstDayOfCurrentMonth = startOfMonth(currentDate);
+    const lastDayOfCurrentMonth = endOfMonth(currentDate);
   
-    const filtered = contasAPagar.filter(conta => {
+    const filtered = contasAPagar.filter((conta) => {
       const contaVencimento = new Date(conta.vencimento);
   
       const isCurrentMonth = 
-        contaVencimento.getMonth() === currentMonth.getMonth() &&
-        contaVencimento.getFullYear() === currentMonth.getFullYear();
-      const isOverdue = conta.status.toLowerCase() === 'vencido';
+        contaVencimento >= firstDayOfCurrentMonth && 
+        contaVencimento <= lastDayOfCurrentMonth;
   
-      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
-      const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
-  
-      // Verificar se o fornecedor está em fornecedorId
-      const matchesFornecedor = 
-        fornecedorId.length === 0 || 
-        fornecedorId.includes(String(conta.fornecedor?.id));
+      const matchesMonth = 
+        month &&
+        contaVencimento >= startOfMonth(new Date(month)) &&
+        contaVencimento <= endOfMonth(new Date(month));
   
       const matchesPeriod = 
         period.start && period.end &&
         contaVencimento >= new Date(period.start) &&
         contaVencimento <= new Date(period.end);
   
-      const matchesMonth = 
-        (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
-        (month && contaVencimento >= startOfMonth(new Date(month)) &&
-          contaVencimento <= endOfMonth(new Date(month)));
+      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
+      const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
+      const matchesFornecedor = fornecedorId.length === 0 || fornecedorId.includes(String(conta.fornecedor?.id));
   
-      // Verificar se a conta atende aos filtros
       return (
+        (matchesPeriod || matchesMonth || (!month && !period.start && !period.end && isCurrentMonth)) &&
         matchesCategoria &&
         matchesStatus &&
-        matchesFornecedor &&
-        (matchesPeriod || matchesMonth)
+        matchesFornecedor
       );
     });
   
-    // Ordenar as contas vencidas no topo
     const sortedFiltered = filtered.sort((a, b) => {
-      if (a.status === 'vencido' && b.status !== 'vencido') return -1;
-      if (a.status !== 'vencido' && b.status === 'vencido') return 1;
+      const isAOverdue = a.status.toLowerCase() === 'vencido';
+      const isBOverdue = b.status.toLowerCase() === 'vencido';
+  
+      if (isAOverdue && !isBOverdue) return -1;
+      if (!isAOverdue && isBOverdue) return 1;
+  
       return new Date(a.vencimento) - new Date(b.vencimento);
     });
   
     setFilteredContasAPagar(sortedFiltered);
   }, [contasAPagar, selectedFilters]);
   
-
+  
+  
   // Atualizar contas a pagar filtradas quando contasAPagar ou filtros mudarem
   useEffect(() => {
     if (contasAPagar && Array.isArray(contasAPagar)) {
@@ -436,44 +437,29 @@ const ContasAPagar = () => {
   // Funça para exportar conta 
   const handleExport = async () => {
     const { categorias, status2, fornecedorId, period, month } = selectedFilters;
-
-    // Construir o filtro consolidado
-    const filtroArray = [];
-
-    if (categorias.length > 0) {
-      filtroArray.push(`categoria:${categorias.join(',')}`);
-    }
-    if (status2.length > 0) {
-      filtroArray.push(`status:${status2.join(',')}`);
-    }
-    if (fornecedorId) {
-      filtroArray.push(`fornecedor:${fornecedorId}`);
-    }
-
-    // Montar os filtros finais
+  
+    const currentMonth = new Date();
+    const defaultStart = startOfMonth(currentMonth);
+    const defaultEnd = endOfMonth(currentMonth);
+  
+    const periodo = period.start && period.end
+      ? `${formatDate(period.start)}:${formatDate(period.end)}`
+      : month
+        ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
+        : `${format(defaultStart, 'yyyy-MM-dd')}:${format(defaultEnd, 'yyyy-MM-dd')}`; // Padrão para o mês atual
+  
     const filtros = {
-      itensPorPagina: 10000, // Grande número para exportação completa
+      itensPorPagina: 20000000, // Exportar tudo
       pagina: 1,
-      ordem: 'ASC',
-      filtro: filtroArray.length > 0 ? filtroArray.join(',') : undefined,
-      periodo: period.start && period.end
-        ? `${formatDate(period.start)}:${formatDate(period.end)}`
-        : month
-          ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
-          : undefined,
+      ...(categorias.length > 0 && { filtro: `categoria:${categorias.join(',')}` }),
+      ...(status2.length > 0 && { filtro: `status:${status2.join(',')}` }),
+      ...(fornecedorId.length > 0 && { filtro: `fornecedor:${fornecedorId.join(',')}` }),
+      periodo,
     };
-
-    // Filtrar apenas parâmetros válidos
-    const filtrosValidos = Object.fromEntries(
-      Object.entries(filtros).filter(([_, v]) => v !== undefined && v !== '')
-    );
-
-    console.log('Filtros enviados para a API:', filtrosValidos);
-
+  
     try {
-      const data = await exportarContasAPagar(filtrosValidos); // Chamada para o contexto
-
-      // Criar o link para download do Excel
+      const data = await exportarContasAPagar(filtros);
+  
       const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -482,8 +468,7 @@ const ContasAPagar = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-
-      // Exibir notificação de sucesso
+  
       setNotificationData({
         title: 'Exportação Concluída',
         message: 'As contas a pagar foram exportadas com sucesso!',
@@ -504,8 +489,7 @@ const ContasAPagar = () => {
       setShowNotification(true);
     }
   };
-
-
+    
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {
     const inicio = (pagina - 1) * itensPorPagina;

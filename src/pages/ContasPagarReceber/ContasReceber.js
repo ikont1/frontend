@@ -72,39 +72,53 @@ const ContasReceber = () => {
 
   const filterContas = useCallback(() => {
     const { categorias = [], status = [], clienteId = [], period, month } = selectedFilters;
-    const currentMonth = new Date();
+    const currentDate = new Date(); // Data atual
+  
+    // Calcular primeiro e último dia do mês atual
+    const firstDayOfCurrentMonth = startOfMonth(currentDate);
+    const lastDayOfCurrentMonth = endOfMonth(currentDate);
   
     const filtered = contasAReceber.filter((conta) => {
       const contaVencimento = new Date(conta.vencimento);
   
-      const isCurrentMonth =
-        contaVencimento.getMonth() === currentMonth.getMonth() &&
-        contaVencimento.getFullYear() === currentMonth.getFullYear();
-      const isOverdue = conta.status.toLowerCase() === 'vencido';
+      // Verifica se a conta é do mês atual
+      const isCurrentMonth = 
+        contaVencimento >= firstDayOfCurrentMonth && 
+        contaVencimento <= lastDayOfCurrentMonth;
   
-      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
-      const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
+      // Lógica de exibição para quando um mês ou período é selecionado
+      const matchesMonth = 
+        month &&
+        contaVencimento >= startOfMonth(new Date(month)) &&
+        contaVencimento <= endOfMonth(new Date(month));
   
-      const matchesCliente =
-        clienteId.length === 0 || clienteId.includes(String(conta.cliente?.id));
-  
-      const matchesPeriod =
+      const matchesPeriod = 
         period.start && period.end &&
         contaVencimento >= new Date(period.start) &&
         contaVencimento <= new Date(period.end);
   
-      const matchesMonth =
-        (!period.start && !period.end && (!month && (isCurrentMonth || isOverdue))) ||
-        (month &&
-          contaVencimento >= startOfMonth(new Date(month)) &&
-          contaVencimento <= endOfMonth(new Date(month)));
+      // Aplicar filtros por categoria, status e cliente
+      const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
+      const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
+      const matchesCliente = clienteId.length === 0 || clienteId.includes(String(conta.cliente?.id));
   
-      return matchesCategoria && matchesStatus && matchesCliente && (matchesPeriod || matchesMonth);
+      // Lógica para garantir que contas de meses diferentes não apareçam fora do contexto:
+      return (
+        (matchesPeriod || matchesMonth || (!month && !period.start && !period.end && isCurrentMonth)) &&
+        matchesCategoria &&
+        matchesStatus &&
+        matchesCliente
+      );
     });
   
+    // Ordenar vencidas do mês atual no topo, depois por data
     const sortedFiltered = filtered.sort((a, b) => {
-      if (a.status === 'vencido' && b.status !== 'vencido') return -1;
-      if (a.status !== 'vencido' && b.status === 'vencido') return 1;
+      const isAOverdue = a.status.toLowerCase() === 'vencido';
+      const isBOverdue = b.status.toLowerCase() === 'vencido';
+  
+      if (isAOverdue && !isBOverdue) return -1;
+      if (!isAOverdue && isBOverdue) return 1;
+  
       return new Date(a.vencimento) - new Date(b.vencimento);
     });
   
@@ -444,45 +458,45 @@ const ContasReceber = () => {
   // função para exportar conta
   const handleExport = async () => {
     const { categorias, status, clienteId, period, month } = selectedFilters;
-
-    // Construir o filtro concatenado com cliente vindo primeiro
-    const filtroArray = [];
-
-    if (clienteId) {
-      filtroArray.push(`cliente:${clienteId}`);
-    }
+  
+    // Obter o mês atual como padrão, caso nenhum filtro de período ou mês tenha sido selecionado
+    const currentMonth = new Date();
+    const defaultStart = startOfMonth(currentMonth);
+    const defaultEnd = endOfMonth(currentMonth);
+  
+    // Preparar o filtro concatenado
+    let filtro = [];
+  
     if (categorias.length > 0) {
-      filtroArray.push(`categoria:${categorias.join(',')}`);
+      filtro.push(`categoria:${categorias.join(',')}`);
     }
     if (status.length > 0) {
-      filtroArray.push(`status:${status.join(',')}`);
+      filtro.push(`status:${status.join(',')}`);
     }
-
-    // Unir os filtros corretamente com '&' SEM codificação extra
-    const filtroString = filtroArray.join('&');
-    console.log('Filtro enviado sem codificar:', filtroString);
-
+    if (clienteId.length > 0) {
+      filtro.push(`cliente:${clienteId.join(',')}`);
+    }
+  
+    // Definir o período para exportação: Se não houver filtro, aplica o mês atual
+    const periodo = period.start && period.end
+      ? `${formatDate(period.start)}:${formatDate(period.end)}`
+      : month
+        ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
+        : `${format(defaultStart, 'yyyy-MM-dd')}:${format(defaultEnd, 'yyyy-MM-dd')}`;  // Mês atual como padrão
+  
+    // Preparar o objeto de filtros para a requisição
     const filtros = {
-      itensPorPagina: 10000,
+      itensPorPagina: 20000000,
       pagina: 1,
-      ordem: 'ASC',
-      filtro: filtroString,  // Cliente sempre primeiro
-      periodo: period.start && period.end
-        ? `${formatDate(period.start)}:${formatDate(period.end)}`
-        : month
-          ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
-          : undefined,
+      ...(filtro.length > 0 && { filtro: filtro.join(',') }),  // Adicionar apenas se houver filtros
+      periodo,
     };
-
-    console.log('Parâmetros finais antes da requisição:', filtros);
-
-    const filtrosValidos = Object.fromEntries(
-      Object.entries(filtros).filter(([_, v]) => v !== undefined && v !== '')
-    );
-
+  
+    console.log('Filtros para exportação:', filtros);
+  
     try {
-      const data = await exportarContasAReceber(filtrosValidos);
-
+      const data = await exportarContasAReceber(filtros);
+  
       const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -491,7 +505,7 @@ const ContasReceber = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-
+  
       setNotificationData({
         title: 'Exportação Concluída',
         message: 'As contas a receber foram exportadas com sucesso!',
@@ -502,8 +516,6 @@ const ContasReceber = () => {
       setShowNotification(true);
     } catch (error) {
       console.error('Erro ao exportar:', error);
-      console.error('Resposta completa:', error.response);
-
       setNotificationData({
         title: 'Erro',
         message: error.message || 'Falha ao exportar contas a receber.',
@@ -514,8 +526,7 @@ const ContasReceber = () => {
       setShowNotification(true);
     }
   };
-
-
+  
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {
     const inicio = (pagina - 1) * itensPorPagina;
