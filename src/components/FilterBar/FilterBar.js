@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './FilterBar.css';
-import { Calendar, PlusCircle, Filter, ArrowDown, ChevronLeft, ChevronRight, Download } from 'react-feather';
+import { Calendar, PlusCircle, Filter, ArrowDown, ChevronLeft, ChevronRight, Download, XCircle } from 'react-feather';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { addMonths, subMonths, format } from 'date-fns';
@@ -141,21 +141,21 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
   };
 
   // Função para limpar os filtros
-const handleClearFilters = () => {
-  const defaultFilters = {
-    categorias: [],
-    status: [],
-    status2: [],
-    clienteId: [],
-    fornecedorId: [],
-    period: { start: null, end: null },
-    month: null,
+  const handleClearFilters = () => {
+    const defaultFilters = {
+      categorias: [],
+      status: [],
+      status2: [],
+      clienteId: [],
+      fornecedorId: [],
+      period: { start: null, end: null },
+      month: null,
+    };
+    onFilterChange({ target: { name: 'clear', value: defaultFilters } }); // Atualiza filtros no pai
+    setStartDate(null);
+    setEndDate(null);
+    setSelectedMonth(new Date());
   };
-  onFilterChange({ target: { name: 'clear', value: defaultFilters } }); // Atualiza filtros no pai
-  setStartDate(null);
-  setEndDate(null);
-  setSelectedMonth(new Date());
-};
 
 
   return (
@@ -229,8 +229,8 @@ const handleClearFilters = () => {
             <Download /> Exportar
           </button>
         )}
-        <button className="clear-filters-button" onClick={handleClearFilters}>
-          Limpar Filtros
+        <button className="filter-button" onClick={handleClearFilters}>
+          <XCircle /> Limpar Filtros
         </button>
       </div>
 
