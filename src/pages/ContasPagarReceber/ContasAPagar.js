@@ -138,53 +138,82 @@ const ContasAPagar = () => {
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
   
+    // Caso seja um reset de filtros
+    if (name === 'clear') {
+      setSelectedFilters(value); // Reseta todos os filtros
+      return; // Não prosseguir com a lógica abaixo
+    }
+  
+    // Atualizar os filtros com base nas seleções
     setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
   
-      // Inicializar arrays como necessário
+      // Inicializar arrays conforme necessário
       if (!updatedFilters.categorias) updatedFilters.categorias = [];
       if (!updatedFilters.status2) updatedFilters.status2 = [];
       if (!updatedFilters.fornecedorId) updatedFilters.fornecedorId = [];
   
+      // Manipulação de categorias
       if (name === 'categoria') {
         if (checked) {
           updatedFilters.categorias.push(value);
         } else {
-          updatedFilters.categorias = updatedFilters.categorias.filter(cat => cat !== value);
+          updatedFilters.categorias = updatedFilters.categorias.filter(
+            (cat) => cat !== value
+          );
         }
-      } else if (name === 'status2') {
+      }
+  
+      // Manipulação de status2
+      else if (name === 'status2') {
         if (checked) {
           updatedFilters.status2.push(value);
         } else {
-          updatedFilters.status2 = updatedFilters.status2.filter(stat => stat !== value);
+          updatedFilters.status2 = updatedFilters.status2.filter(
+            (stat) => stat !== value
+          );
         }
-      } else if (name === 'fornecedor') {
+      }
+  
+      // Manipulação de fornecedores
+      else if (name === 'fornecedor') {
         if (checked) {
-          updatedFilters.fornecedorId = [...(prevFilters.fornecedorId || []), value];
+          updatedFilters.fornecedorId = [
+            ...(prevFilters.fornecedorId || []),
+            value,
+          ];
         } else {
-          updatedFilters.fornecedorId = prevFilters.fornecedorId.filter(id => id !== value);
+          updatedFilters.fornecedorId = prevFilters.fornecedorId.filter(
+            (id) => id !== value
+          );
         }
   
-        // Resetar o filtro se nenhum fornecedor estiver selecionado
+        // Remover a chave se nenhum fornecedor estiver selecionado
         if (updatedFilters.fornecedorId.length === 0) {
-          delete updatedFilters.fornecedorId; // Remove a chave para o estado inicial
+          delete updatedFilters.fornecedorId;
         }
-      } else if (name === 'periodStart' || name === 'periodEnd') {
+      }
+  
+      // Manipulação de período
+      else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
-        updatedFilters.month = null;
-      } else if (name === 'month') {
+        updatedFilters.month = null; // Limpar mês ao definir um período
+      }
+  
+      // Manipulação de mês
+      else if (name === 'month') {
         updatedFilters.month = value;
-        updatedFilters.period = { start: null, end: null };
+        updatedFilters.period = { start: null, end: null }; // Limpar período ao definir mês
       }
   
       return updatedFilters;
     });
   };
   
-  
+
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ");
@@ -207,7 +236,7 @@ const ContasAPagar = () => {
     if (!isValid(parsedDate)) {
       return 'Data inválida';
     }
-    return format(parsedDate, 'yyyy-MM-dd');
+    return format(parsedDate, 'dd-MM-yyyy');
   };
 
   // Formatar valor para o formato de moeda
@@ -438,28 +467,31 @@ const ContasAPagar = () => {
   const handleExport = async () => {
     const { categorias, status2, fornecedorId, period, month } = selectedFilters;
   
+    // Definir o período com base nos filtros ou mês atual
     const currentMonth = new Date();
     const defaultStart = startOfMonth(currentMonth);
     const defaultEnd = endOfMonth(currentMonth);
   
     const periodo = period.start && period.end
-      ? `${formatDate(period.start)}:${formatDate(period.end)}`
+      ? `vencimento:${formatDate(period.start)}|${formatDate(period.end)}`
       : month
-        ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
-        : `${format(defaultStart, 'yyyy-MM-dd')}:${format(defaultEnd, 'yyyy-MM-dd')}`; // Padrão para o mês atual
+        ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
+        : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`;
   
+    // Construir o filtro concatenado
     const filtros = {
       itensPorPagina: 20000000, // Exportar tudo
       pagina: 1,
       ...(categorias.length > 0 && { filtro: `categoria:${categorias.join(',')}` }),
       ...(status2.length > 0 && { filtro: `status:${status2.join(',')}` }),
       ...(fornecedorId.length > 0 && { filtro: `fornecedor:${fornecedorId.join(',')}` }),
-      periodo,
+      periodo, // Novo formato de período
     };
   
     try {
       const data = await exportarContasAPagar(filtros);
   
+      // Criar e baixar o arquivo Excel
       const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -469,6 +501,7 @@ const ContasAPagar = () => {
       link.click();
       link.remove();
   
+      // Exibir notificação de sucesso
       setNotificationData({
         title: 'Exportação Concluída',
         message: 'As contas a pagar foram exportadas com sucesso!',
@@ -489,6 +522,7 @@ const ContasAPagar = () => {
       setShowNotification(true);
     }
   };
+  
     
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {

@@ -141,6 +141,13 @@ const ContasReceber = () => {
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
   
+    // Verificar se é a ação de limpar filtros
+    if (name === 'clear') {
+      setSelectedFilters(value); // Define os filtros como padrão
+      return; // Interrompe a função
+    }
+  
+    // Atualiza os filtros com base na seleção
     setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
   
@@ -149,36 +156,55 @@ const ContasReceber = () => {
       if (!updatedFilters.status) updatedFilters.status = [];
       if (!updatedFilters.clienteId) updatedFilters.clienteId = [];
   
+      // Manipulação de categorias
       if (name === 'categoria') {
         if (checked) {
           updatedFilters.categorias.push(value);
         } else {
-          updatedFilters.categorias = updatedFilters.categorias.filter((cat) => cat !== value);
+          updatedFilters.categorias = updatedFilters.categorias.filter(
+            (cat) => cat !== value
+          );
         }
-      } else if (name === 'status') {
+      }
+  
+      // Manipulação de status
+      else if (name === 'status') {
         if (checked) {
           updatedFilters.status.push(value);
         } else {
-          updatedFilters.status = updatedFilters.status.filter((stat) => stat !== value);
+          updatedFilters.status = updatedFilters.status.filter(
+            (stat) => stat !== value
+          );
         }
-      } else if (name === 'cliente') {
+      }
+  
+      // Manipulação de cliente
+      else if (name === 'cliente') {
         if (checked) {
           updatedFilters.clienteId = [...(prevFilters.clienteId || []), value];
         } else {
-          updatedFilters.clienteId = prevFilters.clienteId.filter((id) => id !== value);
+          updatedFilters.clienteId = prevFilters.clienteId.filter(
+            (id) => id !== value
+          );
         }
   
-        // Resetar o filtro se nenhum cliente estiver selecionado
+        // Remover o filtro se nenhum cliente estiver selecionado
         if (updatedFilters.clienteId.length === 0) {
           delete updatedFilters.clienteId;
         }
-      } else if (name === 'periodStart' || name === 'periodEnd') {
+      }
+  
+      // Manipulação de período
+      else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
         updatedFilters.month = null; // Limpar mês ao definir um período
-      } else if (name === 'month') {
+      }
+  
+      // Manipulação de mês
+      else if (name === 'month') {
         updatedFilters.month = value;
         updatedFilters.period = { start: null, end: null }; // Limpar período ao definir mês
       }
@@ -186,7 +212,7 @@ const ContasReceber = () => {
       return updatedFilters;
     });
   };
-  
+    
 
   // Normalizar string removendo acentos e pontuação
   const normalizeString = (str) => {
@@ -210,7 +236,7 @@ const ContasReceber = () => {
     if (!isValid(parsedDate)) {
       return 'Data inválida';
     }
-    return format(parsedDate, 'yyyy-MM-dd');
+    return format(parsedDate, 'dd-MM-yyyy');
   };
 
   // Formatar valor para o formato de moeda
@@ -459,14 +485,20 @@ const ContasReceber = () => {
   const handleExport = async () => {
     const { categorias, status, clienteId, period, month } = selectedFilters;
   
-    // Obter o mês atual como padrão, caso nenhum filtro de período ou mês tenha sido selecionado
+    // Obter o mês atual como padrão se nenhum filtro for fornecido
     const currentMonth = new Date();
     const defaultStart = startOfMonth(currentMonth);
     const defaultEnd = endOfMonth(currentMonth);
   
-    // Preparar o filtro concatenado
-    let filtro = [];
+    // Preparar o período no novo formato esperado
+    const periodo = period.start && period.end
+      ? `vencimento:${formatDate(period.start)}|${formatDate(period.end)}`
+      : month
+        ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
+        : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`; // Padrão para o mês atual
   
+    // Construir o filtro adicional, se necessário
+    let filtro = [];
     if (categorias.length > 0) {
       filtro.push(`categoria:${categorias.join(',')}`);
     }
@@ -477,18 +509,11 @@ const ContasReceber = () => {
       filtro.push(`cliente:${clienteId.join(',')}`);
     }
   
-    // Definir o período para exportação: Se não houver filtro, aplica o mês atual
-    const periodo = period.start && period.end
-      ? `${formatDate(period.start)}:${formatDate(period.end)}`
-      : month
-        ? `${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}:${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
-        : `${format(defaultStart, 'yyyy-MM-dd')}:${format(defaultEnd, 'yyyy-MM-dd')}`;  // Mês atual como padrão
-  
-    // Preparar o objeto de filtros para a requisição
+    // Configurar os filtros para a requisição
     const filtros = {
-      itensPorPagina: 20000000,
+      itensPorPagina: 20000000, // Exportar tudo
       pagina: 1,
-      ...(filtro.length > 0 && { filtro: filtro.join(',') }),  // Adicionar apenas se houver filtros
+      ...(filtro.length > 0 && { filtro: filtro.join(',') }),
       periodo,
     };
   
@@ -497,6 +522,7 @@ const ContasReceber = () => {
     try {
       const data = await exportarContasAReceber(filtros);
   
+      // Criar e baixar o arquivo Excel
       const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -506,6 +532,7 @@ const ContasReceber = () => {
       link.click();
       link.remove();
   
+      // Exibir notificação de sucesso
       setNotificationData({
         title: 'Exportação Concluída',
         message: 'As contas a receber foram exportadas com sucesso!',
@@ -526,6 +553,7 @@ const ContasReceber = () => {
       setShowNotification(true);
     }
   };
+  
   
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {

@@ -20,8 +20,9 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
   const [filteredClientes, setFilteredClientes] = useState(clientes || []);
   const [searchfornecedor, setSearchFornecedor] = useState('');
   const [filteredFornecedores, setFilteredFornecedores] = useState(fornecedores || []);
-  
-  const filterBarRef = useRef(null);
+
+  const activeModalRef = useRef(null);
+
 
   // Atualizar clientes/fornecedor filtrados quando a lista de clientes mudar
   useEffect(() => {
@@ -31,19 +32,21 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
 
   // Função para detectar clique fora e fechar modal
   const handleClickOutside = (event) => {
-    if (filterBarRef.current && !filterBarRef.current.contains(event.target)) {
-      setActiveModal(null); // Fecha o modal ao clicar fora
+    if (
+      !activeModalRef.current?.contains(event.target)
+    ) {
+      setActiveModal(null);
     }
   };
 
   useEffect(() => {
-    // Adicionar o event listener ao montar o componente
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      // Remover o event listener ao desmontar o componente
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+
 
   // Alternar exibição dos filtros
   const toggleFilters = () => {
@@ -51,13 +54,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
   };
 
   // Alternar exibição dos modais
-  const toggleModal = (modal) => {
+  const toggleModal = (modal, ref) => {
+    activeModalRef.current = ref;
     setActiveModal(activeModal === modal ? null : modal);
   };
 
-  const handleModalSelect = (modal) => {
-    setActiveModal(null); // Fechar o modal após a seleção
-  };
+  // const handleModalSelect = (modal) => {
+  //   setActiveModal(null); // Fechar o modal após a seleção
+  // };
 
   // Navegar para o mês anterior
   const handlePrevMonth = () => {
@@ -136,10 +140,28 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
     setFilteredClientes(filtered);
   };
 
+  // Função para limpar os filtros
+const handleClearFilters = () => {
+  const defaultFilters = {
+    categorias: [],
+    status: [],
+    status2: [],
+    clienteId: [],
+    fornecedorId: [],
+    period: { start: null, end: null },
+    month: null,
+  };
+  onFilterChange({ target: { name: 'clear', value: defaultFilters } }); // Atualiza filtros no pai
+  setStartDate(null);
+  setEndDate(null);
+  setSelectedMonth(new Date());
+};
+
 
   return (
-    <div ref={filterBarRef}  className='filter-bar-container'>
+    <div className='filter-bar-container'>
       <div className="filter-bar">
+
 
         {/* Botão para adicionar nova conta */}
         {filterConfig.buttonAdd && (
@@ -207,6 +229,9 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <Download /> Exportar
           </button>
         )}
+        <button className="clear-filters-button" onClick={handleClearFilters}>
+          Limpar Filtros
+        </button>
       </div>
 
       {/* Filtros avançados */}
@@ -225,7 +250,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
               </button>
 
               {activeModal === 'categoria' && (
-                <div className="modal-filter">
+                <div ref={activeModalRef} className="modal-filter">
                   <ul>
                     {categorias.map(categoria => (
                       <li key={categoria}>
@@ -235,7 +260,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                             name="categoria"
                             onChange={(e) => {
                               onFilterChange(e);
-                              handleModalSelect('categoria'); // Fechar modal ao selecionar
                             }}
                             value={categoria}
                             checked={selectedFilters.categorias.includes(categoria)}
@@ -262,7 +286,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                 <ArrowDown />
               </button>
               {activeModal === 'status' && (
-                <div className="modal-filter">
+                <div ref={activeModalRef} className="modal-filter">
                   <h5>Status</h5>
                   <ul>
                     <li>
@@ -272,7 +296,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           name="status"
                           onChange={(e) => {
                             onFilterChange(e);
-                            handleModalSelect('status'); // Fecha o modal após selecionar
                           }}
                           value="areceber"
                           checked={selectedFilters?.status?.includes('areceber')}
@@ -286,7 +309,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           name="status"
                           onChange={(e) => {
                             onFilterChange(e);
-                            handleModalSelect('status');
                           }}
                           value="recebido"
                           checked={selectedFilters?.status?.includes('recebido')}
@@ -300,7 +322,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           name="status"
                           onChange={(e) => {
                             onFilterChange(e);
-                            handleModalSelect('status');
                           }}
                           value="vencido"
                           checked={selectedFilters?.status?.includes('vencido')}
@@ -324,7 +345,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                 <ArrowDown />
               </button>
               {activeModal === 'status2' && (
-                <div className="modal-filter">
+                <div ref={activeModalRef} className="modal-filter">
                   <ul>
                     <li>
                       <label>
@@ -334,7 +355,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           value="apagar"
                           onChange={(e) => {
                             onFilterChange(e);
-                            handleModalSelect('status2');
                           }}
                           checked={selectedFilters?.status2?.includes('apagar')}
                         /> A pagar
@@ -348,7 +368,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           value="pago"
                           onChange={(e) => {
                             onFilterChange(e);
-                            handleModalSelect('status2');
                           }}
                           checked={selectedFilters?.status2?.includes('pago')}
                         /> Pago
@@ -362,7 +381,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           value="vencido"
                           onChange={(e) => {
                             onFilterChange(e);
-                            handleModalSelect('status2');
                           }}
                           checked={selectedFilters?.status2?.includes('vencido')}
                         /> Vencido
@@ -373,7 +391,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
               )}
             </div>
           )}
-
 
           {/* Filtro por cliente */}
           {filterConfig.cliente && (
@@ -386,7 +403,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                 <ArrowDown />
               </button>
               {activeModal === 'cliente' && (
-                <div className="modal-filter">
+                <div ref={activeModalRef} className="modal-filter">
                   <h5>Escolha os clientes</h5>
                   <input
                     type="text"
@@ -403,7 +420,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                             name="cliente"
                             onChange={(e) => {
                               onFilterChange(e); // Chama a função de filtro
-                              handleModalSelect('cliente'); // Fecha o modal após selecionar/deselecionar
                             }}
                             value={cliente.id}
                             checked={selectedFilters.clienteId?.includes(String(cliente.id))}
@@ -429,7 +445,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                 <ArrowDown />
               </button>
               {activeModal === 'fornecedor' && (
-                <div className="modal-filter">
+                <div ref={activeModalRef} className="modal-filter">
                   <h5>Escolha os fornecedores</h5>
                   <input
                     type="text"
@@ -446,7 +462,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                             name="fornecedor"
                             onChange={(e) => {
                               onFilterChange(e); // Chama a função de filtro
-                              handleModalSelect('fornecedor'); // Fecha o modal após selecionar/deselecionar
                             }}
                             value={fornecedor.id}
                             checked={selectedFilters.fornecedorId?.includes(String(fornecedor.id))}
@@ -461,7 +476,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             </div>
           )}
 
-
           {/* Filtro por situação da nota fiscal */}
           {filterConfig.situacaoNF && (
             <div className="form-group">
@@ -470,7 +484,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                 Todos <ArrowDown />
               </button>
               {activeModal === 'situacaoNF' && (
-                <div className="modal-filter">
+                <div ref={activeModalRef} className="modal-filter">
                   <h5>Situação</h5>
                   <ul>
                     <li><label><input type="checkbox" id="processamento" /> Processamento</label></li>
