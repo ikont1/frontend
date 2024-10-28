@@ -7,6 +7,7 @@ import { BiWallet } from 'react-icons/bi';
 import { PlusCircle } from 'react-feather';
 import { useWallet } from '../../context/WalletContext';
 import ConfirmationModal from '../../components/Modal/confirmationModal';
+import RedirectButton from '../../components/RedirectButton';
 
 const Carteira = () => {
   const { listarContas, excluirConta, desativarConta, reativarConta } = useWallet();
@@ -102,7 +103,10 @@ const Carteira = () => {
         <Header />
 
         <div className='container-carteira'>
-          <h3><BiWallet className='walet-icon' /> Contas e Carteiras</h3>
+          <div className='h3-icon'>
+            <h3><BiWallet className='walet-icon' /> Contas e Carteiras </h3>
+            <RedirectButton />
+          </div>
 
           <div className='contas'>
             {contas.length > 0 ? (
