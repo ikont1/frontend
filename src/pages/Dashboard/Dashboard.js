@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [contas, setContas] = useState([]);
   const [conciliadas, setConciliadas] = useState(0);
   const [pendentes, setPendentes] = useState(0);
+  const [totalSaldoInicial, setTotalSaldoInicial] = useState(0); // Estado para armazenar o total dos saldos iniciais
 
   const bancoLogos = {
     '001': require('../../assets/imgs/bbLogo.png'),
@@ -32,6 +33,11 @@ const Dashboard = () => {
     try {
       const response = await listarContas();
       setContas(response || []);
+
+      // Soma dos saldos iniciais
+      const totalSaldo = response.reduce((total, conta) => total + parseFloat(conta.saldoInicial || 0), 0);
+      setTotalSaldoInicial(totalSaldo);
+
     } catch (error) {
       console.error('Erro ao buscar contas:', error);
     }
@@ -124,7 +130,10 @@ const Dashboard = () => {
 
             <div className='cards-left'>
               <h4><BiWallet className='icon' />Conta e carteira <Link to='/carteira' className='i'><ArrowRightCircle /></Link></h4>
-
+              <div className='totalContas'>
+                <h5>Saldo total das contas</h5>
+                <span>R$ {totalSaldoInicial.toLocaleString()}</span>
+              </div>
               <div className="card-conta">
                 {contas.length > 0 ? (
                   contas
