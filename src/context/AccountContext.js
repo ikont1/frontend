@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
 import Notification from '../components/Notification/Notification';
 import { ThumbsUp, AlertTriangle } from 'react-feather';
@@ -11,12 +11,36 @@ export const AccountProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [dadosEmpresa, setDadosEmpresa] = useState(null); // Estado para armazenar dados da empresa
 
   const handleNotificationClose = () => {
     setNotification(null);
   };
 
-  // Cadastrar conta
+  // Função para buscar dados da empresa e armazená-los no estado global
+  const listarContas = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('/conta');
+      setDadosEmpresa(response.data);
+      setLoading(false);
+      console.log('Dados empresar',response.data)
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      setError('Erro ao listar contas. Por favor, tente novamente.');
+      setLoading(false);
+      return [];
+    }
+  };
+
+  // Efeito para buscar os dados da empresa ao iniciar o contexto
+  useEffect(() => {
+    listarContas();
+  }, []);
+
+  // Função para cadastrar uma nova conta
   const cadastrarConta = async (data) => {
     setLoading(true);
     setError(null);
@@ -44,7 +68,7 @@ export const AccountProvider = ({ children }) => {
     }
   };
 
-  // Atualizar dados minha empresa
+  // Função para atualizar dados da empresa
   const atualizarConta = async (data) => {
     setLoading(true);
     setError(null);
@@ -64,7 +88,7 @@ export const AccountProvider = ({ children }) => {
       setNotification({
         title: 'Erro',
         message: error.response?.data?.message || 'Erro ao atualizar. Por favor, tente novamente.',
-        secondaryMessage: 'Verifique todos os capos e tente novamente',
+        secondaryMessage: 'Verifique todos os campos e tente novamente',
         type: 'error',
         icon: AlertTriangle,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
@@ -72,24 +96,6 @@ export const AccountProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
-  // Listar dados minha empresa
-  const listarContas = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get('/conta');
-      setLoading(false);
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      setError('Erro ao listar contas. Por favor, tente novamente.');
-      setLoading(false);
-      return [];
-    }
-  };
-
-
 
   return (
     <AccountContext.Provider
@@ -99,6 +105,7 @@ export const AccountProvider = ({ children }) => {
         cadastrarConta,
         atualizarConta,
         listarContas,
+        dadosEmpresa, // Disponibiliza os dados da empresa no contexto
       }}
     >
       {children}
