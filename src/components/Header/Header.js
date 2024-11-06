@@ -2,10 +2,10 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import './Header.css';
 import { BarChart2, Search } from 'react-feather';
-import { useAccount } from '../../context/AccountContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
-  const { dadosEmpresa } = useAccount();
+  const { decodedToken } = useAuth();
   const location = useLocation();
 
   return (
@@ -35,7 +35,7 @@ const Header = () => {
         <div>
           <div></div>
         </div> */}
-        <h5>{dadosEmpresa?.data.conta.nomeFantasia || 'Empresa não encontrada'}</h5>
+        <h5>{decodedToken?.usuario?.nome || 'Usuário não encontrada'}</h5>
       </div>
     </header>
   );

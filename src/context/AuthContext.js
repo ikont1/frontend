@@ -1,6 +1,7 @@
 // AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import api from '../services/api';
 import Notification from '../components/Notification/Notification';
 import { AlertTriangle } from 'react-feather';
@@ -11,16 +12,29 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
+  const [decodedToken, setDecodedToken] = useState(null); // Estado para armazenar os dados decodificados
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
+
+  // Decode Token
+  const decodeAndStoreToken = (jwtToken) => {
+    try {
+      const decoded = jwtDecode(jwtToken); // Decodifica o token
+      setDecodedToken(decoded); // Armazena os dados decodificados
+    } catch (err) {
+      console.error('Erro ao decodificar o token JWT:', err);
+    }
+  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
       api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      decodeAndStoreToken(storedToken); // Decodifica e armazena ao carregar
     }
     setLoading(false);
   }, []);
@@ -39,6 +53,7 @@ export const AuthProvider = ({ children }) => {
       setToken(token);
       localStorage.setItem('token', token);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      decodeAndStoreToken(token); // Decodifica e armazena ao fazer login
       navigate('/');
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Erro ao logar. Por favor, tente novamente.';
@@ -79,6 +94,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setError(null);
     setToken(null);
+    setDecodedToken(null);
     localStorage.removeItem('token');
     delete api.defaults.headers.common['Authorization'];
     navigate('/login');
@@ -116,7 +132,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, loading, error, login, logout, resetPassword, setPassword }}>
+    <AuthContext.Provider value={{ token,decodedToken, loading, error, login, logout, resetPassword, setPassword }}>
       {children}
       {notification && (
         <Notification
