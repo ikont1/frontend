@@ -4,6 +4,7 @@ import { FileText, DollarSign, User, Users, Briefcase, Settings, HelpCircle, Log
 import './Sidebar.css';
 import logo from '../../assets/imgs/logosvg.svg';
 import { useAuth } from '../../context/AuthContext';
+import Permissao from '../../permissions/Permissao';
 
 const Sidebar = () => {
   const { logout } = useAuth(); // Obtendo a função de logout do contexto
@@ -44,7 +45,7 @@ const Sidebar = () => {
                 </NavLink>
               </li>
               <li onClick={toggleConciliacao} className={isConciliacaoOpen ? "submenu-open" : ""}>
-                <div style={{paddingLeft: '20px'}} className="menu-item">
+                <div style={{ paddingLeft: '20px' }} className="menu-item">
                   <BarChart2 className="icon" /> Conciliação
                 </div>
                 {isConciliacaoOpen && (
@@ -96,7 +97,7 @@ const Sidebar = () => {
               </li>
 
               <li onClick={toggleConfiguracao} className={isConfiguracaoOpen ? "submenu-open" : ""}>
-                <div style={{paddingLeft: '20px'}} className="menu-item">
+                <div style={{ paddingLeft: '20px' }} className="menu-item">
                   <Settings style={{ color: 'var(--highlight-color)' }} className="icon" /> Configurações
                 </div>
                 {isConfiguracaoOpen && (
@@ -106,26 +107,19 @@ const Sidebar = () => {
                         <Award className="icon" /> Certificado Digital
                       </NavLink>
                     </li>
-                    <li>
-                      <NavLink to="/perfis" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <Users className="icon" /> Perfis
-                      </NavLink>
-                    </li>
-                    {/* <li>
-                      <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <Settings className="icon" /> Criar Perfis
-                      </NavLink>
-                    </li> */}
-                    <li>
-                      <NavLink to="/usuarios" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <User className="icon" /> Usuários
-                      </NavLink>
-                    </li>
-                    {/* <li>
-                      <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <Settings className="icon" /> Criar Usuário
-                      </NavLink>
-                    </li> */}
+
+                    <Permissao ehAdmin>
+                      <li>
+                        <NavLink to="/perfis" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                          <Users className="icon" /> Perfis
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink to="/usuarios" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                          <User className="icon" /> Usuários
+                        </NavLink>
+                      </li>
+                    </Permissao>
                   </ul>
                 )}
               </li>
