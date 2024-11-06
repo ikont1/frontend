@@ -303,7 +303,7 @@ const Usuarios = () => {
               name="login"
               value={novoUsuario.login}
               onChange={handleNovoUsuarioChange}
-              placeholder="Cpf ou cnpj"
+              placeholder="CPF"
               required
             />
           </div>
