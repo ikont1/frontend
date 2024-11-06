@@ -263,45 +263,46 @@ const Perfil = () => {
             <br />
           </>
         )}
-
-        <div className="content content-table">
-          <h1 className='h1-search'>
-            Perfis de Usuário
-            <div className='search-container-usuario'>
-              <input
-                type='text'
-                placeholder='Buscar perfil'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Search />
-            </div>
-          </h1>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Status</th>
-                <th>Data de Criação</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPerfis.map((perfil) => (
-                <tr key={perfil.id}>
-                  <td>{perfil.nome}</td>
-                  <td>{perfil.ehAdmin ? 'Admin' : 'Ativo'}</td>
-                  <td>{format(new Date(perfil.criadoEm), 'dd/MM/yyyy')}</td>
-                  <td>
-                    <button onClick={() => handleToggleExpandPerfil(perfil)} className="action-button action-button-perfis">
-                      {expandPerfil === perfil.id ? <ArrowUp /> : <ArrowRight />}
-                    </button>
-                  </td>
+        {!showCriarPerfil && !expandPerfil && (
+          <div className="content content-table">
+            <h1 className='h1-search'>
+              Perfis de Usuário
+              <div className='search-container-usuario'>
+                <input
+                  type='text'
+                  placeholder='Buscar perfil'
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Search />
+              </div>
+            </h1>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Status</th>
+                  <th>Data de Criação</th>
+                  <th>Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredPerfis.map((perfil) => (
+                  <tr key={perfil.id}>
+                    <td>{perfil.nome}</td>
+                    <td>{perfil.ehAdmin ? 'Admin' : 'Ativo'}</td>
+                    <td>{format(new Date(perfil.criadoEm), 'dd/MM/yyyy')}</td>
+                    <td>
+                      <button onClick={() => handleToggleExpandPerfil(perfil)} className="action-button action-button-perfis">
+                        {expandPerfil === perfil.id ? <ArrowUp /> : <ArrowRight />}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Modal de Confirmação de Exclusão */}
