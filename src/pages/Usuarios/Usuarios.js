@@ -49,6 +49,19 @@ const Usuarios = () => {
   };
 
   const handleCadastrarUsuario = async () => {
+    const { perfilId, nome, email, login, status } = novoUsuario;
+
+    // Verificação para garantir que todos os campos obrigatórios estão preenchidos
+    if (!perfilId || !nome || !email || !login || !status) {
+      setNotificationData({
+        title: 'Erro',
+        message: 'Por favor, preencha todos os campos de cadastrar.',
+        icon: AlertTriangle,
+        type: 'error',
+      });
+      setShowNotification(true);
+      return; // Interrompe a execução se algum campo estiver vazio
+    }
     const novoUsuarioData = {
       perfilId: novoUsuario.perfilId,
       nome: novoUsuario.nome,
@@ -68,8 +81,20 @@ const Usuarios = () => {
         icon: ThumbsUp,
         type: 'success',
       });
+
+      setNovoUsuario({
+        perfilId: null,
+        nome: '',
+        email: '',
+        login: '',
+        status: ''
+      });
     } else {
-      const errorMessages = response.error.map((err) => err.message).join(', ');
+      // Verifica se o erro é uma string ou um objeto de erros
+      const errorMessages = Array.isArray(response.error)
+        ? response.error.map((err) => err.message).join(', ')  // Tratar lista de erros
+        : response.error || 'Erro desconhecido ao cadastrar usuário'; // Tratar erro único
+
       setNotificationData({
         title: 'Erro',
         message: 'Erro ao cadastrar usuário',
@@ -123,7 +148,7 @@ const Usuarios = () => {
   const handleDeleteUsuario = async () => {
     if (selectedUsuario) {
       const response = await deletarUsuario(selectedUsuario.id);
-  
+
       if (response.success) {
         setNotificationData({
           title: 'Usuário Excluído',
@@ -144,10 +169,10 @@ const Usuarios = () => {
         });
       }
       setShowDeleteModal(false);
-      setShowNotification(true); 
+      setShowNotification(true);
     }
   };
-  
+
   const handleActionsClick = (id) => {
     setActiveTooltip(activeTooltip === id ? null : id);
   };
@@ -307,6 +332,7 @@ const Usuarios = () => {
               value={novoUsuario.status}
               onChange={handleNovoUsuarioChange}
             >
+              <option value="">Selecione</option>
               <option value="ativo">Ativo</option>
               <option value="inativo">Inativo</option>
             </select>
