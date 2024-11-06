@@ -141,52 +141,36 @@ const ContasAPagar = () => {
     // Caso seja um reset de filtros
     if (name === 'clear') {
       setSelectedFilters(value); // Reseta todos os filtros
-      return; // Não prosseguir com a lógica abaixo
+      return;
     }
   
     // Atualizar os filtros com base nas seleções
     setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
   
-      // Inicializar arrays conforme necessário
       if (!updatedFilters.categorias) updatedFilters.categorias = [];
       if (!updatedFilters.status2) updatedFilters.status2 = [];
       if (!updatedFilters.fornecedorId) updatedFilters.fornecedorId = [];
   
       // Manipulação de categorias
       if (name === 'categoria') {
-        if (checked) {
-          updatedFilters.categorias.push(value);
-        } else {
-          updatedFilters.categorias = updatedFilters.categorias.filter(
-            (cat) => cat !== value
-          );
-        }
+        updatedFilters.categorias = checked
+          ? [...new Set([...updatedFilters.categorias, value])] // Adiciona sem duplicar
+          : updatedFilters.categorias.filter((cat) => cat !== value);
       }
   
       // Manipulação de status2
       else if (name === 'status2') {
-        if (checked) {
-          updatedFilters.status2.push(value);
-        } else {
-          updatedFilters.status2 = updatedFilters.status2.filter(
-            (stat) => stat !== value
-          );
-        }
+        updatedFilters.status2 = checked
+          ? [...new Set([...updatedFilters.status2, value])] // Adiciona sem duplicar
+          : updatedFilters.status2.filter((stat) => stat !== value);
       }
   
       // Manipulação de fornecedores
       else if (name === 'fornecedor') {
-        if (checked) {
-          updatedFilters.fornecedorId = [
-            ...(prevFilters.fornecedorId || []),
-            value,
-          ];
-        } else {
-          updatedFilters.fornecedorId = prevFilters.fornecedorId.filter(
-            (id) => id !== value
-          );
-        }
+        updatedFilters.fornecedorId = checked
+          ? [...new Set([...(prevFilters.fornecedorId || []), value])] // Adiciona sem duplicar
+          : prevFilters.fornecedorId.filter((id) => id !== value);
   
         // Remover a chave se nenhum fornecedor estiver selecionado
         if (updatedFilters.fornecedorId.length === 0) {
@@ -213,19 +197,22 @@ const ContasAPagar = () => {
     });
   };
   
-
-  // Normalizar string removendo acentos e pontuação
-  const normalizeString = (str) => {
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ");
-  };
-
-  // Lidar com o filtro de busca
+  // Função de busca com restauração de estado usando filteredContasAPagar
   const handleSearch = (searchTerm) => {
-    const normalizedSearchTerm = normalizeString(searchTerm.toLowerCase());
-    const filtered = contasAPagar.filter(conta =>
-      normalizeString(conta.categoria.toLowerCase()).includes(normalizedSearchTerm) ||
-      normalizeString(conta.descricao.toLowerCase()).includes(normalizedSearchTerm)
-    );
+    const normalizedSearchTerm = searchTerm.replace(/[^0-9.]/g, '');
+
+    if (!normalizedSearchTerm) {
+      // Quando o campo está vazio, use o estado filtrado atual
+      filterContas(); // Reaplica os filtros para restaurar `filteredContasAReceber`
+      return;
+    }
+
+    // Filtragem normal quando há um termo de busca
+    const filtered = filteredContasAPagar.filter(conta => {
+      const valorConta = conta.valor.toString();
+      return valorConta.includes(normalizedSearchTerm);
+    });
+
     setFilteredContasAPagar(filtered);
   };
 
@@ -578,7 +565,7 @@ const ContasAPagar = () => {
 
 
         <div className='content content-table'>
-          <h1 className='h1-search'>Contas a pagar <SearchBar onSearch={handleSearch} placeholder='Categoria/descrição' /></h1>
+          <h1 className='h1-search'>Contas a pagar <SearchBar onSearch={handleSearch} placeholder='Pesquisa pelo valor' /></h1>
           <table className="table">
             <thead>
               <tr>

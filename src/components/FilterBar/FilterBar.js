@@ -89,7 +89,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
     });
   };
 
-
   // Alternar exibição do seletor de data
   const toggleDatePicker = () => {
     setShowDatePicker(!showDatePicker);
@@ -110,10 +109,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
         value: endDate ? endDate.toISOString().split('T')[0] : null,
       }
     });
-
-    // Zerar as datas após aplicar o filtro
-    setStartDate(null);
-    setEndDate(null);
   };
 
   // Filtrar fornecedor com base no texto digitado
@@ -134,7 +129,8 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
     setSearchCliente(searchTerm);
 
     const filtered = (clientes || []).filter(cliente =>
-      cliente.nomeFantasia.toLowerCase().includes(searchTerm)
+      cliente.nomeFantasia.toLowerCase().includes(searchTerm) ||
+      cliente.cpfCnpj.replace(/\D/g, '').includes(searchTerm)
     );
 
     setFilteredClientes(filtered);
@@ -184,7 +180,11 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
           {/* Filtro por período */}
           {filterConfig.buttonPeriod && (
             <button className="period-button" onClick={toggleDatePicker}>
-              <Calendar /> Selecionar período
+              <Calendar />
+              {startDate && endDate
+                ? `${startDate.toLocaleDateString("pt-BR")} - ${endDate.toLocaleDateString("pt-BR")}`
+                : "Selecionar período"
+              }
             </button>
           )}
 
@@ -243,9 +243,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Categoria</h5>
               <button onClick={() => toggleModal('categoria')}>
-                {selectedFilters?.categorias && selectedFilters.categorias.length > 0
-                  ? 'Filtradas' // Exibe as categorias selecionadas separadas por vírgula
-                  : 'Todos'} {/* Caso nenhuma categoria esteja selecionada */}
+                <div>
+                  {selectedFilters.categorias.length > 0 && (
+                    <span className="filter-count">{selectedFilters.categorias.length}</span>
+                  )}
+                  {selectedFilters?.categorias && selectedFilters.categorias.length > 0
+                    ? 'Filtradas'
+                    : 'Todos'}
+                </div>
                 <ArrowDown />
               </button>
 
@@ -280,9 +285,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Status</h5>
               <button onClick={() => toggleModal('status')}>
-                {selectedFilters?.status && selectedFilters.status.length > 0
-                  ? 'Filtradas'
-                  : 'Todos'}
+                <div>
+                  {selectedFilters.status.length > 0 && (
+                    <span className="filter-count">{selectedFilters.status.length}</span>
+                  )}
+                  {selectedFilters?.status && selectedFilters.status.length > 0
+                    ? 'Filtradas'
+                    : 'Todos'}
+                </div>
                 <ArrowDown />
               </button>
               {activeModal === 'status' && (
@@ -339,9 +349,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Status</h5>
               <button onClick={() => toggleModal('status2')}>
-                {selectedFilters?.status2 && selectedFilters.status2.length > 0
-                  ? 'Filtradas'
-                  : 'Todos'}
+                <div>
+                  {selectedFilters.status2.length > 0 && (
+                    <span className="filter-count">{selectedFilters.status2.length}</span>
+                  )}
+                  {selectedFilters?.status2 && selectedFilters.status2.length > 0
+                    ? 'Filtradas'
+                    : 'Todos'}
+                </div>
                 <ArrowDown />
               </button>
               {activeModal === 'status2' && (
@@ -397,9 +412,12 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Cliente</h5>
               <button onClick={() => toggleModal('cliente')}>
-                {selectedFilters?.clienteId?.length > 0
-                  ? 'Filtrados'
-                  : 'Todos'}
+                <div>
+                  {selectedFilters.clienteId?.length > 0 && (
+                    <span className="filter-count">{selectedFilters.clienteId.length}</span>
+                  )}
+                  {selectedFilters?.clienteId?.length > 0 ? 'Filtrados' : 'Todos'}
+                </div>
                 <ArrowDown />
               </button>
               {activeModal === 'cliente' && (
@@ -407,7 +425,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                   <h5>Escolha os clientes</h5>
                   <input
                     type="text"
-                    placeholder="Digite"
+                    placeholder="Digite nome ou CPF/CNPJ"
                     value={searchCliente}
                     onChange={handleClientSearch}
                   />
@@ -424,7 +442,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                             value={cliente.id}
                             checked={selectedFilters.clienteId?.includes(String(cliente.id))}
                           />
-                          {cliente.nomeFantasia}
+                          {cliente.nomeFantasia} - {cliente.cpfCnpj}
                         </label>
                       </li>
                     ))}
@@ -439,9 +457,14 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <div className="form-group">
               <h5>Fornecedor</h5>
               <button onClick={() => toggleModal('fornecedor')}>
-                {selectedFilters?.fornecedorId?.length > 0
-                  ? 'Filtrados'
-                  : 'Todos'}
+                <div>
+                  {selectedFilters.fornecedorId?.length > 0 && (
+                    <span className="filter-count">{selectedFilters.fornecedorId.length}</span>
+                  )}
+                  {selectedFilters?.fornecedorId?.length > 0
+                    ? 'Filtrados'
+                    : 'Todos'}
+                </div>
                 <ArrowDown />
               </button>
               {activeModal === 'fornecedor' && (

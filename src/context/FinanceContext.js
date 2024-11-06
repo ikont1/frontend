@@ -26,7 +26,6 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-pagar');
-      console.log(response.data.data.contas);
       setContasAPagar(response.data.data.contas);
     } catch (error) {
       setError(error);
@@ -53,14 +52,12 @@ export const FinanceProvider = ({ children }) => {
   
         return response.data;
       } catch (error) {
-        console.error('Erro na exportação:', error);
         throw error;
       }
     },
     []
   );
   
-
   const fetchCategorias = useCallback(async () => {
     setLoading(true);
     try {
@@ -93,7 +90,6 @@ export const FinanceProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.log(error)
       setError(error);
       showNotification({
         title: 'Erro',
@@ -228,7 +224,7 @@ export const FinanceProvider = ({ children }) => {
 
   const exportarContasAReceber = useCallback(
     async (filtros) => {
-      console.log('Chamando API com filtros:', filtros);
+      // console.log('Chamando API com filtros:', filtros);
   
       try {
         const response = await api.get('/contas-a-receber/exportar', {
@@ -247,13 +243,11 @@ export const FinanceProvider = ({ children }) => {
   
         return response.data;
       } catch (error) {
-        console.error('Erro na exportação:', error);
         throw error;
       }
     },
     []
   );
-  
   
   const fetchCategoriasAReceber = useCallback(async () => {
     setLoading(true);
@@ -287,7 +281,6 @@ export const FinanceProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.log(error)
       setError(error);
       showNotification({
         title: 'Erro',
@@ -368,7 +361,6 @@ export const FinanceProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.log(error)
       setError(error);
       showNotification({
         title: 'Erro',

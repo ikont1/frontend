@@ -11,7 +11,7 @@ export const AccountProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
-  const [dadosEmpresa, setDadosEmpresa] = useState(null); // Estado para armazenar dados da empresa
+  const [dadosEmpresa, setDadosEmpresa] = useState(null); 
 
   const handleNotificationClose = () => {
     setNotification(null);
@@ -25,10 +25,8 @@ export const AccountProvider = ({ children }) => {
       const response = await api.get('/conta');
       setDadosEmpresa(response.data);
       setLoading(false);
-      console.log('Dados empresar',response.data)
       return response.data;
     } catch (error) {
-      console.error(error);
       setError('Erro ao listar contas. Por favor, tente novamente.');
       setLoading(false);
       return [];

@@ -7,26 +7,29 @@ import { ClientSupplierProvider } from "./context/ClientSupplierContext";
 import { WalletProvider } from "./context/WalletContext";
 import { ConciliacaoProvider } from "./context/ConciliacaoContext";
 import { AssinaturaProvider } from "./context/AssinaturaContext";
+import { UsersProvider } from "./context/UsersContext";
 
 function App() {
   return (
     <BrowserRouter className="container">
       <AuthProvider>
-        <AccountProvider>
-          <ClientSupplierProvider>
-            <FinanceProvider>
-              <WalletProvider>
-                <ConciliacaoProvider>
-                  <AssinaturaProvider>
+        <UsersProvider>
+          <AccountProvider>
+            <ClientSupplierProvider>
+              <FinanceProvider>
+                <WalletProvider>
+                  <ConciliacaoProvider>
+                    <AssinaturaProvider>
 
-                    <RoutesApp />
+                      <RoutesApp />
 
-                  </AssinaturaProvider>
-                </ConciliacaoProvider>
-              </WalletProvider>
-            </FinanceProvider>
-          </ClientSupplierProvider>
-        </AccountProvider>
+                    </AssinaturaProvider>
+                  </ConciliacaoProvider>
+                </WalletProvider>
+              </FinanceProvider>
+            </ClientSupplierProvider>
+          </AccountProvider>
+        </UsersProvider>
       </AuthProvider>
     </BrowserRouter >
   );

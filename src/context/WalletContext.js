@@ -20,7 +20,6 @@ export const WalletProvider = ({ children }) => {
   const listarContas = async () => {
     try {
       const response = await api.get('/conta-bancaria');
-      console.log(response.data.data.contas);
       return response.data.data.contas;
     } catch (error) {
       throw error;
@@ -39,7 +38,6 @@ export const WalletProvider = ({ children }) => {
       });
       return response.data;
     } catch (error) {
-      console.error('Erro ao cadastrar conta:', error);
       showNotification({
         title: 'Erro',
         message: error.response?.data?.message || 'Falha ao adicionar conta bancaria.',
@@ -63,7 +61,6 @@ export const WalletProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.error('Erro ao excluir conta:', error);
       showNotification({
         title: 'Erro',
         message: error.response?.data?.message || 'Falha ao remover conta bancaria.',
@@ -86,7 +83,6 @@ export const WalletProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.error('Erro ao desativar conta:', error);
       showNotification({
         title: 'Erro',
         message: error.response?.data?.error || 'Falha ao desativar conta bancária.',
@@ -110,7 +106,6 @@ export const WalletProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.error('Erro ao reativar conta:', error);
       showNotification({
         title: 'Erro',
         message: error.response?.data?.error || 'Falha ao reativar conta bancária.',
@@ -156,8 +151,6 @@ export const WalletProvider = ({ children }) => {
 
       return true;
     } catch (error) {
-      console.error('Erro ao integrar conta:', error);
-
       showNotification({
         title: 'Erro na Integração',
         message: 'Verifique as credenciais e tente novamente.',
@@ -182,7 +175,6 @@ export const WalletProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.error('Erro ao desconectar conta:', error);
       showNotification({
         title: 'Erro',
         message: 'Falha ao desconectar a conta. Tente novamente mais tarde.',

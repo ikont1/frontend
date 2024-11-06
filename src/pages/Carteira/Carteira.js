@@ -105,7 +105,7 @@ const Carteira = () => {
         <div className='container-carteira'>
           <div className='h3-icon'>
             <h3><BiWallet className='walet-icon' /> Contas e Carteiras </h3>
-            <RedirectButton />
+            <RedirectButton  route='/' tooltipText='Voltar para dashbord'/>
           </div>
 
           <div className='contas'>

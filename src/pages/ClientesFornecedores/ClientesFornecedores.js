@@ -205,7 +205,6 @@ const ClientesFornecedores = () => {
                   <th>Nome / Razão Social</th>
                   <th></th>
                   <th>Inscrição Municipal</th>
-                  <th>Nome</th>
                   <th>E-mail</th>
                   <th>Inscrição Estadual</th>
                   <th></th>
@@ -222,7 +221,6 @@ const ClientesFornecedores = () => {
                         <span>{cliente.cpfCnpj}</span>
                       </td>
                       <td>{cliente.inscricalMunicipal}</td>
-                      <td>{cliente.contato}</td>
                       <td>{cliente.email}</td>
                       <td>{cliente.inscricalEstadual}</td>
                       <td data-label="Ações" className="actions">

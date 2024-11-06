@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight } from 'react-feather';
 import { useWallet } from '../../context/WalletContext';
 import IntegracaoModal from '../../components/Modal/integracaoModal';
 import ConfirmationModal from '../../components/Modal/confirmationModal';
+import RedirectButton from '../../components/RedirectButton';
 
 const bancoLogos = {
   '001': require('../../assets/imgs/bbLogo.png'),
@@ -136,7 +137,10 @@ const DetalhesConta = () => {
         <Header />
 
         <div className="container-carteira">
-          <h3><BiWallet className='walet-icon' /> Contas e Carteiras</h3>
+          <div className='h3-icon'>
+            <h3><BiWallet className='walet-icon' /> Detalhes da Conta </h3>
+            <RedirectButton route='/carteira' tooltipText='Voltar para carteira' />
+          </div>
 
           <div className="detalhes-header">
             <img src={conta.bancoLogo} alt="Banco Logo" className="banco-logo" />

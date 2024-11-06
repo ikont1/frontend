@@ -4,8 +4,9 @@
 }
 
 .icon {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
+  margin-top: 5px;
 }
 
 .tooltip-container {
@@ -21,12 +22,12 @@
   width: 100px;
   color: var(--text-color);
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   border-radius: 5px;
   padding: 5px;
   position: absolute;
   bottom: -50%; /* Posiciona o tooltip acima do botão */
-  left: -20%;
+  right: -110px;
   transform: translateX(-50%);
   opacity: 0;
   transition: opacity 0.3s;

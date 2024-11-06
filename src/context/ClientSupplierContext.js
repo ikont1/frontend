@@ -36,7 +36,7 @@ export const ClientSupplierProvider = ({ children }) => {
       if (error.response && error.response.status === 404) {
         setClientes([]); // Se não encontrar clientes, seta um array vazio
       } else {
-        console.error('Erro ao buscar clientes', error);
+        // console.error('Erro ao buscar clientes', error);
       }
     }
   }, [token]);
@@ -63,7 +63,7 @@ export const ClientSupplierProvider = ({ children }) => {
       if (error.response && error.response.status === 404) {
         setFornecedores([]); // Se não encontrar fornecedores, seta um array vazio
       } else {
-        console.error('Erro ao buscar fornecedores', error);
+        // console.error('Erro ao buscar fornecedores', error);
       }
     }
   }, [token]);
@@ -80,7 +80,7 @@ export const ClientSupplierProvider = ({ children }) => {
       });
       setClientes([...clientes, response.data.data]);
     } catch (error) {
-      console.error('Erro ao adicionar cliente', error);
+      // console.error('Erro ao adicionar cliente', error);
       throw error;
     }
   };
@@ -97,7 +97,7 @@ export const ClientSupplierProvider = ({ children }) => {
       });
       setFornecedores([...fornecedores, response.data.data]);
     } catch (error) {
-      console.error('Erro ao adicionar fornecedor', error);
+      // console.error('Erro ao adicionar fornecedor', error);
       throw error;
     }
   };
@@ -114,7 +114,7 @@ export const ClientSupplierProvider = ({ children }) => {
       });
       setClientes(clientes.filter(cliente => cliente.id !== id));
     } catch (error) {
-      console.error('Erro ao deletar cliente', error);
+      // console.error('Erro ao deletar cliente', error);
       throw error;
     }
   };
@@ -131,7 +131,7 @@ export const ClientSupplierProvider = ({ children }) => {
       });
       setFornecedores(fornecedores.filter(fornecedor => fornecedor.id !== id));
     } catch (error) {
-      console.error('Erro ao deletar fornecedor', error);
+      // console.error('Erro ao deletar fornecedor', error);
       throw error;
     }
   };
@@ -155,7 +155,7 @@ export const ClientSupplierProvider = ({ children }) => {
       const updatedCliente = response.data;
       setClientes(clientes.map(cliente => cliente.id === id ? updatedCliente : cliente));
     } catch (error) {
-      console.error('Erro ao atualizar cliente', error);
+      // console.error('Erro ao atualizar cliente', error);
       throw error;
     }
   };
@@ -179,7 +179,7 @@ export const ClientSupplierProvider = ({ children }) => {
       const updatedFornecedor = response.data;
       setFornecedores(fornecedores.map(fornecedor => fornecedor.id === id ? updatedFornecedor : fornecedor));
     } catch (error) {
-      console.error('Erro ao atualizar fornecedor', error);
+      // console.error('Erro ao atualizar fornecedor', error);
       throw error;
     }
   };

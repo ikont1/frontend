@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FileText, DollarSign, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle, Award } from 'react-feather';
+import { FileText, DollarSign, User, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle, Award } from 'react-feather';
 import './Sidebar.css';
 import logo from '../../assets/imgs/logosvg.svg';
 import { useAuth } from '../../context/AuthContext';
@@ -107,10 +107,25 @@ const Sidebar = () => {
                       </NavLink>
                     </li>
                     <li>
-                      <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <Settings className="icon" /> Outras Configurações
+                      <NavLink to="/perfis" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                        <Users className="icon" /> Perfis
                       </NavLink>
                     </li>
+                    {/* <li>
+                      <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                        <Settings className="icon" /> Criar Perfis
+                      </NavLink>
+                    </li> */}
+                    <li>
+                      <NavLink to="/usuarios" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                        <User className="icon" /> Usuários
+                      </NavLink>
+                    </li>
+                    {/* <li>
+                      <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                        <Settings className="icon" /> Criar Usuário
+                      </NavLink>
+                    </li> */}
                   </ul>
                 )}
               </li>

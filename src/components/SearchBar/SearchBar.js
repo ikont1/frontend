@@ -17,7 +17,7 @@ const SearchBar = ({ onSearch, placeholder }) => {
     setShowInput(!showInput);
     if (!showInput) {
       setSearchQuery('');
-      onSearch(''); // Limpa a busca quando o campo é escondido
+      // onSearch(''); // Limpa a busca quando o campo é escondido
     }
   };
 

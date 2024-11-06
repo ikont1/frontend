@@ -87,7 +87,7 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 1000;
   >span {
     color: var(--highlight-color);
     font-weight: 600;
@@ -191,6 +191,10 @@
   align-items: center;
   justify-content: space-between;
   max-width: 260px;
+  >div{
+    display: flex;
+    gap: 5px;
+  }
 }
 
 .advanced-filters .form-group button svg {
@@ -243,6 +247,15 @@
   padding: 2px 10px !important;
   font-size: 12px;
   letter-spacing: .5px;
+}
+
+/* Bola de contagem */
+.filter-count {
+  background-color: var(--highlight-color);
+  color: white;
+  border-radius: 50%;
+  padding: 1px 6px;
+  font-size: 12px;
 }
 
 

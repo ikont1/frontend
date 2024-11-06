@@ -23,7 +23,6 @@ export const AssinaturaProvider = ({ children }) => {
   const criarAssinatura = async (dados) => {
     try {
       const response = await api.post('/assinatura', dados);
-      console.log(response.data);
       setAssinatura(response.data);
       showNotification({
         title: 'Sucesso',
@@ -34,7 +33,6 @@ export const AssinaturaProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
     } catch (error) {
-      console.error('Erro ao criar assinatura:', error);
       showNotification({
         title: 'Erro',
         message: error.response?.data?.message || 'Falha ao adicionar conta a pagar.',
@@ -63,7 +61,7 @@ export const AssinaturaProvider = ({ children }) => {
       const response = await api.get('/assinatura');
       setAssinatura(response.data);
     } catch (error) {
-      console.error('Erro ao listar assinaturas:', error);
+      throw error;
     }
   };
 
@@ -73,7 +71,7 @@ export const AssinaturaProvider = ({ children }) => {
       const response = await api.get('/assinatura/faturas');
       setFaturas(response.data);
     } catch (error) {
-      console.error('Erro ao listar faturas:', error);
+      throw error;
     }
   };
 
@@ -83,7 +81,7 @@ export const AssinaturaProvider = ({ children }) => {
       const response = await api.get('/assinatura/cartao');
       setCartoes(response.data);
     } catch (error) {
-      console.error('Erro ao listar cartões:', error);
+      throw error;
     }
   };
 

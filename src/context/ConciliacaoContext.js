@@ -60,7 +60,6 @@ export const ConciliacaoProvider = ({ children }) => {
       });
       return response.data;
     } catch (error) {
-      console.error('Erro ao desfazer conciliação:', error);
       setError('Erro ao desfazer conciliação. Por favor, tente novamente.');
       setNotification({
         title: 'Erro',
@@ -90,7 +89,6 @@ export const ConciliacaoProvider = ({ children }) => {
       });
       return response.data;
     } catch (error) {
-      console.error('Erro ao aceitar conciliação:', error);
       setError('Erro ao aceitar conciliação. Por favor, tente novamente.');
       setNotification({
         title: 'Erro',
@@ -120,7 +118,6 @@ export const ConciliacaoProvider = ({ children }) => {
       });
       return response.data;
     } catch (error) {
-      console.error('Erro ao recusar conciliação:', error);
       setError('Erro ao recusar conciliação. Por favor, tente novamente.');
       setNotification({
         title: 'Erro',
