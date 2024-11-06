@@ -10,6 +10,9 @@ import { useUsers } from '../../context/UsersContext';
 import { format } from 'date-fns';
 
 const Perfil = () => {
+  // Lista de exclusão para ocultar certos itens de permissão
+  const exclusoes = ['assinatura'];
+
   const { perfis, modulos, loading, obterPerfilPorId, criarPerfil, editarPerfil, excluirPerfil } = useUsers();
 
   const [showCriarPerfil, setShowCriarPerfil] = useState(false);
@@ -213,6 +216,10 @@ const Perfil = () => {
                 ) : (
                   Object.keys(modulos).map((moduloKey) => {
                     const modulo = modulos[moduloKey];
+
+                    // Ocultar o módulo se ele estiver na lista de exclusão
+                    if (exclusoes.includes(modulo.nome.toLowerCase())) return null;
+
                     return (
                       <div key={modulo.id} className="permissoes-grupo">
                         <h4>{modulo.nome}</h4>
