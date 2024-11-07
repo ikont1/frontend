@@ -203,10 +203,8 @@ const ClientesFornecedores = () => {
               <thead>
                 <tr>
                   <th>Nome / Razão Social</th>
-                  <th></th>
-                  <th>Inscrição Municipal</th>
+                  <th>CPF/CNPJ</th>
                   <th>E-mail</th>
-                  <th>Inscrição Estadual</th>
                   <th></th>
                 </tr>
               </thead>
@@ -215,14 +213,8 @@ const ClientesFornecedores = () => {
                   filteredClientes.map((cliente, index) => (
                     <tr key={cliente.id || index}>
                       <td>{cliente.nomeFantasia}</td>
-                      <td>
-                        {cliente.razaoSocial}
-                        <br />
-                        <span>{cliente.cpfCnpj}</span>
-                      </td>
-                      <td>{cliente.inscricalMunicipal}</td>
+                      <td>{cliente.cpfCnpj}</td>
                       <td>{cliente.email}</td>
-                      <td>{cliente.inscricalEstadual}</td>
                       <td data-label="Ações" className="actions">
                         <button onClick={() => handleActionsClick(cliente.id)}>...</button>
                         {activeTooltip === cliente.id && (

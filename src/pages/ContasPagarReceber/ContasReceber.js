@@ -606,7 +606,7 @@ const ContasReceber = () => {
                 <th>Vencimento</th>
                 <th>Categoria</th>
                 <th>Cliente</th>
-                <th>Descrição</th>
+                <th>CPF/CNPJ</th>
                 <th>Status</th>
                 <th>Valor</th>
                 <th>Ações</th>
@@ -622,7 +622,7 @@ const ContasReceber = () => {
                       {conta.categoria} <span className="nf-badge">{`NF ${conta.nf || 'N/A'}`}</span>
                     </td>
                     <td data-label="Cliente">{conta.cliente ? conta.cliente.nomeFantasia : 'Cliente não encontrado'}</td>
-                    <td data-label="Descrição">{conta.descricao}</td>
+                    <td data-label="Descrição">{conta.cliente.cpfCnpj}</td>
                     <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aReceber' ? 'a receber' : conta.status}</span>
                     </td>
