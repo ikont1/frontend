@@ -1,5 +1,5 @@
 // Perfil.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Header from '../../components/Header/Header';
 import { Search, PlusCircle, ArrowRight, ArrowUp, AlertTriangle, ThumbsUp } from 'react-feather';
@@ -10,10 +10,9 @@ import { useUsers } from '../../context/UsersContext';
 import { format } from 'date-fns';
 
 const Perfil = () => {
-  // Lista de exclusão para ocultar certos itens de permissão
   const exclusoes = ['assinatura'];
 
-  const { perfis, modulos, loading, obterPerfilPorId, criarPerfil, editarPerfil, excluirPerfil } = useUsers();
+  const { perfis, modulos, listarModulos, listarPerfis, loading, obterPerfilPorId, criarPerfil, editarPerfil, excluirPerfil } = useUsers();
 
   const [showCriarPerfil, setShowCriarPerfil] = useState(false);
   const [expandPerfil, setExpandPerfil] = useState(null);
@@ -25,7 +24,6 @@ const Perfil = () => {
   });
 
   const [confirmarExclusao, setConfirmarExclusao] = useState(false);
-
   const [showNotification, setShowNotification] = useState(false);
   const [notificationData, setNotificationData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -36,6 +34,11 @@ const Perfil = () => {
       (perfil.status || 'Ativo').toLowerCase().includes(searchTerm.toLowerCase()) ||
       format(new Date(perfil.criadoEm), 'yyyy-MM-dd').includes(searchTerm)
   );
+
+  useEffect(() => {
+    listarModulos();
+    listarPerfis();
+  }, [listarModulos, listarPerfis]);
 
   const handleToggleExpandPerfil = async (perfil) => {
     setShowCriarPerfil(false);
@@ -73,6 +76,8 @@ const Perfil = () => {
   };
 
   const handleTogglePermissao = (moduloId, permissaoId) => {
+    if (novoPerfil.ehAdmin) return; // Impede alterações caso seja admin
+
     setNovoPerfil((prev) => {
       const moduloExistente = prev.permissoes.find((mod) => mod.id === moduloId);
 
@@ -89,8 +94,8 @@ const Perfil = () => {
           ...prev,
           permissoes: novasPermissoesModulo
             ? prev.permissoes.map((mod) =>
-              mod.id === moduloId ? novasPermissoesModulo : mod
-            )
+                mod.id === moduloId ? novasPermissoesModulo : mod
+              )
             : prev.permissoes.filter((mod) => mod.id !== moduloId),
         };
       } else {
@@ -217,7 +222,6 @@ const Perfil = () => {
                   Object.keys(modulos).map((moduloKey) => {
                     const modulo = modulos[moduloKey];
 
-                    // Ocultar o módulo se ele estiver na lista de exclusão
                     if (exclusoes.includes(modulo.nome.toLowerCase())) return null;
 
                     return (
@@ -229,10 +233,14 @@ const Perfil = () => {
                             <label className="switch-container">
                               <input
                                 type="checkbox"
-                                checked={novoPerfil.permissoes.some(
-                                  (mod) => mod.id === modulo.id && mod.permissoes.includes(perm.id)
-                                )}
+                                checked={
+                                  novoPerfil.ehAdmin ||
+                                  novoPerfil.permissoes.some(
+                                    (mod) => mod.id === modulo.id && mod.permissoes.includes(perm.id)
+                                  )
+                                }
                                 onChange={() => handleTogglePermissao(modulo.id, perm.id)}
+                                disabled={novoPerfil.ehAdmin} // Desabilita os checkboxes se for admin
                               />
                               <span className="slider"></span>
                             </label>
@@ -305,7 +313,6 @@ const Perfil = () => {
         )}
       </div>
 
-      {/* Modal de Confirmação de Exclusão */}
       {confirmarExclusao && (
         <ConfirmationModal
           title="Confirmar Exclusão"

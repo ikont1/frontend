@@ -12,39 +12,38 @@ export const UsersProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Listar módulos
-  const listarModulos = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.get('/usuario/perfil/modulos');
-      setModulos(response.data?.data?.modulos || []);
-    } catch (err) {
-      setError('Erro ao listar módulos');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+ // Listar módulos
+ const listarModulos = useCallback(async () => {
+  setLoading(true);
+  try {
+    const response = await api.get('/usuario/perfil/modulos');
+    setModulos(response.data.data.modulos);
+  } catch (err) {
+    setError('Erro ao listar módulos');
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
-  // Listar perfis
-  const listarPerfis = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/usuario/perfil');
-      setPerfis(response.data?.data?.perfil || []);
-    } catch (err) {
-      setError('Erro ao listar perfis');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+// Listar perfis
+const listarPerfis = useCallback(async () => {
+  setLoading(true);
+  try {
+    const response = await api.get('/usuario/perfil');
+    setPerfis(response.data.data.perfil);
+  } catch (err) {
+    setError('Erro ao listar perfis');
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   // Obter perfil específico por ID
   const obterPerfilPorId = async (perfilId) => {
     setLoading(true);
     try {
       const response = await api.get(`/usuario/perfil/${perfilId}`);
-      return response.data?.data || null;
+      return response.data.data;
     } catch (err) {
       setError('Erro ao obter perfil');
       return null;
@@ -109,7 +108,7 @@ export const UsersProvider = ({ children }) => {
     setLoading(true);
     try {
       await api.post('/usuario', usuarioData);
-      await listarUsuarios();  // Atualizar lista após criação
+      await listarUsuarios();
       return { success: true };
     } catch (error) {
       console.error("Erro ao cadastrar usuário:", error);
@@ -163,6 +162,7 @@ export const UsersProvider = ({ children }) => {
       modulos,
       perfis,
       listarPerfis,
+      listarModulos,
       criarPerfil,
       obterPerfilPorId,
       editarPerfil,
