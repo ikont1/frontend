@@ -18,9 +18,6 @@ import Certificado from "../pages/Certificado/Certificado.js";
 import Usuarios from "../pages/Usuarios/Usuarios.js";
 import Perfis from "../pages/Usuarios/Perfis.js";
 
-// Rotas do BackOffice
-import VisaoGeral from "../pages/Backoffice/VisaoGeral.js";
-import LoginBackOffice from "../pages/Backoffice/LoginBackOffice.js";
 
 function RoutesApp() {
   return (
@@ -30,10 +27,6 @@ function RoutesApp() {
       <Route path="/recuperar-senha" element={<RecuperarSenha />} />
       <Route path="/nova-senha" element={<RedefinirSenha />} />
       <Route path="/assinatura" element={<Assinatura />} />
-
-      {/* Login backoffice */}
-      <Route path="/login-backoffice" element={<LoginBackOffice/>} />
-
 
       {/* Rotas bloqueadas */}
       <Route element={<ProtectedRoute />}>
@@ -49,12 +42,10 @@ function RoutesApp() {
         <Route path="/conciliacao-financeira" element={<Conciliacao />} />
         <Route path="/certificado" element={<Certificado />} />
 
-        <Route path="/usuarios" element={<Usuarios/>} />
-        <Route path="/perfis" element={<Perfis/>} />
+        <Route path="/usuarios" element={<Usuarios />} />
+        <Route path="/perfis" element={<Perfis />} />
 
-        {/* Rotas backOffice */}
-        <Route path="/backoffice" element={<VisaoGeral />} />
-        
+
       </Route>
     </Routes >
   );
