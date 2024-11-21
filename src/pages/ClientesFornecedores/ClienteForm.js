@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Importando axios
 import { useClientSupplier } from '../../context/ClientSupplierContext';
 import './ClientesFornecedores.css';
 import { ThumbsUp, AlertTriangle } from 'react-feather';
@@ -62,6 +63,65 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     setErrors({ ...errors, [name]: '' });
   };
 
+  const fetchCnpjData = async (cnpj) => {
+    const cleanCnpj = cnpj.replace(/\D/g, '');
+    if (cleanCnpj.length === 14) {
+      try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          razaoSocial: data.razao_social || '',
+          nomeFantasia: data.nome_fantasia || '',
+          telefone: data.ddd_telefone_2 || '',
+          celular: data.ddd_telefone_1 || '',
+          email: data.email || '',
+          contato: data.qsa[0].nome_socio || '',
+          endereco: {
+            ...prevFormData.endereco,
+            endereco: data.logradouro || '',
+            complemento: data.complemento || '',
+            numero: data.numero || '',
+            bairro: data.bairro || '',
+            cidade: data.municipio || '',
+            uf: data.uf || '',
+            cep: data.cep || '',
+          },
+        }));
+        setErrors((prevErrors) => ({ ...prevErrors, cpfCnpj: '' }));
+      } catch (error) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          razaoSocial: '',
+          nomeFantasia: '',
+          telefone: '',
+          celular: '',
+          email: '',
+          contato: '',
+          endereco: {
+            ...prevFormData.endereco,
+            endereco: '',
+            complemento: '',
+            numero: '',
+            bairro: '',
+            cidade: '',
+            uf: '',
+            cep: '',
+          },
+        }));
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          cpfCnpj: 'CNPJ inválido ou não encontrado.',
+        }));
+      }
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        cpfCnpj: 'CNPJ deve conter 14 dígitos.',
+      }));
+    }
+  };
+
+
   const validateStep1 = () => {
     const newErrors = {};
     if (!formData.nomeFantasia) newErrors.nomeFantasia = 'Nome é obrigatório';
@@ -98,11 +158,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     const validationErrorsStep1 = validateStep1();
     const validationErrorsStep2 = validateStep2();
     const validationErrors = { ...validationErrorsStep1, ...validationErrorsStep2 };
-  
+
     if (Object.keys(validationErrors).length === 0) {
       // Copiar o formData para um novo objeto
       const dataToSubmit = { ...formData };
-  
+
       // Remover campos vazios
       if (!dataToSubmit.inscricalMunicipal) {
         delete dataToSubmit.inscricalMunicipal;
@@ -110,7 +170,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
       if (!dataToSubmit.inscricalEstadual) {
         delete dataToSubmit.inscricalEstadual;
       }
-  
+
       // Remover campos vazios do endereço
       const cleanedEndereco = { ...dataToSubmit.endereco };
       Object.keys(cleanedEndereco).forEach(key => {
@@ -119,7 +179,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
         }
       });
       dataToSubmit.endereco = cleanedEndereco;
-   
+
       try {
         if (initialData.id) {
           await updateCliente(initialData.id, dataToSubmit);
@@ -154,7 +214,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
       setErrors(validationErrors);
     }
   };
-  
+
 
   return (
     <>
@@ -184,22 +244,24 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
 
             <div className="form-group">
+              <label htmlFor="cpfCnpj">CNPJ/CPF</label>
+              <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj"
+                value={formData.cpfCnpj} onChange={handleChange}
+                onBlur={(e) => fetchCnpjData(e.target.value)} required />
+              {errors.cpfCnpj ? (
+                <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
+              ) : (
+                <span>Digite um CNPJ ou CPF válido.</span>
+              )}
+            </div>
+
+            <div className="form-group">
               <label htmlFor="nomeFantasia">Nome Fantasia</label>
               <input type="text" id="nomeFantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} required />
               {errors.nomeFantasia ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
               ) : (
                 <span>O nome da empresa deve ter entre 2 e 100 caracteres.</span>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="cpfCnpj">CNPJ/CPF</label>
-              <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj" value={formData.cpfCnpj} onChange={handleChange} required />
-              {errors.cpfCnpj ? (
-                <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
-              ) : (
-                <span>Digite um CNPJ ou CPF válido.</span>
               )}
             </div>
 
@@ -284,7 +346,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
             <div className="form-group">
               <label htmlFor="complemento">Complemento (obrigatório)</label>
-              <input type="text" id="complemento" name="complemento" value={formData.endereco.complemento} onChange={handleChange} required/>
+              <input type="text" id="complemento" name="complemento" value={formData.endereco.complemento} onChange={handleChange} required />
               {errors.complemento ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.complemento}</span>
               ) : (

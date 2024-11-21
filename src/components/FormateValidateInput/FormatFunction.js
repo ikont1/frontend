@@ -97,7 +97,7 @@ const validateFunctions = {
   senha: value => !validatePassword(value) // Retorna true se não houver erros
 };
 
-export const FormattedInput = ({ type, placeholder, value, onChange, name, readOnly, required }) => {
+export const FormattedInput = ({ type, placeholder, value, onChange, name, readOnly, onBlur, required }) => {
   const [displayValue, setDisplayValue] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -134,6 +134,7 @@ export const FormattedInput = ({ type, placeholder, value, onChange, name, readO
           value={displayValue}
           onChange={handleChange}
           placeholder={placeholder}
+          onBlur={onBlur}
           readOnly={readOnly}
           required={required}
         />
