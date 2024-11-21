@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
 import './ClientesFornecedores.css';
+import axios from 'axios'; // Importando axios
 import { ThumbsUp, AlertTriangle } from 'react-feather';
 import Notification from '../../components/Notification/Notification';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
@@ -20,6 +21,40 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
 
   const [notification, setNotification] = useState(null);
   const [errors, setErrors] = useState({});
+
+  const fetchCnpjData = async (cnpj) => {
+    const cleanCnpj = cnpj.replace(/\D/g, '');
+    if (cleanCnpj.length === 14) {
+      try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+        setFormData((formData) => ({
+          ...formData,
+          razaoSocial: data.razao_social || '',
+          nomeFantasia: data.nome_fantasia || '',
+          telefone: data.ddd_telefone_1 || '',
+          email: data.email || '',
+        }));
+        setErrors((prevErrors) => ({ ...prevErrors, cpfCnpj: '' }));
+      } catch (error) {
+        setFormData((formData) => ({
+          ...formData,
+          razaoSocial: '',
+          nomeFantasia: '',
+          telefone: '',
+          email: '',
+        }));
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          cpfCnpj: 'CNPJ inválido ou não encontrado.',
+        }));
+      }
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        cpfCnpj: 'CNPJ deve conter 14 dígitos.',
+      }));
+    }
+  };
 
   const handleNotificationClose = () => {
     setNotification(null);
@@ -104,21 +139,21 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
     <>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
+          <label htmlFor="cpfCnpj">CNPJ ou CPF (Obrigatório)</label>
+          <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj" value={formData.cpfCnpj} onChange={handleChange} onBlur={(e) => fetchCnpjData(e.target.value)} />
+          {errors.cpfCnpj ? (
+            <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
+          ) : (
+            <span>Digite um CNPJ ou CPF válido.</span>
+          )}
+        </div>
+        <div className="form-group">
           <label htmlFor="nomeFantasia">Nome (Obrigatório)</label>
           <input type="text" id="nomeFantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
           {errors.nomeFantasia ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
           ) : (
             <span>Este campo é obrigatório.</span>
-          )}
-        </div>
-        <div className="form-group">
-          <label htmlFor="cpfCnpj">CNPJ ou CPF (Obrigatório)</label>
-          <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj" value={formData.cpfCnpj} onChange={handleChange} />
-          {errors.cpfCnpj ? (
-            <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
-          ) : (
-            <span>Digite um CNPJ ou CPF válido.</span>
           )}
         </div>
         <div className="form-group">
