@@ -204,6 +204,8 @@ const ClientesFornecedores = () => {
                 <tr>
                   <th>Nome / Razão Social</th>
                   <th>CPF/CNPJ</th>
+                  <th>Celular</th>
+                  <th>Telefone</th>
                   <th>E-mail</th>
                   <th></th>
                 </tr>
@@ -214,6 +216,8 @@ const ClientesFornecedores = () => {
                     <tr key={cliente.id || index}>
                       <td>{cliente.nomeFantasia}</td>
                       <td>{cliente.cpfCnpj}</td>
+                      <td>{cliente.celular}</td>
+                      <td>{cliente.telefone}</td>
                       <td>{cliente.email}</td>
                       <td data-label="Ações" className="actions">
                         <button onClick={() => handleActionsClick(cliente.id)}>...</button>
@@ -243,11 +247,9 @@ const ClientesFornecedores = () => {
               <thead>
                 <tr>
                   <th>Nome / Razão Social</th>
-                  <th></th>
-                  <th>Inscrição Municipal</th>
-                  <th>Inscrição Estadual</th>
-                  <th>E-mail</th>
+                  <th>CPF/CNPJ</th>
                   <th>Telefone</th>
+                  <th>E-mail</th>
                   <th></th>
                 </tr>
               </thead>
@@ -256,15 +258,9 @@ const ClientesFornecedores = () => {
                   filteredFornecedores.map((fornecedor, index) => (
                     <tr key={fornecedor.id || index}>
                       <td>{fornecedor.nomeFantasia}</td>
-                      <td>
-                        {fornecedor.razaoSocial}
-                        <br />
-                        <span>{fornecedor.cpfCnpj}</span>
-                      </td>
-                      <td>{fornecedor.inscricalMunicipal}</td>
-                      <td>{fornecedor.inscricalEstadual}</td>
-                      <td>{fornecedor.email}</td>
+                      <td>{fornecedor.cpfCnpj}</td>
                       <td>{fornecedor.telefone}</td>
+                      <td>{fornecedor.email}</td>
                       <td data-label="Ações" className="actions">
                         <button onClick={() => handleActionsClick(fornecedor.id)}>...</button>
                         {activeTooltip === fornecedor.id && (

@@ -113,12 +113,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
           cpfCnpj: 'CNPJ inválido ou não encontrado.',
         }));
       }
-    } else {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        cpfCnpj: 'CNPJ deve conter 14 dígitos.',
-      }));
-    }
+    } 
   };
 
 
