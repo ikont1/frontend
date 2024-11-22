@@ -246,8 +246,9 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group">
               <label htmlFor="cpfCnpj">CNPJ/CPF</label>
               <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj"
-                value={formData.cpfCnpj} onChange={handleChange}
-                onBlur={(e) => fetchCnpjData(e.target.value)} required />
+                  placeholder="Campo obrigatório"
+                  value={formData.cpfCnpj} onChange={handleChange}
+                  onBlur={(e) => fetchCnpjData(e.target.value)} required />
               {errors.cpfCnpj ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
               ) : (
@@ -257,7 +258,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
 
             <div className="form-group">
               <label htmlFor="nomeFantasia">Nome Fantasia</label>
-              <input type="text" id="nomeFantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} required />
+              <input type="text" id="nomeFantasia" 
+                    name="nomeFantasia" 
+                    placeholder="Campo obrigatório"
+                    value={formData.nomeFantasia} 
+                    onChange={handleChange} required />
               {errors.nomeFantasia ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
               ) : (
@@ -267,7 +272,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
 
             <div className="form-group">
               <label htmlFor="razaoSocial">Razão Social</label>
-              <input type="text" id="razaoSocial" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} required />
+              <input type="text" id="razaoSocial" 
+                    name="razaoSocial" placeholder="Campo obrigatório"
+                    value={formData.razaoSocial} 
+                    onChange={handleChange} required />
               {errors.razaoSocial ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.razaoSocial}</span>
               ) : (
@@ -287,8 +295,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
 
             <div className="form-group-modal">
               <div className="form-group">
-                <label htmlFor="telefone">Telefone (obrigatório)</label>
-                <FormattedInput type="telefone" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} required />
+                <label htmlFor="telefone">Telefone</label>
+                <FormattedInput type="telefone" id="telefone" 
+                      name="telefone" placeholder="Campo obrigatório"
+                      value={formData.telefone} 
+                      onChange={handleChange} required />
                 {errors.telefone ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.telefone}</span>
                 ) : (
@@ -296,8 +307,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
                 )}
               </div>
               <div className="form-group">
-                <label htmlFor="celular">Celular (obrigatório)</label>
-                <FormattedInput type="telefone" id="celular" name="celular" value={formData.celular} onChange={handleChange} required />
+                <label htmlFor="celular">Celular</label>
+                <FormattedInput type="telefone" id="celular" 
+                      name="celular" value={formData.celular} 
+                      placeholder="Campo obrigatório"
+                      onChange={handleChange} required />
                 {errors.celular ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.celular}</span>
                 ) : (
@@ -309,7 +323,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group-modal">
               <div className="form-group">
                 <label htmlFor="email">E-mail</label>
-                <FormattedInput type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+                <FormattedInput type="email" id="email" 
+                      name="email" value={formData.email} 
+                      placeholder="Campo obrigatório"
+                      onChange={handleChange} required />
                 {errors.email ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.email}</span>
                 ) : (
@@ -318,7 +335,9 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               </div>
               <div className="form-group">
                 <label htmlFor="contato">Nome do Contato</label>
-                <input type="text" id="contato" name="contato" value={formData.contato} onChange={handleChange} required />
+                <input type="text" id="contato" name="contato" 
+                      value={formData.contato} placeholder="Campo obrigatório"
+                      onChange={handleChange} required />
                 {errors.contato ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.contato}</span>
                 ) : (
@@ -336,8 +355,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
         {step === 2 && (
           <div className="step">
             <div className='form-group'>
-              <label htmlFor="endereco">Endereço (obrigatório)</label>
-              <input type="text" id="endereco" name="endereco" value={formData.endereco.endereco} onChange={handleChange} required />
+              <label htmlFor="endereco">Endereço</label>
+              <input type="text" id="endereco" name="endereco" 
+                    value={formData.endereco.endereco} 
+                    placeholder="Campo obrigatório"
+                    onChange={handleChange} required />
               {errors.endereco ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.endereco}</span>
               ) : (
@@ -345,8 +367,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               )}
             </div>
             <div className="form-group">
-              <label htmlFor="complemento">Complemento (obrigatório)</label>
-              <input type="text" id="complemento" name="complemento" value={formData.endereco.complemento} onChange={handleChange} required />
+              <label htmlFor="complemento">Complemento</label>
+              <input type="text" id="complemento" name="complemento" 
+                    value={formData.endereco.complemento} 
+                    placeholder="Campo obrigatório"
+                    onChange={handleChange} required />
               {errors.complemento ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.complemento}</span>
               ) : (
@@ -354,8 +379,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               )}
             </div>
             <div className="form-group">
-              <label htmlFor="cep">CEP (obrigatório)</label>
-              <FormattedInput type="cep" id="cep" name="cep" value={formData.endereco.cep} onChange={handleChange} required />
+              <label htmlFor="cep">CEP</label>
+              <FormattedInput type="cep" id="cep" name="cep" 
+                    value={formData.endereco.cep} 
+                    placeholder="Campo obrigatório"
+                    onChange={handleChange} required />
               {errors.cep ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.cep}</span>
               ) : (
@@ -364,8 +392,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
             <div className="form-group-modal">
               <div className="form-group">
-                <label htmlFor="numero">Número (obrigatório)</label>
-                <input type="text" id="numero" name="numero" value={formData.endereco.numero} onChange={handleChange} required />
+                <label htmlFor="numero">Número</label>
+                <input type="text" id="numero" name="numero" 
+                    value={formData.endereco.numero} 
+                    placeholder="Campo obrigatório"
+                    onChange={handleChange} required />
                 {errors.numero ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.numero}</span>
                 ) : (
@@ -373,8 +404,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
                 )}
               </div>
               <div className="form-group">
-                <label htmlFor="bairro">Bairro (obrigatório)</label>
-                <input type="text" id="bairro" name="bairro" value={formData.endereco.bairro} onChange={handleChange} required />
+                <label htmlFor="bairro">Bairro</label>
+                <input type="text" id="bairro" name="bairro" 
+                    value={formData.endereco.bairro} 
+                    placeholder="Campo obrigatório"
+                    onChange={handleChange} required />
                 {errors.bairro ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.bairro}</span>
                 ) : (
@@ -384,7 +418,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
             <div className="form-group-modal">
               <div className="form-group">
-                <label htmlFor="uf">Estado (obrigatório)</label>
+                <label htmlFor="uf">Estado</label>
                 <select type="text" id="uf" name="uf" value={formData.endereco.uf} onChange={handleChange} required>
                   <option value="">Selecione um Estado</option>
                   <option value="PI">PI</option>
@@ -394,8 +428,11 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
                 {errors.estado && <span style={{ color: 'red', fontSize: '10px' }}>{errors.estado}</span>}
               </div>
               <div className="form-group">
-                <label htmlFor="cidade">Cidade (obrigatório)</label>
-                <input type="text" id="cidade" name="cidade" value={formData.endereco.cidade} onChange={handleChange} required />
+                <label htmlFor="cidade">Cidade</label>
+                <input type="text" id="cidade" name="cidade" 
+                    value={formData.endereco.cidade} 
+                    placeholder="Campo obrigatório"
+                    onChange={handleChange} required />
                 {errors.cidade && <span style={{ color: 'red', fontSize: '10px' }}>{errors.cidade}</span>}
               </div>
             </div>

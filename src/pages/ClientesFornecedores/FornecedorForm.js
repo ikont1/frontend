@@ -139,8 +139,8 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
     <>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="cpfCnpj">CNPJ ou CPF (Obrigatório)</label>
-          <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj" value={formData.cpfCnpj} onChange={handleChange} onBlur={(e) => fetchCnpjData(e.target.value)} />
+          <label htmlFor="cpfCnpj">CNPJ ou CPF</label>
+          <FormattedInput type="cpfCnpj" id="cpfCnpj" placeholder="Campo obrigatório" name="cpfCnpj" value={formData.cpfCnpj} onChange={handleChange} onBlur={(e) => fetchCnpjData(e.target.value)} />
           {errors.cpfCnpj ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
           ) : (
@@ -148,8 +148,8 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="nomeFantasia">Nome (Obrigatório)</label>
-          <input type="text" id="nomeFantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
+          <label htmlFor="nomeFantasia">Nome</label>
+          <input type="text" id="nomeFantasia" name="nomeFantasia" placeholder="Campo obrigatório" value={formData.nomeFantasia} onChange={handleChange} />
           {errors.nomeFantasia ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
           ) : (
@@ -157,8 +157,8 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="razaoSocial">Nome ou Razão Social (Obrigatório)</label>
-          <input type="text" id="razaoSocial" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
+          <label htmlFor="razaoSocial">Nome ou Razão Social</label>
+          <input type="text" id="razaoSocial" name="razaoSocial" placeholder="Campo obrigatório" value={formData.razaoSocial} onChange={handleChange} />
           {errors.razaoSocial ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.razaoSocial}</span>
           ) : (
@@ -166,7 +166,7 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="inscricalMunicipal">Inscrição municipal (Opcional)</label>
+          <label htmlFor="inscricalMunicipal">Inscrição municipal</label>
           <input type="text" id="inscricalMunicipal" name="inscricalMunicipal" value={formData.inscricalMunicipal} onChange={handleChange} />
           {errors.inscricalMunicipal ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.inscricalMunicipal}</span>
@@ -175,12 +175,12 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="inscricalEstadual">Inscrição estadual (Opcional)</label>
+          <label htmlFor="inscricalEstadual">Inscrição estadual</label>
           <input type="text" id="inscricalEstadual" name="inscricalEstadual" value={formData.inscricalEstadual} onChange={handleChange} />
         </div>
         <div className="form-group">
-          <label htmlFor="email">E-mail (Obrigatório)</label>
-          <FormattedInput type="email" id="email" name="email" value={formData.email} onChange={handleChange} />
+          <label htmlFor="email">E-mail</label>
+          <FormattedInput type="email" id="email" name="email" placeholder="Campo obrigatório" value={formData.email} onChange={handleChange} />
           {errors.email ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.email}</span>
           ) : (
@@ -188,8 +188,8 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="telefone">Telefone (Obrigatório)</label>
-          <FormattedInput type="telefone" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} />
+          <label htmlFor="telefone">Telefone</label>
+          <FormattedInput type="telefone" id="telefone" name="telefone" placeholder="Campo obrigatório" value={formData.telefone} onChange={handleChange} />
           {errors.telefone ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.telefone}</span>
           ) : (
