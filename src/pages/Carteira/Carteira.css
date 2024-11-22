@@ -275,6 +275,9 @@
 }
 
 .saldo-atual {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background-color: #fff;
   padding: 8px 20px;
   border-radius: 10px;
@@ -631,4 +634,14 @@
   font-weight: bold;
   font-size: 12px;
   margin-top: 5px;
+}
+
+/* Checkbox conta principal */
+.conta-principal{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  >span{
+    font-size: 14px;
+  }
 }

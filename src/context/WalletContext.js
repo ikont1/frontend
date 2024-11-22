@@ -31,17 +31,25 @@ export const WalletProvider = ({ children }) => {
       const response = await api.post('/conta-bancaria', dadosConta);
       showNotification({
         title: 'Sucesso',
-        message: 'Conta Bacaria adicionada com sucesso.',
+        message: 'Conta Bancária adicionada com sucesso.',
         type: 'success',
         icon: ThumbsUp,
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
       return response.data;
     } catch (error) {
+      // Verificar se o erro é relacionado à conta principal
+      const contaPrincipalErro = error.response?.data?.error?.contaPrincipal;
+      const mensagemErro = contaPrincipalErro
+        ? `Erro: ${contaPrincipalErro}` // Exibe o erro específico de conta principal
+        : error.response?.data?.message || 'Falha ao adicionar conta bancária.';
+
       showNotification({
         title: 'Erro',
-        message: error.response?.data?.message || 'Falha ao adicionar conta bancaria.',
-        secondaryMessage: 'Verifique os dados e tente novamente',
+        message: mensagemErro,
+        secondaryMessage: contaPrincipalErro
+          ? 'Já existe uma conta principal cadastrada. Atualize a conta principal existente ou desative-a antes de continuar.'
+          : 'Verifique os dados e tente novamente.',
         type: 'error',
         icon: XCircle,
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
@@ -115,6 +123,73 @@ export const WalletProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
       });
       throw error;
+    }
+  };
+
+  const atualizarContaBancaria = async (id, dadosAtuais, contaPrincipal) => {
+    try {
+      // Define os campos permitidos e garante que os opcionais sejam strings
+      const camposPermitidos = [
+        "nomeConta",
+        "codigoBanco",
+        "tipo",
+        "agencia",
+        "numeroConta",
+        "contaDV",
+        "saldoInicial",
+        "dataSaldoInicial",
+        "chavePix",
+        "codigoIban",
+        "codigoSwift",
+        "contaPrincipal",
+      ];
+  
+      // Filtra apenas os campos permitidos e converte opcionais para strings
+      const dadosAtualizados = Object.keys(dadosAtuais)
+        .filter((key) => camposPermitidos.includes(key))
+        .reduce((obj, key) => {
+          obj[key] =
+            key === "contaPrincipal"
+              ? contaPrincipal
+              : key === "chavePix" || key === "codigoIban" || key === "codigoSwift"
+              ? dadosAtuais[key] || "" // Garante que seja string
+              : dadosAtuais[key];
+          return obj;
+        }, {});
+  
+      const response = await api.patch(`/conta-bancaria/${id}`, dadosAtualizados);
+  
+      showNotification({
+        title: "Sucesso",
+        message: contaPrincipal
+          ? "Conta marcada como principal com sucesso."
+          : "Conta desmarcada como principal.",
+        type: "success",
+        icon: ThumbsUp,
+        buttons: [{ label: "Ok", onClick: () => setNotificationData(false) }],
+      });
+  
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar conta bancária:", error);
+  
+      const contaPrincipalErro = error.response?.data?.error?.contaPrincipal;
+      const mensagemErro = contaPrincipalErro
+        ? `Erro: ${contaPrincipalErro}`
+        : error.response?.data?.message || "Falha ao atualizar a conta bancária.";
+  
+      showNotification({
+        title: "Erro",
+        message: mensagemErro,
+        secondaryMessage: contaPrincipalErro
+          ? "Já existe uma conta principal cadastrada. Atualize a conta principal existente ou desative-a antes de continuar."
+          : "Verifique os dados e tente novamente.",
+        type: "error",
+        icon: XCircle,
+        buttons: [{ label: "Ok", onClick: () => setNotificationData(false) }],
+      });
+  
+      throw error; // Propaga o erro para tratamento adicional, se necessário
     }
   };
 
@@ -196,7 +271,8 @@ export const WalletProvider = ({ children }) => {
       desativarConta,
       listarExtrato,
       integrarConta,
-      desconectarConta
+      desconectarConta,
+      atualizarContaBancaria
     }}>
       {children}
 

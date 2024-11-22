@@ -338,7 +338,7 @@ const CadastroContaBancaria = () => {
                     <span>04</span> Concluído
                   </div>
                 </div>
-                <h2>Operação realizada com sucesso!</h2>
+                <h2>Clique em “Ok” para confirmar o cadastro da nova conta</h2>
               </div>
             )}
 

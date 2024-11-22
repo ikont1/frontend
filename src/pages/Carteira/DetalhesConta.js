@@ -22,7 +22,7 @@ const bancoLogos = {
 
 const DetalhesConta = () => {
   const { id } = useParams();
-  const { listarContas, listarExtrato, desconectarConta } = useWallet();
+  const { listarContas, listarExtrato, desconectarConta, atualizarContaBancaria } = useWallet();
 
   const [conta, setConta] = useState(null);
   const [extrato, setExtrato] = useState([]);
@@ -164,8 +164,37 @@ const DetalhesConta = () => {
           </div>
 
           <div className="saldo-atual">
-            <span>Saldo atual</span>
-            <h2>R${parseFloat(conta.saldoInicial).toLocaleString()}</h2>
+            <div>
+              <span>Saldo atual</span>
+              <h2>R${parseFloat(conta.saldoInicial).toLocaleString()}</h2>
+            </div>
+            <div className="conta-principal">
+              <span>Conta Principal</span>
+              <div className="switch-container">
+                <label className="switch-label">
+                  <input
+                    type="checkbox"
+                    checked={conta.contaPrincipal}
+                    onChange={async (e) => {
+                      const isPrincipal = e.target.checked;
+
+                      try {
+                        await atualizarContaBancaria(conta.id, conta, isPrincipal);
+
+                        // Atualiza o estado local para refletir a mudança visual
+                        setConta((prevConta) => ({ ...prevConta, contaPrincipal: isPrincipal }));
+
+                        // Opcional: Recarrega as contas para garantir consistência
+                        await listarContas();
+                      } catch (err) {
+                        console.error("Erro ao atualizar a conta bancária:", err);
+                      }
+                    }}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div className='content content-table table-extrato'>
