@@ -49,9 +49,23 @@ export const AssinaturaProvider = ({ children }) => {
     try {
       await api.delete('/assinatura');
       setAssinatura(null);
+      showNotification({
+        title: 'Sucesso',
+        message: 'Assinatura cancelada com sucesso.',
+        type: 'success',
+        icon: ThumbsUp,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
     } catch (error) {
       console.error('Erro ao cancelar assinatura:', error);
-      throw error;
+      showNotification({
+        title: 'Erro',
+        message: error.response?.data?.message || 'Falha ao cancelar assinatura.',
+        secondaryMessage: 'Verifique os dados e tente novamente',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
     }
   };
 

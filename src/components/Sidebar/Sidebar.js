@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FileText, DollarSign, User, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle, Award } from 'react-feather';
+import { FileText, DollarSign, User, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle, Award, BookOpen } from 'react-feather';
 import './Sidebar.css';
 import logo from '../../assets/imgs/logosvg.svg';
 import { useAuth } from '../../context/AuthContext';
 import Permissao from '../../permissions/Permissao';
+import ConfirmationModal from '../Modal/confirmationModal';
+import { useAssinatura } from '../../context/AssinaturaContext';
+
 
 const Sidebar = () => {
   const { logout } = useAuth(); // Obtendo a função de logout do contexto
+  const { cancelarAssinatura } = useAssinatura();
+
   const [isConciliacaoOpen, setIsConciliacaoOpen] = useState(false);
   const [isConfiguracaoOpen, setIsConfiguracaoOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false); // Estado do modal de confirmação
 
   const toggleConciliacao = () => {
     setIsConciliacaoOpen(!isConciliacaoOpen);
@@ -25,6 +31,19 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleConfirmCancelarAssinatura = async () => {
+    try {
+      await cancelarAssinatura(); // Chama a função do contexto
+      setIsConfirmCancelModalOpen(false); // Fecha o modal ao concluir
+      
+      setTimeout(async () => {
+        await logout(); // Desloga o usuário
+      }, 2000);
+    } catch (error) {
+      console.error("Erro ao cancelar assinatura:", error);
+    }
   };
 
   return (
@@ -120,6 +139,15 @@ const Sidebar = () => {
                         </NavLink>
                       </li>
                     </Permissao>
+
+                    <li>
+                      <button
+                        className="nav-link button-link"
+                        onClick={() => setIsConfirmCancelModalOpen(true)} // Abre o modal
+                      >
+                        <BookOpen className="icon" /> Cancelar assinatura
+                      </button>
+                    </li>
                   </ul>
                 )}
               </li>
@@ -141,6 +169,16 @@ const Sidebar = () => {
           </ul>
         </div>
       </div>
+      {/* Modal de Confirmação */}
+      {isConfirmCancelModalOpen && (
+        <ConfirmationModal
+          title="Confirmar Cancelamento"
+          message="Tem certeza de que deseja cancelar sua assinatura?"
+          secondaryMessage="Essa ação não pode ser desfeita e o acesso será perdido imediatamente."
+          onConfirm={handleConfirmCancelarAssinatura}
+          onCancel={() => setIsConfirmCancelModalOpen(false)}
+        />
+      )}
     </>
   );
 };
