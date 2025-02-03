@@ -50,6 +50,7 @@ const ContasReceber = () => {
     categorias: [],
     status: [],
     clienteId: [],
+    subtipo: [],
     period: {
       start: null,
       end: null
@@ -101,13 +102,16 @@ const ContasReceber = () => {
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
       const matchesCliente = clienteId.length === 0 || clienteId.includes(String(conta.cliente?.id));
+      const matchesSubTipo = (!selectedFilters.subTipo || selectedFilters.subTipo.length === 0) || 
+      (conta.extrato && selectedFilters.subTipo.includes(conta.extrato.subTipo));
 
       // Lógica para garantir que contas de meses diferentes não apareçam fora do contexto:
       return (
         (matchesPeriod || matchesMonth || (!month && !period.start && !period.end && isCurrentMonth)) &&
         matchesCategoria &&
         matchesStatus &&
-        matchesCliente
+        matchesCliente &&
+        matchesSubTipo
       );
     });
 
@@ -141,66 +145,49 @@ const ContasReceber = () => {
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
   
-    // Verificar se é a ação de limpar filtros
-    if (name === 'clear') {
-      setSelectedFilters(value); // Define os filtros como padrão
-      return; // Interrompe a função
-    }
-  
-    // Atualiza os filtros com base na seleção
     setSelectedFilters((prevFilters) => {
-      const updatedFilters = { ...prevFilters };
+      let updatedFilters = { ...prevFilters };
   
-      // Inicializar arrays conforme necessário
+      if (name === 'resetFilters') {
+        return value; // Reseta os filtros para os valores padrão
+      }
+  
       if (!updatedFilters.categorias) updatedFilters.categorias = [];
       if (!updatedFilters.status) updatedFilters.status = [];
       if (!updatedFilters.clienteId) updatedFilters.clienteId = [];
+      if (!updatedFilters.subTipo) updatedFilters.subTipo = [];
   
-      // Manipulação de categorias
       if (name === 'categoria') {
         updatedFilters.categorias = checked
-          ? [...new Set([...updatedFilters.categorias, value])] // Adiciona sem duplicar
+          ? [...new Set([...updatedFilters.categorias, value])]
           : updatedFilters.categorias.filter((cat) => cat !== value);
-      }
-  
-      // Manipulação de status
-      else if (name === 'status') {
+      } else if (name === 'status') {
         updatedFilters.status = checked
-          ? [...new Set([...updatedFilters.status, value])] // Adiciona sem duplicar
+          ? [...new Set([...updatedFilters.status, value])]
           : updatedFilters.status.filter((stat) => stat !== value);
-      }
-  
-      // Manipulação de cliente
-      else if (name === 'cliente') {
+      } else if (name === 'cliente') {
         updatedFilters.clienteId = checked
-          ? [...new Set([...(prevFilters.clienteId || []), value])] // Adiciona sem duplicar
-          : prevFilters.clienteId.filter((id) => id !== value);
-  
-        // Remover o filtro se nenhum cliente estiver selecionado
-        if (updatedFilters.clienteId.length === 0) {
-          delete updatedFilters.clienteId;
-        }
-      }
-  
-      // Manipulação de período
-      else if (name === 'periodStart' || name === 'periodEnd') {
+          ? [...new Set([...updatedFilters.clienteId, value])]
+          : updatedFilters.clienteId.filter((id) => id !== value);
+      } else if (name === 'subTipo') {
+        updatedFilters.subTipo = checked
+          ? [...new Set([...updatedFilters.subTipo, value])]
+          : updatedFilters.subTipo.filter((tipo) => tipo !== value);
+      } else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
-        updatedFilters.month = null; // Limpar mês ao definir um período
-      }
-  
-      // Manipulação de mês
-      else if (name === 'month') {
+        updatedFilters.month = null;
+      } else if (name === 'month') {
         updatedFilters.month = value;
-        updatedFilters.period = { start: null, end: null }; // Limpar período ao definir mês
+        updatedFilters.period = { start: null, end: null };
       }
   
       return updatedFilters;
     });
   };
-
+  
   // Função de busca com restauração de estado usando filteredContasAReceber
   const handleSearch = (searchTerm) => {
     const normalizedSearchTerm = searchTerm.replace(/[^0-9.]/g, '');
@@ -588,6 +575,7 @@ const ContasReceber = () => {
             buttonAdd: true,
             buttonPeriod: true,
             buttonMeses: true,
+            subTipo: [],
           }}
           categorias={categoriasAReceber}
           clientes={clientes}

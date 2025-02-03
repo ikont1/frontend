@@ -50,13 +50,14 @@ const ContasAPagar = () => {
     categorias: [],
     status2: [],
     fornecedorId: [],
+    subtipo: [],
     period: {
       start: null,
       end: null
     },
     month: null,
   });
-  
+
 
   // Estados de paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -75,54 +76,56 @@ const ContasAPagar = () => {
   const filterContas = useCallback(() => {
     const { categorias = [], status2 = [], fornecedorId = [], period, month } = selectedFilters;
     const currentDate = new Date(); // Data atual
-    
+
     const firstDayOfCurrentMonth = startOfMonth(currentDate);
     const lastDayOfCurrentMonth = endOfMonth(currentDate);
-  
+
     const filtered = contasAPagar.filter((conta) => {
       const contaVencimento = new Date(conta.vencimento);
-  
-      const isCurrentMonth = 
-        contaVencimento >= firstDayOfCurrentMonth && 
+
+      const isCurrentMonth =
+        contaVencimento >= firstDayOfCurrentMonth &&
         contaVencimento <= lastDayOfCurrentMonth;
-  
-      const matchesMonth = 
+
+      const matchesMonth =
         month &&
         contaVencimento >= startOfMonth(new Date(month)) &&
         contaVencimento <= endOfMonth(new Date(month));
-  
-      const matchesPeriod = 
+
+      const matchesPeriod =
         period.start && period.end &&
         contaVencimento >= new Date(period.start) &&
         contaVencimento <= new Date(period.end);
-  
+
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
       const matchesFornecedor = fornecedorId.length === 0 || fornecedorId.includes(String(conta.fornecedor?.id));
-  
+      const matchesSubTipo = (!selectedFilters.subTipo || selectedFilters.subTipo.length === 0) ||
+        (conta.extrato && selectedFilters.subTipo.includes(conta.extrato.subTipo));
+
       return (
         (matchesPeriod || matchesMonth || (!month && !period.start && !period.end && isCurrentMonth)) &&
         matchesCategoria &&
         matchesStatus &&
-        matchesFornecedor
+        matchesFornecedor &&
+        matchesSubTipo
       );
     });
-  
+
     const sortedFiltered = filtered.sort((a, b) => {
       const isAOverdue = a.status.toLowerCase() === 'vencido';
       const isBOverdue = b.status.toLowerCase() === 'vencido';
-  
+
       if (isAOverdue && !isBOverdue) return -1;
       if (!isAOverdue && isBOverdue) return 1;
-  
+
       return new Date(a.vencimento) - new Date(b.vencimento);
     });
-  
+
     setFilteredContasAPagar(sortedFiltered);
   }, [contasAPagar, selectedFilters]);
-  
-  
-  
+
+
   // Atualizar contas a pagar filtradas quando contasAPagar ou filtros mudarem
   useEffect(() => {
     if (contasAPagar && Array.isArray(contasAPagar)) {
@@ -138,65 +141,49 @@ const ContasAPagar = () => {
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
   
-    // Caso seja um reset de filtros
-    if (name === 'clear') {
-      setSelectedFilters(value); // Reseta todos os filtros
-      return;
-    }
-  
-    // Atualizar os filtros com base nas seleções
     setSelectedFilters((prevFilters) => {
-      const updatedFilters = { ...prevFilters };
+      // Se o nome do filtro for reset, retorna os valores padrão
+      if (name === 'resetFilters') {
+        return value;
+      }
+  
+      let updatedFilters = { ...prevFilters };
   
       if (!updatedFilters.categorias) updatedFilters.categorias = [];
       if (!updatedFilters.status2) updatedFilters.status2 = [];
       if (!updatedFilters.fornecedorId) updatedFilters.fornecedorId = [];
+      if (!updatedFilters.subTipo) updatedFilters.subTipo = [];
   
-      // Manipulação de categorias
       if (name === 'categoria') {
         updatedFilters.categorias = checked
-          ? [...new Set([...updatedFilters.categorias, value])] // Adiciona sem duplicar
+          ? [...new Set([...updatedFilters.categorias, value])]
           : updatedFilters.categorias.filter((cat) => cat !== value);
-      }
-  
-      // Manipulação de status2
-      else if (name === 'status2') {
+      } else if (name === 'status2') {
         updatedFilters.status2 = checked
-          ? [...new Set([...updatedFilters.status2, value])] // Adiciona sem duplicar
+          ? [...new Set([...updatedFilters.status2, value])]
           : updatedFilters.status2.filter((stat) => stat !== value);
-      }
-  
-      // Manipulação de fornecedores
-      else if (name === 'fornecedor') {
+      } else if (name === 'fornecedor') {
         updatedFilters.fornecedorId = checked
-          ? [...new Set([...(prevFilters.fornecedorId || []), value])] // Adiciona sem duplicar
+          ? [...new Set([...(prevFilters.fornecedorId || []), value])]
           : prevFilters.fornecedorId.filter((id) => id !== value);
-  
-        // Remover a chave se nenhum fornecedor estiver selecionado
-        if (updatedFilters.fornecedorId.length === 0) {
-          delete updatedFilters.fornecedorId;
-        }
-      }
-  
-      // Manipulação de período
-      else if (name === 'periodStart' || name === 'periodEnd') {
+      } else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
           [name === 'periodStart' ? 'start' : 'end']: value,
         };
-        updatedFilters.month = null; // Limpar mês ao definir um período
-      }
-  
-      // Manipulação de mês
-      else if (name === 'month') {
+        updatedFilters.month = null;
+      } else if (name === 'month') {
         updatedFilters.month = value;
-        updatedFilters.period = { start: null, end: null }; // Limpar período ao definir mês
+        updatedFilters.period = { start: null, end: null };
+      } else if (name === 'subTipo') {
+        updatedFilters.subTipo = checked
+          ? [...new Set([...updatedFilters.subTipo, value])]
+          : updatedFilters.subTipo.filter((tipo) => tipo !== value);
       }
   
       return updatedFilters;
     });
   };
-  
   // Função de busca com restauração de estado usando filteredContasAPagar
   const handleSearch = (searchTerm) => {
     const normalizedSearchTerm = searchTerm.replace(/[^0-9.]/g, '');
@@ -453,18 +440,18 @@ const ContasAPagar = () => {
   // Funça para exportar conta 
   const handleExport = async () => {
     const { categorias, status2, fornecedorId, period, month } = selectedFilters;
-  
+
     // Definir o período com base nos filtros ou mês atual
     const currentMonth = new Date();
     const defaultStart = startOfMonth(currentMonth);
     const defaultEnd = endOfMonth(currentMonth);
-  
+
     const periodo = period.start && period.end
       ? `vencimento:${formatDate(period.start)}|${formatDate(period.end)}`
       : month
         ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
         : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`;
-  
+
     // Construir o filtro concatenado
     const filtros = {
       itensPorPagina: 20000000, // Exportar tudo
@@ -474,10 +461,10 @@ const ContasAPagar = () => {
       ...(fornecedorId.length > 0 && { filtro: `fornecedor:${fornecedorId.join(',')}` }),
       periodo, // Novo formato de período
     };
-  
+
     try {
       const data = await exportarContasAPagar(filtros);
-  
+
       // Criar e baixar o arquivo Excel
       const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
@@ -487,7 +474,7 @@ const ContasAPagar = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-  
+
       // Exibir notificação de sucesso
       setNotificationData({
         title: 'Exportação Concluída',
@@ -509,8 +496,8 @@ const ContasAPagar = () => {
       setShowNotification(true);
     }
   };
-  
-    
+
+
   // Função para paginar itens
   const paginarItens = (itens, pagina, itensPorPagina) => {
     const inicio = (pagina - 1) * itensPorPagina;
@@ -554,6 +541,7 @@ const ContasAPagar = () => {
             buttonAdd: true,
             buttonPeriod: true,
             buttonMeses: true,
+            subTipo: [],
           }}
           categorias={categorias}
           fornecedores={fornecedores}

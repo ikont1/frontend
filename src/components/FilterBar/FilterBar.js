@@ -138,19 +138,25 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
 
   // Função para limpar os filtros
   const handleClearFilters = () => {
-    const defaultFilters = {
-      categorias: [],
-      status: [],
-      status2: [],
-      clienteId: [],
-      fornecedorId: [],
-      period: { start: null, end: null },
-      month: null,
-    };
-    onFilterChange({ target: { name: 'clear', value: defaultFilters } }); // Atualiza filtros no pai
     setStartDate(null);
     setEndDate(null);
     setSelectedMonth(new Date());
+  
+    onFilterChange({
+      target: {
+        name: 'resetFilters',
+        value: {
+          categorias: [],
+          status: [],
+          status2: [],
+          clienteId: [],
+          fornecedorId: [],
+          subTipo: [],
+          period: { start: null, end: null },
+          month: null,
+        }
+      }
+    });
   };
 
 
@@ -514,6 +520,52 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                     <li><label><input type="checkbox" id="emitido" /> Emitido</label></li>
                     <li><label><input type="checkbox" id="cancelado" /> Cancelado</label></li>
                     <li><label><input type="checkbox" id="pendente" /> Pendente</label></li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Filtro por tipo de transação (subTipo) */}
+          {filterConfig.subTipo && (
+            <div className="form-group">
+              <h5>Tipo de Pagamento</h5>
+              <button onClick={() => toggleModal('subTipo')}>
+                <div>
+                  {selectedFilters.subTipo?.length > 0 && (
+                    <span className="filter-count">{selectedFilters.subTipo.length}</span>
+                  )}
+                  {selectedFilters?.subTipo?.length > 0 ? 'Filtrados' : 'Todos'}
+                </div>
+                <ArrowDown />
+              </button>
+              {activeModal === 'subTipo' && (
+                <div ref={activeModalRef} className="modal-filter">
+                  <ul>
+                    {["pix", "boleto", "transferencia", "compraNoDebito", "pagamentoFaturaCartao", "recargaCelular", "outro"].map((tipo) => (
+                      <li key={tipo}>
+                        <label>
+                          <input
+                            type="checkbox"
+                            name="subTipo"
+                            value={tipo}
+                            onChange={(e) => {
+                              const { name, value, checked } = e.target;
+                            
+                              onFilterChange({
+                                target: {
+                                  name,
+                                  value,
+                                  checked
+                                }
+                              });
+                            }}
+                            checked={selectedFilters.subTipo?.includes(tipo) || false}
+                          />
+                          {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+                        </label>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}
