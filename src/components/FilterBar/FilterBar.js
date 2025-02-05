@@ -141,7 +141,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
     setStartDate(null);
     setEndDate(null);
     setSelectedMonth(new Date());
-  
+
     onFilterChange({
       target: {
         name: 'resetFilters',
@@ -529,7 +529,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
           {/* Filtro por tipo de transação (subTipo) */}
           {filterConfig.subTipo && (
             <div className="form-group">
-              <h5>Tipo de Pagamento</h5>
+              <h5>Tipo de transação</h5>
               <button onClick={() => toggleModal('subTipo')}>
                 <div>
                   {selectedFilters.subTipo?.length > 0 && (
@@ -542,30 +542,51 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
               {activeModal === 'subTipo' && (
                 <div ref={activeModalRef} className="modal-filter">
                   <ul>
-                    {["pix", "boleto", "transferencia", "compraNoDebito", "pagamentoFaturaCartao", "recargaCelular", "outro"].map((tipo) => (
-                      <li key={tipo}>
-                        <label>
-                          <input
-                            type="checkbox"
-                            name="subTipo"
-                            value={tipo}
-                            onChange={(e) => {
-                              const { name, value, checked } = e.target;
-                            
-                              onFilterChange({
-                                target: {
-                                  name,
-                                  value,
-                                  checked
-                                }
-                              });
-                            }}
-                            checked={selectedFilters.subTipo?.includes(tipo) || false}
-                          />
-                          {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
-                        </label>
-                      </li>
-                    ))}
+                    {[
+                      "pix",
+                      "boleto",
+                      "transferencia",
+                      "compraNoDebito",
+                      "pagamentoFaturaCartao",
+                      "recargaCelular",
+                      "outro",
+                    ].map((tipo) => {
+                      // Mapeamento de nomes legíveis
+                      const subTipoLabels = {
+                        pix: "PIX",
+                        boleto: "Boleto",
+                        transferencia: "Transferência",
+                        compraNoDebito: "Compra no Débito",
+                        pagamentoFaturaCartao: "Pagamento de Fatura",
+                        recargaCelular: "Recarga de Celular",
+                        outro: "Outro",
+                      };
+
+                      return (
+                        <li key={tipo}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              name="subTipo"
+                              value={tipo}
+                              onChange={(e) => {
+                                const { name, value, checked } = e.target;
+
+                                onFilterChange({
+                                  target: {
+                                    name,
+                                    value,
+                                    checked,
+                                  },
+                                });
+                              }}
+                              checked={selectedFilters.subTipo?.includes(tipo) || false}
+                            />
+                            {subTipoLabels[tipo] || tipo} {/* Nome formatado */}
+                          </label>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
