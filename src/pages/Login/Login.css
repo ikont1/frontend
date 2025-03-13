@@ -134,6 +134,12 @@
 }
 
 
+.reset-link{
+  color: var(--highlight-color);
+  text-decoration: underline;
+}
+
+
 @media (max-width: 768px) {
   .login-container {
     flex-direction: column;

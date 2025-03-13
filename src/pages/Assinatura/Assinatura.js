@@ -8,6 +8,7 @@ import imgLogin from '../../assets/imgs/img-login.png';
 import { FaWhatsapp, FaInstagram, FaFacebook, FaLinkedin } from 'react-icons/fa';
 import Lottie from 'react-lottie';
 import animationData from '../../lottieflow-scrolling-01-1-ffffff-easey.json';
+import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 
 const Assinatura = () => {
   const { criarAssinatura } = useAssinatura();
@@ -241,8 +242,8 @@ const Assinatura = () => {
 
               <div className='input-duplo'>
                 <div>
-                  <input
-                    type="text"
+                  <FormattedInput
+                    type="cep"
                     name="cep"
                     placeholder="CEP"
                     value={formData.cep}

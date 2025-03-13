@@ -13,7 +13,7 @@ const RedefinirSenha = () => {
   const [confirmeNovaSenha, setConfirmeNovaSenha] = useState('');
   const [inputError, setInputError] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [showResetLink, setShowResetLink] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -32,27 +32,29 @@ const RedefinirSenha = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (novaSenha !== confirmeNovaSenha) {
       setErrorMessage('As senhas não coincidem. Por favor, verifique e tente novamente.');
       return;
     }
-  
+
     const token = getTokenFromUrl();
-  
+
     try {
       setErrorMessage('');
-      await setPassword(token, novaSenha, confirmeNovaSenha);
-  
-      // Exibe a mensagem de sucesso e aguarda 2 segundos antes de redirecionar
-      setSuccess(true);
-  
+      setShowResetLink(false);
+
+      const response = await setPassword(token, novaSenha, confirmeNovaSenha);
+
+      if (response && response.success) {
+      } else {
+        setErrorMessage(response.message || 'Erro ao redefinir senha. Verifique os dados e tente novamente.');
+      }
     } catch (err) {
-      console.error('Erro ao redefinir/criar a senha:', err);
-      setErrorMessage('Erro inesperado ao processar sua solicitação. Tente novamente mais tarde.');
+      setShowResetLink(true);
     }
   };
-  
+
 
   return (
     <div className="login-container">
@@ -62,61 +64,60 @@ const RedefinirSenha = () => {
 
       <div className="login-form">
         <img src={logo} alt="Logo" className="logo" />
-        {success ? (
-          <div className="success-message">
-            <p>Sua senha foi redefinida com sucesso. Você será redirecionado para a página inicial.</p>
-            <Link to="/" className="login-button">Ir para a Home</Link>
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label htmlFor="password" className={inputError.novaSenha ? 'error-label' : ''}>Nova senha</label>
+            <div className="password-wrapper">
+              <FormattedInput
+                type="senha"
+                name="senha"
+                id="password"
+                className={inputError.novaSenha ? 'error-input' : ''}
+                placeholder="Nova senha"
+                value={novaSenha}
+                onChange={(e) => {
+                  setNovaSenha(e.target.value);
+                  setInputError({ ...inputError, novaSenha: false });
+                  setErrorMessage('');
+                }}
+                required
+              />
+            </div>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label htmlFor="password" className={inputError.novaSenha ? 'error-label' : ''}>Nova senha</label>
-              <div className="password-wrapper">
-                <FormattedInput
-                  type="senha"
-                  name="senha"
-                  id="password"
-                  className={inputError.novaSenha ? 'error-input' : ''}
-                  placeholder="Nova senha"
-                  value={novaSenha}
-                  onChange={(e) => {
-                    setNovaSenha(e.target.value);
-                    setInputError({ ...inputError, novaSenha: false });
-                    setErrorMessage('');
-                  }}
-                  required
-                />
-              </div>
-            </div>
 
-            <div className="input-group">
-              <label htmlFor="password2" className={inputError.confirmeNovaSenha ? 'error-label' : ''}>Confirmar senha</label>
-              <div className="password-wrapper">
-                <FormattedInput
-                  type="senha"
-                  name="senha2"
-                  id="password2"
-                  className={inputError.confirmeNovaSenha ? 'error-input' : ''}
-                  placeholder="Confirmar nova senha"
-                  value={confirmeNovaSenha}
-                  onChange={(e) => {
-                    setConfirmeNovaSenha(e.target.value);
-                    setInputError({ ...inputError, confirmeNovaSenha: false });
-                    setErrorMessage('');
-                  }}
-                  required
-                />
-              </div>
+          <div className="input-group">
+            <label htmlFor="password2" className={inputError.confirmeNovaSenha ? 'error-label' : ''}>Confirmar senha</label>
+            <div className="password-wrapper">
+              <FormattedInput
+                type="senha"
+                name="senha2"
+                id="password2"
+                className={inputError.confirmeNovaSenha ? 'error-input' : ''}
+                placeholder="Confirmar nova senha"
+                value={confirmeNovaSenha}
+                onChange={(e) => {
+                  setConfirmeNovaSenha(e.target.value);
+                  setInputError({ ...inputError, confirmeNovaSenha: false });
+                  setErrorMessage('');
+                }}
+                required
+              />
             </div>
-            {errorMessage && <p className="error-message">{errorMessage}</p>}
+          </div>
 
-            <div className="container-reset-submit">
-              <button type="submit" disabled={loading}>
-                {loading ? 'Enviando...' : 'Enviar'}
-              </button>
-            </div>
-          </form>
-        )}
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {showResetLink && (
+            <p className="error-message">
+              <Link to="/recuperar-senha" className="reset-link"> Clique aqui e solicite um novo link de criação/redefinição de senha no seu e-mail.</Link>
+            </p>
+          )}
+          <div className="container-reset-submit">
+            <button type="submit" disabled={loading}>
+              {loading ? 'Enviando...' : 'Enviar'}
+            </button>
+          </div>
+        </form>
 
         <div className="div-botton">
           <Link to='https://ikont1.com.br/#planos' className="register-link" target="_blank" rel="noopener noreferrer">
