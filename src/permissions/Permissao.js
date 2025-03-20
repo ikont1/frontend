@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 
 const Permissao = ({ modulo, permissao, ehAdmin, children }) => {
-  const { decodedToken } = useAuth(); // Dados do token, incluindo ehAdmin e permissoes
+  const { decodedToken } = useAuth(); 
 
   // Verifica se o usuário é admin e a prop ehAdmin é true
   if (ehAdmin && decodedToken?.perfil?.ehAdmin) {
@@ -16,7 +16,7 @@ const Permissao = ({ modulo, permissao, ehAdmin, children }) => {
     return children;
   }
 
-  return null; // Oculta o conteúdo se não atender aos requisitos
+  return null;
 };
 
 export default Permissao;

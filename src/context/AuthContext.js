@@ -1,4 +1,3 @@
-// AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -12,8 +11,8 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
-  const [decodedToken, setDecodedToken] = useState(null); // Estado para armazenar os dados decodificados
-  const [permissions, setPermissions] = useState([]);//Armazenda os modulos de permissoes
+  const [decodedToken, setDecodedToken] = useState(null);
+  const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
@@ -22,9 +21,9 @@ export const AuthProvider = ({ children }) => {
   // Decode Token
   const decodeAndStoreToken = (jwtToken) => {
     try {
-      const decoded = jwtDecode(jwtToken); // Decodifica o token
+      const decoded = jwtDecode(jwtToken); 
       setDecodedToken(decoded);
-      setPermissions(decoded?.perfil?.modulos || []); // Extrai módulos do perfil
+      setPermissions(decoded?.perfil?.modulos || []);
     } catch (err) {
       console.error('Erro ao decodificar o token JWT:', err);
     }
@@ -35,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       setToken(storedToken);
       api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-      decodeAndStoreToken(storedToken); // Decodifica e armazena ao carregar
+      decodeAndStoreToken(storedToken);
     }
     setLoading(false);
   }, []);
@@ -54,7 +53,7 @@ export const AuthProvider = ({ children }) => {
       setToken(token);
       localStorage.setItem('token', token);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      decodeAndStoreToken(token); // Decodifica e armazena ao fazer login
+      decodeAndStoreToken(token);
       navigate('/');
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Erro ao logar. Por favor, tente novamente.';
