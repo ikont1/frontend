@@ -129,8 +129,24 @@ const IntegracaoModal = ({ isOpen, onClose, conta }) => {
           {step === 1 ? (
             <>
               <div className="detalhes-text">
-                <p>Você confirma que possui as credenciais do Banco do Brasil para autorizar a integração? Caso não tenha, lembre-se de que o processo para conseguir essas credenciais pode levar até 6 dias úteis.</p>
+                <p>
+                  Você confirma que possui as credenciais do Banco do Brasil para autorizar a integração? Caso não tenha, lembre-se de que o processo para conseguir essas credenciais pode levar até 6 dias úteis.</p>
+                <br />
+                Para garantir a integração, realize a atualização das suas informações, solicitamos que você acesse o Gerenciador Financeiro do Banco do Brasil e siga os passos abaixo:
+                <br />
+                <br />
+                1. Acesse sua conta no Gerenciador Financeiro.
+                <br />
+                2. Clique na opção <strong>Conta Corrente</strong>.
+                <br />
+                3. Selecione <strong>Cadastro</strong> .
+                <br />
+                4. Escolha <strong>Atualizar/Consultar</strong> e siga as instruções.
+                <br />
+                <br />
+                Pronto, basta inserir suas informações!
               </div>
+
               <div className="modal-integracao-footer">
                 <button className="cancel" onClick={handleSupport}>
                   Não, preciso de suporte.

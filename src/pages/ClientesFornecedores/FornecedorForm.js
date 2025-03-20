@@ -156,7 +156,7 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
         </div>
         <div className="form-group">
           <label htmlFor="nomeFantasia">Nome Fantasia</label>
-          <input type="text" id="nomeFantasia" name="nomeFantasia" placeholder="Campo obrigatório" value={formData.nomeFantasia} onChange={handleChange} />
+          <input type="text" id="nomeFantasia" name="nomeFantasia" placeholder="Campo obrigatório para cnpj" value={formData.nomeFantasia} onChange={handleChange} />
           {errors.nomeFantasia ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
           ) : (

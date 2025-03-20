@@ -265,7 +265,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               {errors.nomeFantasia ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
               ) : (
-                <span>O nome fantasia da empresa deve ter entre 2 e 100 caracteres.</span>
+                <span>Nome Fantasia é obrigatório para CNPJ</span>
               )}
             </div>
 
