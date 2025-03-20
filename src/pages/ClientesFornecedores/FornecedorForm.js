@@ -64,18 +64,30 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.nomeFantasia) newErrors.nomeFantasia = 'NomeFantasia é obrigatório';
+    const cleanValue = formData.cpfCnpj.replace(/\D/g, '');
+  
     if (!formData.cpfCnpj) {
-      newErrors.cpfCnpj = 'CNPJ/CPFC é obrigatório';
-    } else {
-      const cleanValue = formData.cpfCnpj.replace(/\D/g, '');
-      if (cleanValue.length !== 11 && cleanValue.length !== 14) {
-        newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
-      }
+      newErrors.cpfCnpj = 'CNPJ/CPF é obrigatório';
+    } else if (cleanValue.length !== 11 && cleanValue.length !== 14) {
+      newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
     }
-    if (!formData.razaoSocial) newErrors.razaoSocial = 'Razão Social é obrigatória';
-    if (!formData.email) newErrors.email = 'E-mail é obrigatório';
-    if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
+  
+    if (cleanValue.length === 14 && !formData.nomeFantasia) {
+      newErrors.nomeFantasia = 'Nome Fantasia é obrigatório para CNPJ';
+    }
+  
+    if (!formData.razaoSocial) {
+      newErrors.razaoSocial = 'Nome ou Razão Social é obrigatória';
+    }
+  
+    if (!formData.email) {
+      newErrors.email = 'E-mail é obrigatório';
+    }
+  
+    if (!formData.telefone) {
+      newErrors.telefone = 'Telefone é obrigatório';
+    }
+  
     return newErrors;
   };
 
@@ -143,12 +155,12 @@ const FornecedorForm = ({ initialData = {}, onClose, fetchData }) => {
           )}
         </div>
         <div className="form-group">
-          <label htmlFor="nomeFantasia">Nome</label>
+          <label htmlFor="nomeFantasia">Nome Fantasia</label>
           <input type="text" id="nomeFantasia" name="nomeFantasia" placeholder="Campo obrigatório" value={formData.nomeFantasia} onChange={handleChange} />
           {errors.nomeFantasia ? (
             <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
           ) : (
-            <span>Este campo é obrigatório.</span>
+            <span>Nome Fantasia é obrigatório para CNPJ</span>
           )}
         </div>
         <div className="form-group">

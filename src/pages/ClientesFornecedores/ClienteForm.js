@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Importando axios
+import axios from 'axios';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
 import './ClientesFornecedores.css';
 import { ThumbsUp, AlertTriangle } from 'react-feather';
@@ -31,13 +31,13 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     ...initialData
   });
 
-  const [step, setStep] = useState(1); // Controla os passos do formulário
-  const [notification, setNotification] = useState(null); // Controla as notificações
-  const [errors, setErrors] = useState({}); // Controla os erros de validação
+  const [step, setStep] = useState(1);
+  const [notification, setNotification] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const handleNotificationClose = () => {
     setNotification(null);
-    onClose(); // Fecha o modal
+    onClose();
   };
 
   const handleNextStep = () => {
@@ -113,23 +113,27 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
           cpfCnpj: 'CNPJ inválido ou não encontrado.',
         }));
       }
-    } 
+    }
   };
 
 
   const validateStep1 = () => {
     const newErrors = {};
-    if (!formData.nomeFantasia) newErrors.nomeFantasia = 'Nome é obrigatório';
+    const cleanCnpjCpf = formData.cpfCnpj.replace(/\D/g, '');
+  
     if (!formData.cpfCnpj) {
       newErrors.cpfCnpj = 'CNPJ/CPF é obrigatório';
-    } else {
-      const cleanValue = formData.cpfCnpj.replace(/\D/g, '');
-      if (cleanValue.length !== 11 && cleanValue.length !== 14) {
-        newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
-      }
+    } else if (cleanCnpjCpf.length !== 11 && cleanCnpjCpf.length !== 14) {
+      newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
     }
+  
+    // Se for CNPJ (14 dígitos), o Nome Fantasia se torna obrigatório
+    if (cleanCnpjCpf.length === 14 && !formData.nomeFantasia.trim()) {
+      newErrors.nomeFantasia = 'Nome Fantasia é obrigatório para CNPJ';
+    }
+  
 
-    if (!formData.razaoSocial) newErrors.razaoSocial = 'Razão Social é obrigatória';
+    if (!formData.razaoSocial) newErrors.razaoSocial = 'Nome ou Razão Social é obrigatória';
     if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
     if (!formData.celular) newErrors.celular = 'Celular é obrigatório';
     if (!formData.email) newErrors.email = 'E-mail é obrigatório';
@@ -155,10 +159,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     const validationErrors = { ...validationErrorsStep1, ...validationErrorsStep2 };
 
     if (Object.keys(validationErrors).length === 0) {
-      // Copiar o formData para um novo objeto
+
       const dataToSubmit = { ...formData };
 
-      // Remover campos vazios
+
       if (!dataToSubmit.inscricalMunicipal) {
         delete dataToSubmit.inscricalMunicipal;
       }
@@ -166,7 +170,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
         delete dataToSubmit.inscricalEstadual;
       }
 
-      // Remover campos vazios do endereço
+
       const cleanedEndereco = { ...dataToSubmit.endereco };
       Object.keys(cleanedEndereco).forEach(key => {
         if (cleanedEndereco[key] === '') {
@@ -241,9 +245,9 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group">
               <label htmlFor="cpfCnpj">CNPJ/CPF</label>
               <FormattedInput type="cpfCnpj" id="cpfCnpj" name="cpfCnpj"
-                  placeholder="Campo obrigatório"
-                  value={formData.cpfCnpj} onChange={handleChange}
-                  onBlur={(e) => fetchCnpjData(e.target.value)} required />
+                placeholder="Campo obrigatório"
+                value={formData.cpfCnpj} onChange={handleChange}
+                onBlur={(e) => fetchCnpjData(e.target.value)} required />
               {errors.cpfCnpj ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.cpfCnpj}</span>
               ) : (
@@ -253,24 +257,24 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
 
             <div className="form-group">
               <label htmlFor="nomeFantasia">Nome Fantasia</label>
-              <input type="text" id="nomeFantasia" 
-                    name="nomeFantasia" 
-                    placeholder="Campo obrigatório"
-                    value={formData.nomeFantasia} 
-                    onChange={handleChange} required />
+              <input type="text" id="nomeFantasia"
+                name="nomeFantasia"
+                placeholder="Campo obrigatório para cnpj"
+                value={formData.nomeFantasia}
+                onChange={handleChange} required />
               {errors.nomeFantasia ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.nomeFantasia}</span>
               ) : (
-                <span>O nome da empresa deve ter entre 2 e 100 caracteres.</span>
+                <span>O nome fantasia da empresa deve ter entre 2 e 100 caracteres.</span>
               )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="razaoSocial">Razão Social</label>
-              <input type="text" id="razaoSocial" 
-                    name="razaoSocial" placeholder="Campo obrigatório"
-                    value={formData.razaoSocial} 
-                    onChange={handleChange} required />
+              <label htmlFor="razaoSocial">Nome ou Razão Social</label>
+              <input type="text" id="razaoSocial"
+                name="razaoSocial" placeholder="Campo obrigatório"
+                value={formData.razaoSocial}
+                onChange={handleChange} required />
               {errors.razaoSocial ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.razaoSocial}</span>
               ) : (
@@ -291,10 +295,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group-modal">
               <div className="form-group">
                 <label htmlFor="telefone">Telefone</label>
-                <FormattedInput type="telefone" id="telefone" 
-                      name="telefone" placeholder="Campo obrigatório"
-                      value={formData.telefone} 
-                      onChange={handleChange} required />
+                <FormattedInput type="telefone" id="telefone"
+                  name="telefone" placeholder="Campo obrigatório"
+                  value={formData.telefone}
+                  onChange={handleChange} required />
                 {errors.telefone ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.telefone}</span>
                 ) : (
@@ -303,10 +307,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               </div>
               <div className="form-group">
                 <label htmlFor="celular">Celular</label>
-                <FormattedInput type="telefone" id="celular" 
-                      name="celular" value={formData.celular} 
-                      placeholder="Campo obrigatório"
-                      onChange={handleChange} required />
+                <FormattedInput type="telefone" id="celular"
+                  name="celular" value={formData.celular}
+                  placeholder="Campo obrigatório"
+                  onChange={handleChange} required />
                 {errors.celular ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.celular}</span>
                 ) : (
@@ -318,10 +322,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group-modal">
               <div className="form-group">
                 <label htmlFor="email">E-mail</label>
-                <FormattedInput type="email" id="email" 
-                      name="email" value={formData.email} 
-                      placeholder="Campo obrigatório"
-                      onChange={handleChange} required />
+                <FormattedInput type="email" id="email"
+                  name="email" value={formData.email}
+                  placeholder="Campo obrigatório"
+                  onChange={handleChange} required />
                 {errors.email ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.email}</span>
                 ) : (
@@ -330,9 +334,9 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               </div>
               <div className="form-group">
                 <label htmlFor="contato">Nome do Contato</label>
-                <input type="text" id="contato" name="contato" 
-                      value={formData.contato} placeholder="Campo obrigatório"
-                      onChange={handleChange} required />
+                <input type="text" id="contato" name="contato"
+                  value={formData.contato} placeholder="Campo obrigatório"
+                  onChange={handleChange} required />
                 {errors.contato ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.contato}</span>
                 ) : (
@@ -351,10 +355,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
           <div className="step">
             <div className='form-group'>
               <label htmlFor="endereco">Endereço</label>
-              <input type="text" id="endereco" name="endereco" 
-                    value={formData.endereco.endereco} 
-                    placeholder="Campo obrigatório"
-                    onChange={handleChange} required />
+              <input type="text" id="endereco" name="endereco"
+                value={formData.endereco.endereco}
+                placeholder="Campo obrigatório"
+                onChange={handleChange} required />
               {errors.endereco ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.endereco}</span>
               ) : (
@@ -363,10 +367,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
             <div className="form-group">
               <label htmlFor="complemento">Complemento</label>
-              <input type="text" id="complemento" name="complemento" 
-                    value={formData.endereco.complemento} 
-                    placeholder="Campo obrigatório"
-                    onChange={handleChange} required />
+              <input type="text" id="complemento" name="complemento"
+                value={formData.endereco.complemento}
+                placeholder="Campo obrigatório"
+                onChange={handleChange} required />
               {errors.complemento ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.complemento}</span>
               ) : (
@@ -375,10 +379,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             </div>
             <div className="form-group">
               <label htmlFor="cep">CEP</label>
-              <FormattedInput type="cep" id="cep" name="cep" 
-                    value={formData.endereco.cep} 
-                    placeholder="Campo obrigatório"
-                    onChange={handleChange} required />
+              <FormattedInput type="cep" id="cep" name="cep"
+                value={formData.endereco.cep}
+                placeholder="Campo obrigatório"
+                onChange={handleChange} required />
               {errors.cep ? (
                 <span style={{ color: 'red', fontSize: '10px' }}>{errors.cep}</span>
               ) : (
@@ -388,10 +392,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group-modal">
               <div className="form-group">
                 <label htmlFor="numero">Número</label>
-                <input type="text" id="numero" name="numero" 
-                    value={formData.endereco.numero} 
-                    placeholder="Campo obrigatório"
-                    onChange={handleChange} required />
+                <input type="text" id="numero" name="numero"
+                  value={formData.endereco.numero}
+                  placeholder="Campo obrigatório"
+                  onChange={handleChange} required />
                 {errors.numero ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.numero}</span>
                 ) : (
@@ -400,10 +404,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               </div>
               <div className="form-group">
                 <label htmlFor="bairro">Bairro</label>
-                <input type="text" id="bairro" name="bairro" 
-                    value={formData.endereco.bairro} 
-                    placeholder="Campo obrigatório"
-                    onChange={handleChange} required />
+                <input type="text" id="bairro" name="bairro"
+                  value={formData.endereco.bairro}
+                  placeholder="Campo obrigatório"
+                  onChange={handleChange} required />
                 {errors.bairro ? (
                   <span style={{ color: 'red', fontSize: '10px' }}>{errors.bairro}</span>
                 ) : (
@@ -424,10 +428,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               </div>
               <div className="form-group">
                 <label htmlFor="cidade">Cidade</label>
-                <input type="text" id="cidade" name="cidade" 
-                    value={formData.endereco.cidade} 
-                    placeholder="Campo obrigatório"
-                    onChange={handleChange} required />
+                <input type="text" id="cidade" name="cidade"
+                  value={formData.endereco.cidade}
+                  placeholder="Campo obrigatório"
+                  onChange={handleChange} required />
                 {errors.cidade && <span style={{ color: 'red', fontSize: '10px' }}>{errors.cidade}</span>}
               </div>
             </div>

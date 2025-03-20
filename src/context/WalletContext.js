@@ -229,7 +229,7 @@ export const WalletProvider = ({ children }) => {
       showNotification({
         title: 'Erro na Integração',
         message: 'Verifique as credenciais e tente novamente.',
-        secondaryMessage: error.response?.data?.message || 'Falha ao conectar a conta.',
+        secondaryMessage: error.response?.data?.message || 'Erro desconhecido.',
         type: 'error',
         icon: XCircle,
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(null) }],

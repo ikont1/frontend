@@ -129,7 +129,7 @@ const IntegracaoModal = ({ isOpen, onClose, conta }) => {
           {step === 1 ? (
             <>
               <div className="detalhes-text">
-                <p>Você confirma que possui as credenciais do Banco para autorizar a integração?</p>
+                <p>Você confirma que possui as credenciais do Banco do Brasil para autorizar a integração? Caso não tenha, lembre-se de que o processo para conseguir essas credenciais pode levar até 6 dias úteis.</p>
               </div>
               <div className="modal-integracao-footer">
                 <button className="cancel" onClick={handleSupport}>
