@@ -19,18 +19,28 @@ api.interceptors.request.use(
   error => Promise.reject(error)
 );
 
+
+
+const publicRoutes = [
+  '/assinatura',
+  '/recuperar-senha',
+  '/nova-senha'
+];
+
 // Interceptor para capturar erros de autenticação
 api.interceptors.response.use(
   response => response,
   error => {
     if (error.response) {
       const { status } = error.response;
+      const currentPath = window.location.pathname;
 
-      // Se o token for inválido, remover do localStorage e redirecionar para login
-      if (status === 401 || status === 403) {
+      const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
+
+
+      if ((status === 401 || status === 403) && !isPublicRoute) {
         localStorage.removeItem('token');
 
-        //Se já estiver na página de login não realiza a ação
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
