@@ -8,7 +8,7 @@ import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp, ArrowLeft, ArrowRight } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
-import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns'; // Adicione startOfMonth e endOfMonth
+import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
 
@@ -26,7 +26,8 @@ const ContasReceber = () => {
     categoria: '',
     clienteId: '',
     descricao: '',
-    status: 'A receber'
+    tipoTransacao: '',
+    status: 'A receber',
   });
   const [selectedConta, setSelectedConta] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
@@ -50,7 +51,7 @@ const ContasReceber = () => {
     categorias: [],
     status: [],
     clienteId: [],
-    subtipo: [],
+    tipoTransacao: [],
     period: {
       start: null,
       end: null
@@ -102,8 +103,8 @@ const ContasReceber = () => {
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status.length === 0 || status.includes(conta.status.toLowerCase());
       const matchesCliente = clienteId.length === 0 || clienteId.includes(String(conta.cliente?.id));
-      const matchesSubTipo = (!selectedFilters.subTipo || selectedFilters.subTipo.length === 0) || 
-      (conta.extrato && selectedFilters.subTipo.includes(conta.extrato.subTipo));
+      const matchesTipoTransacao = (!selectedFilters.tipoTransacao || selectedFilters.tipoTransacao.length === 0) ||
+        selectedFilters.tipoTransacao.includes(conta.tipoTransacao);
 
       // Lógica para garantir que contas de meses diferentes não apareçam fora do contexto:
       return (
@@ -111,7 +112,7 @@ const ContasReceber = () => {
         matchesCategoria &&
         matchesStatus &&
         matchesCliente &&
-        matchesSubTipo
+        matchesTipoTransacao
       );
     });
 
@@ -144,19 +145,19 @@ const ContasReceber = () => {
 
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
-  
+
     setSelectedFilters((prevFilters) => {
       let updatedFilters = { ...prevFilters };
-  
+
       if (name === 'resetFilters') {
         return value; // Reseta os filtros para os valores padrão
       }
-  
+
       if (!updatedFilters.categorias) updatedFilters.categorias = [];
       if (!updatedFilters.status) updatedFilters.status = [];
       if (!updatedFilters.clienteId) updatedFilters.clienteId = [];
-      if (!updatedFilters.subTipo) updatedFilters.subTipo = [];
-  
+      if (!updatedFilters.tipoTransacao) updatedFilters.tipoTransacao = [];
+
       if (name === 'categoria') {
         updatedFilters.categorias = checked
           ? [...new Set([...updatedFilters.categorias, value])]
@@ -169,10 +170,10 @@ const ContasReceber = () => {
         updatedFilters.clienteId = checked
           ? [...new Set([...updatedFilters.clienteId, value])]
           : updatedFilters.clienteId.filter((id) => id !== value);
-      } else if (name === 'subTipo') {
-        updatedFilters.subTipo = checked
-          ? [...new Set([...updatedFilters.subTipo, value])]
-          : updatedFilters.subTipo.filter((tipo) => tipo !== value);
+      } else if (name === 'tipoTransacao') {
+        updatedFilters.tipoTransacao = checked
+          ? [...new Set([...updatedFilters.tipoTransacao, value])]
+          : updatedFilters.tipoTransacao.filter((tipo) => tipo !== value);
       } else if (name === 'periodStart' || name === 'periodEnd') {
         updatedFilters.period = {
           ...updatedFilters.period,
@@ -183,11 +184,11 @@ const ContasReceber = () => {
         updatedFilters.month = value;
         updatedFilters.period = { start: null, end: null };
       }
-  
+
       return updatedFilters;
     });
   };
-  
+
   // Função de busca com restauração de estado usando filteredContasAReceber
   const handleSearch = (searchTerm) => {
     const normalizedSearchTerm = searchTerm.replace(/[^0-9.]/g, '');
@@ -287,6 +288,7 @@ const ContasReceber = () => {
         multa: '',
         juros: '',
         desconto: '',
+        tipoTransacao: conta.tipoTransacao || '',
       });
       setExpandSection(false);
       setShowConfirmModal(true);
@@ -296,7 +298,9 @@ const ContasReceber = () => {
   // Lidar com mudanças de entrada no formulário de nova/edição de conta
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNovaConta({ ...novaConta, [name]: type === 'checkbox' ? (checked ? 'Recebido' : 'A receber') : value });
+    setNovaConta(prev => ({
+      ...prev, [name]: type === 'checkbox' ? (checked ? 'Recebido' : 'A receber') : value
+    }));
   };
 
   // Lidar com mudanças de entrada no formulário de recebimento
@@ -359,6 +363,10 @@ const ContasReceber = () => {
       ...(novaConta.descricao && { descricao: novaConta.descricao }),
     };
 
+    if (novaConta.status === 'Recebido' && novaConta.tipoTransacao) {
+      contaToSave.tipoTransacao = novaConta.tipoTransacao;
+    }
+
     try {
       if (modalMode === 'edit') {
         await updateContaAReceber(novaConta.id, contaToSave);
@@ -401,6 +409,10 @@ const ContasReceber = () => {
         juros: recebimento.juros ? parseFloat(recebimento.juros) : undefined,
         desconto: recebimento.desconto ? parseFloat(recebimento.desconto) : undefined,
       };
+
+      if (recebimento.tipoTransacao) {
+        updatedConta.tipoTransacao = recebimento.tipoTransacao;
+      }
 
       await informRecebimento(selectedConta.id, updatedConta);
 
@@ -575,7 +587,7 @@ const ContasReceber = () => {
             buttonAdd: true,
             buttonPeriod: true,
             buttonMeses: true,
-            subTipo: [],
+            tipoTransacao: []
           }}
           categorias={categoriasAReceber}
           clientes={clientes}
@@ -595,6 +607,7 @@ const ContasReceber = () => {
                 <th>Categoria</th>
                 <th>Cliente</th>
                 <th>CPF/CNPJ</th>
+                <th>Tipo transação</th>
                 <th>Status</th>
                 <th>Valor</th>
                 <th>Ações</th>
@@ -611,6 +624,7 @@ const ContasReceber = () => {
                     </td>
                     <td data-label="Cliente">{conta.cliente ? conta.cliente.nomeFantasia : 'Cliente não encontrado'}</td>
                     <td data-label="Descrição">{conta.cliente.cpfCnpj}</td>
+                    <td data-label="Tipo Transação">{conta.tipoTransacao || '-'}</td>
                     <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aReceber' ? 'a receber' : conta.status}</span>
                     </td>
@@ -744,6 +758,28 @@ const ContasReceber = () => {
               <label htmlFor="recebido">Marcar como recebido</label>
             </div>
           )}
+
+          {novaConta.status === 'Recebido' && (
+            <div className="form-group">
+              <label htmlFor="tipoTransacao">Tipo de transação</label>
+              <select
+                id="tipoTransacao"
+                name="tipoTransacao"
+                value={novaConta.tipoTransacao}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Selecione</option>
+                <option value="pix">PIX</option>
+                <option value="boleto">Boleto</option>
+                <option value="transferencia">Transferência</option>
+                <option value="compraNoDebito">Compra no Débito</option>
+                <option value="pagamentoFaturaCartao">Pagamento de Fatura</option>
+                <option value="recargaCelular">Recarga de Celular</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+          )}
           {modalMode === 'view' && (
             <div className="form-group">
               <label htmlFor="status">Status</label>
@@ -787,6 +823,25 @@ const ContasReceber = () => {
               <span>{selectedConta?.categoria}</span>
             </div>
             <span>R${formatValue(selectedConta?.valor)}</span>
+          </div>
+          <div className="form-group">
+            <label htmlFor="tipoTransacao">Tipo de transação</label>
+            <select
+              id="tipoTransacao"
+              name="tipoTransacao"
+              value={recebimento.tipoTransacao || ''}
+              onChange={handleRecebimentoChange}
+              required
+            >
+              <option value="">Selecione</option>
+              <option value="pix">PIX</option>
+              <option value="boleto">Boleto</option>
+              <option value="transferencia">Transferência</option>
+              <option value="compraNoDebito">Compra no Débito</option>
+              <option value="pagamentoFaturaCartao">Pagamento de Fatura</option>
+              <option value="recargaCelular">Recarga de Celular</option>
+              <option value="outro">Outro</option>
+            </select>
           </div>
           <div className="form-group">
             <label htmlFor="recebidoEm">Data do recebimento</label>

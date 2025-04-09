@@ -151,7 +151,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
           status2: [],
           clienteId: [],
           fornecedorId: [],
-          subTipo: [],
+        tipoTransacao: [],
           period: { start: null, end: null },
           month: null,
         }
@@ -526,20 +526,20 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             </div>
           )}
 
-          {/* Filtro por tipo de transação (subTipo) */}
-          {filterConfig.subTipo && (
+          {/* Filtro por tipo de transação (tipoTransacao) */}
+          {filterConfig.tipoTransacao && (
             <div className="form-group">
               <h5>Tipo de transação</h5>
-              <button onClick={() => toggleModal('subTipo')}>
+              <button onClick={() => toggleModal('tipoTransacao')}>
                 <div>
-                  {selectedFilters.subTipo?.length > 0 && (
-                    <span className="filter-count">{selectedFilters.subTipo.length}</span>
+                  {selectedFilters.tipoTransacao?.length > 0 && (
+                    <span className="filter-count">{selectedFilters.tipoTransacao.length}</span>
                   )}
-                  {selectedFilters?.subTipo?.length > 0 ? 'Filtrados' : 'Todos'}
+                  {selectedFilters?.tipoTransacao?.length > 0 ? 'Filtrados' : 'Todos'}
                 </div>
                 <ArrowDown />
               </button>
-              {activeModal === 'subTipo' && (
+              {activeModal === 'tipoTransacao' && (
                 <div ref={activeModalRef} className="modal-filter">
                   <ul>
                     {[
@@ -552,7 +552,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                       "outro",
                     ].map((tipo) => {
                       // Mapeamento de nomes legíveis
-                      const subTipoLabels = {
+                      const tipoTransacaoLabels = {
                         pix: "PIX",
                         boleto: "Boleto",
                         transferencia: "Transferência",
@@ -567,7 +567,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                           <label>
                             <input
                               type="checkbox"
-                              name="subTipo"
+                              name="tipoTransacao"
                               value={tipo}
                               onChange={(e) => {
                                 const { name, value, checked } = e.target;
@@ -580,9 +580,9 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                                   },
                                 });
                               }}
-                              checked={selectedFilters.subTipo?.includes(tipo) || false}
+                              checked={selectedFilters.tipoTransacao?.includes(tipo) || false}
                             />
-                            {subTipoLabels[tipo] || tipo} {/* Nome formatado */}
+                            {tipoTransacaoLabels[tipo] || tipo} {/* Nome formatado */}
                           </label>
                         </li>
                       );

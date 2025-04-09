@@ -37,7 +37,7 @@ export const FinanceProvider = ({ children }) => {
   const exportarContasAPagar = useCallback(
     async (filtros) => {
       console.log('Chamando API com filtros:', filtros);
-  
+
       try {
         const response = await api.get('/contas-a-pagar/exportar', {
           params: filtros,
@@ -49,7 +49,7 @@ export const FinanceProvider = ({ children }) => {
           },
           responseType: 'blob', // Para garantir que o Excel seja recebido corretamente
         });
-  
+
         return response.data;
       } catch (error) {
         throw error;
@@ -57,7 +57,7 @@ export const FinanceProvider = ({ children }) => {
     },
     []
   );
-  
+
   const fetchCategorias = useCallback(async () => {
     setLoading(true);
     try {
@@ -214,6 +214,7 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-receber');
+      console.log(response.data.data.contas);
       setContasAReceber(response.data.data.contas);
     } catch (error) {
       setError(error);
@@ -224,8 +225,6 @@ export const FinanceProvider = ({ children }) => {
 
   const exportarContasAReceber = useCallback(
     async (filtros) => {
-      // console.log('Chamando API com filtros:', filtros);
-  
       try {
         const response = await api.get('/contas-a-receber/exportar', {
           params: filtros,
@@ -240,7 +239,7 @@ export const FinanceProvider = ({ children }) => {
           },
           responseType: 'blob',
         });
-  
+
         return response.data;
       } catch (error) {
         throw error;
@@ -248,7 +247,7 @@ export const FinanceProvider = ({ children }) => {
     },
     []
   );
-  
+
   const fetchCategoriasAReceber = useCallback(async () => {
     setLoading(true);
     try {

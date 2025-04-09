@@ -26,6 +26,7 @@ const ContasAPagar = () => {
     categoria: '',
     fornecedorId: '',
     descricao: '',
+    tipoTransacao: '',
     estaPago: false
   });
   const [selectedConta, setSelectedConta] = useState(null);
@@ -50,7 +51,7 @@ const ContasAPagar = () => {
     categorias: [],
     status2: [],
     fornecedorId: [],
-    subtipo: [],
+    tipoTransacao: [],
     period: {
       start: null,
       end: null
@@ -100,15 +101,14 @@ const ContasAPagar = () => {
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
       const matchesFornecedor = fornecedorId.length === 0 || fornecedorId.includes(String(conta.fornecedor?.id));
-      const matchesSubTipo = (!selectedFilters.subTipo || selectedFilters.subTipo.length === 0) ||
-        (conta.extrato && selectedFilters.subTipo.includes(conta.extrato.subTipo));
-
+      const matchesTipoTransacao = (!selectedFilters.tipoTransacao || selectedFilters.tipoTransacao.length === 0) ||
+        selectedFilters.tipoTransacao.includes(conta.tipoTransacao);
       return (
         (matchesPeriod || matchesMonth || (!month && !period.start && !period.end && isCurrentMonth)) &&
         matchesCategoria &&
         matchesStatus &&
         matchesFornecedor &&
-        matchesSubTipo
+        matchesTipoTransacao
       );
     });
 
@@ -140,20 +140,20 @@ const ContasAPagar = () => {
 
   const handleFilterChange = (e) => {
     const { name, value, checked } = e.target;
-  
+
     setSelectedFilters((prevFilters) => {
       // Se o nome do filtro for reset, retorna os valores padrão
       if (name === 'resetFilters') {
         return value;
       }
-  
+
       let updatedFilters = { ...prevFilters };
-  
+
       if (!updatedFilters.categorias) updatedFilters.categorias = [];
       if (!updatedFilters.status2) updatedFilters.status2 = [];
       if (!updatedFilters.fornecedorId) updatedFilters.fornecedorId = [];
       if (!updatedFilters.subTipo) updatedFilters.subTipo = [];
-  
+
       if (name === 'categoria') {
         updatedFilters.categorias = checked
           ? [...new Set([...updatedFilters.categorias, value])]
@@ -175,12 +175,12 @@ const ContasAPagar = () => {
       } else if (name === 'month') {
         updatedFilters.month = value;
         updatedFilters.period = { start: null, end: null };
-      } else if (name === 'subTipo') {
-        updatedFilters.subTipo = checked
-          ? [...new Set([...updatedFilters.subTipo, value])]
-          : updatedFilters.subTipo.filter((tipo) => tipo !== value);
+      } else if (name === 'tipoTransacao') {
+        updatedFilters.tipoTransacao = checked
+          ? [...new Set([...updatedFilters.tipoTransacao, value])]
+          : updatedFilters.tipoTransacao.filter((tipo) => tipo !== value);
       }
-  
+
       return updatedFilters;
     });
   };
@@ -283,6 +283,7 @@ const ContasAPagar = () => {
         multa: '',
         juros: '',
         desconto: '',
+        tipoTransacao: conta.tipoTransacao || ''
       });
       setExpandSection(false);
       setShowConfirmModal(true);
@@ -353,6 +354,7 @@ const ContasAPagar = () => {
       categoria: novaConta.categoria,
       fornecedorId: novaConta.fornecedorId,
       ...(novaConta.descricao && { descricao: novaConta.descricao }),
+      ...(novaConta.tipoTransacao && { tipoTransacao: novaConta.tipoTransacao }),
     };
 
     try {
@@ -395,6 +397,9 @@ const ContasAPagar = () => {
       }
       if (pagamento.desconto) {
         updatedConta.desconto = parseFloat(pagamento.desconto);
+      }
+      if (pagamento.tipoTransacao) {
+        updatedConta.tipoTransacao = pagamento.tipoTransacao;
       }
 
       await informPagamento(selectedConta.id, updatedConta);
@@ -541,7 +546,7 @@ const ContasAPagar = () => {
             buttonAdd: true,
             buttonPeriod: true,
             buttonMeses: true,
-            subTipo: [],
+            tipoTransacao: [],
           }}
           categorias={categorias}
           fornecedores={fornecedores}
@@ -561,6 +566,7 @@ const ContasAPagar = () => {
                 <th>Categoria</th>
                 <th>Fornecedor</th>
                 <th>Descrição</th>
+                <th>Tipo Transação</th>
                 <th>Status</th>
                 <th>Valor</th>
                 <th>Ações</th>
@@ -575,6 +581,7 @@ const ContasAPagar = () => {
                     <td data-label="Categoria">{conta.categoria}</td>
                     <td data-label="Fornecedor">{conta.fornecedor ? conta.fornecedor.nomeFantasia : 'Fornecedor não informado'}</td>
                     <td data-label="Descrição">{conta.descricao}</td>
+                    <td data-label="Tipo Transação">{conta.tipoTransacao || '-'}</td>
                     <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aPagar' ? 'a pagar' : conta.status}</span>
                     </td>
@@ -711,6 +718,27 @@ const ContasAPagar = () => {
               <label htmlFor="pago">Marcar como pago</label>
             </div>
           )}
+          {novaConta.estaPago === 'pago' && (
+            <div className="form-group">
+              <label htmlFor="tipoTransacao">Tipo de transação</label>
+              <select
+                id="tipoTransacao"
+                name="tipoTransacao"
+                value={novaConta.tipoTransacao}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Selecione</option>
+                <option value="pix">PIX</option>
+                <option value="boleto">Boleto</option>
+                <option value="transferencia">Transferência</option>
+                <option value="compraNoDebito">Compra no Débito</option>
+                <option value="pagamentoFaturaCartao">Pagamento de Fatura</option>
+                <option value="recargaCelular">Recarga de Celular</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+          )}
           {modalMode === 'view' && (
             <div className="form-group">
               <label htmlFor="status">Status</label>
@@ -754,6 +782,25 @@ const ContasAPagar = () => {
               <span>{selectedConta?.categoria}</span>
             </div>
             <span>R${formatValue(selectedConta?.valor)}</span>
+          </div>
+          <div className="form-group">
+            <label htmlFor="tipoTransacao">Tipo de transação</label>
+            <select
+              id="tipoTransacao"
+              name="tipoTransacao"
+              value={pagamento.tipoTransacao}
+              onChange={handlePagamentoChange}
+              required
+            >
+              <option value="">Selecione</option>
+              <option value="pix">PIX</option>
+              <option value="boleto">Boleto</option>
+              <option value="transferencia">Transferência</option>
+              <option value="compraNoDebito">Compra no Débito</option>
+              <option value="pagamentoFaturaCartao">Pagamento de Fatura</option>
+              <option value="recargaCelular">Recarga de Celular</option>
+              <option value="outro">Outro</option>
+            </select>
           </div>
           <div className="form-group">
             <label htmlFor="pagoEm">Data do pagamento</label>
