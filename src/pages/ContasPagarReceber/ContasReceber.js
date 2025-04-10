@@ -8,9 +8,10 @@ import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp, ArrowLeft, ArrowRight } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
-import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns';
+import { format, isValid, startOfMonth, endOfMonth } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
+
 
 const ContasReceber = () => {
   const { fetchClientes, clientes } = useClientSupplier();
@@ -211,11 +212,12 @@ const ContasReceber = () => {
   // Formatar data para 'yyyy-MM-dd'
   const formatDate = (dateString) => {
     if (!dateString) return 'Data inválida';
-    const parsedDate = parseISO(dateString);
-    if (!isValid(parsedDate)) {
-      return 'Data inválida';
-    }
-    return format(parsedDate, 'dd-MM-yyyy');
+    const date = new Date(dateString); // já está em ISO completo
+    if (!isValid(date)) return 'Data inválida';
+
+    // Ajuste manual do timezone (UTC -> local)
+    const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    return format(adjustedDate, 'dd-MM-yyyy');
   };
 
   // Formatar valor para o formato de moeda
@@ -249,7 +251,9 @@ const ContasReceber = () => {
     setModalMode('edit');
     setNovaConta({
       ...conta,
-      vencimento: formatDate(conta.vencimento),
+      vencimento: new Date(new Date(conta.vencimento).getTime() + new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .split('T')[0],
       valor: formatValue(conta.valor),
       clienteId: conta.cliente?.id || '',
     });
@@ -261,7 +265,9 @@ const ContasReceber = () => {
     setModalMode('view');
     setNovaConta({
       ...conta,
-      vencimento: formatDate(conta.vencimento),
+      vencimento: new Date(new Date(conta.vencimento).getTime() + new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .split('T')[0],
       valor: formatValue(conta.valor),
     });
     setShowModal(true);
@@ -360,6 +366,7 @@ const ContasReceber = () => {
       vencimento: novaConta.vencimento,
       categoria: novaConta.categoria,
       clienteId: novaConta.clienteId,
+      recebido: novaConta.status === 'Recebido',
       ...(novaConta.descricao && { descricao: novaConta.descricao }),
     };
 
@@ -570,6 +577,21 @@ const ContasReceber = () => {
     }
   };
 
+  // função pra transformar os tipos de transação
+  const formatTipoTransacao = (value) => {
+    const map = {
+      pix: 'PIX',
+      boleto: 'Boleto',
+      transferencia: 'Transferência',
+      compraNoDebito: 'Compra no Débito',
+      pagamentoFaturaCartao: 'Pagamento de Fatura',
+      recargaCelular: 'Recarga de Celular',
+      outro: 'Outro',
+    };
+
+    return map[value] || value;
+  };
+
   return (
     <div className="container">
       <Sidebar />
@@ -624,8 +646,7 @@ const ContasReceber = () => {
                     </td>
                     <td data-label="Cliente">{conta.cliente ? conta.cliente.nomeFantasia : 'Cliente não encontrado'}</td>
                     <td data-label="Descrição">{conta.cliente.cpfCnpj}</td>
-                    <td data-label="Tipo Transação">{conta.tipoTransacao || '-'}</td>
-                    <td data-label="Status">
+                    <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>                    <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aReceber' ? 'a receber' : conta.status}</span>
                     </td>
                     <td data-label="Valor">R${formatValue(conta.valor)}</td>

@@ -8,9 +8,10 @@ import './ContasPagarReceber.css';
 import { AlertOctagon, ThumbsUp, XCircle, ChevronDown, ChevronUp, ArrowLeft, ArrowRight } from 'react-feather';
 import { useFinance } from '../../context/FinanceContext';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
-import { parseISO, format, isValid, startOfMonth, endOfMonth } from 'date-fns';
+import { format, isValid, startOfMonth, endOfMonth } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
+
 
 const ContasAPagar = () => {
   const { fetchFornecedores, fornecedores } = useClientSupplier();
@@ -206,11 +207,12 @@ const ContasAPagar = () => {
   // Formatar data para 'yyyy-MM-dd'
   const formatDate = (dateString) => {
     if (!dateString) return 'Data inválida';
-    const parsedDate = parseISO(dateString);
-    if (!isValid(parsedDate)) {
-      return 'Data inválida';
-    }
-    return format(parsedDate, 'dd-MM-yyyy');
+    const date = new Date(dateString); // já está em ISO completo
+    if (!isValid(date)) return 'Data inválida';
+
+    // Ajuste manual do timezone (UTC -> local)
+    const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    return format(adjustedDate, 'dd-MM-yyyy');
   };
 
   // Formatar valor para o formato de moeda
@@ -244,7 +246,9 @@ const ContasAPagar = () => {
     setModalMode('edit');
     setNovaConta({
       ...conta,
-      vencimento: formatDate(conta.vencimento),
+      vencimento: new Date(new Date(conta.vencimento).getTime() + new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .split('T')[0],
       valor: formatValue(conta.valor),
       fornecedorId: conta.fornecedor?.id || '',
     });
@@ -256,7 +260,9 @@ const ContasAPagar = () => {
     setModalMode('view');
     setNovaConta({
       ...conta,
-      vencimento: formatDate(conta.vencimento),
+      vencimento: new Date(new Date(conta.vencimento).getTime() + new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .split('T')[0],
       valor: formatValue(conta.valor),
     });
     setShowModal(true);
@@ -353,6 +359,7 @@ const ContasAPagar = () => {
       vencimento: novaConta.vencimento,
       categoria: novaConta.categoria,
       fornecedorId: novaConta.fornecedorId,
+      estaPago: novaConta.estaPago === 'pago',
       ...(novaConta.descricao && { descricao: novaConta.descricao }),
       ...(novaConta.tipoTransacao && { tipoTransacao: novaConta.tipoTransacao }),
     };
@@ -529,6 +536,22 @@ const ContasAPagar = () => {
   };
 
 
+  // função pra transformar os tipos de transação
+  const formatTipoTransacao = (value) => {
+    const map = {
+      pix: 'PIX',
+      boleto: 'Boleto',
+      transferencia: 'Transferência',
+      compraNoDebito: 'Compra no Débito',
+      pagamentoFaturaCartao: 'Pagamento de Fatura',
+      recargaCelular: 'Recarga de Celular',
+      outro: 'Outro',
+    };
+  
+    return map[value] || value;
+  };
+
+
   return (
     <div className="container">
       <Sidebar />
@@ -581,8 +604,7 @@ const ContasAPagar = () => {
                     <td data-label="Categoria">{conta.categoria}</td>
                     <td data-label="Fornecedor">{conta.fornecedor ? conta.fornecedor.nomeFantasia : 'Fornecedor não informado'}</td>
                     <td data-label="Descrição">{conta.descricao}</td>
-                    <td data-label="Tipo Transação">{conta.tipoTransacao || '-'}</td>
-                    <td data-label="Status">
+                    <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>                    <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aPagar' ? 'a pagar' : conta.status}</span>
                     </td>
                     <td data-label="Valor">R${formatValue(conta.valor)}</td>
@@ -611,6 +633,7 @@ const ContasAPagar = () => {
             </tbody>
           </table>
         </div>
+
         {/* Controle de paginação */}
         <div className="paginacao-container">
           <div className="paginacao-texto">
