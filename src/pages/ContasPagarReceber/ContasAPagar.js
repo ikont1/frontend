@@ -603,6 +603,7 @@ const ContasAPagar = () => {
                     <td data-label="Categoria">
                       {conta.categoria} <span className="nf-badge">{`NF ${conta.nf ? conta.nf.nNF : 'N/A'}`}</span>
                     </td>
+                    <td data-label="Fornecedor">{conta.fornecedor.nomeFantasia}</td>
                     <td data-label="Descrição">{conta.descricao}</td>
                     <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>
                     <td data-label="Origem">{conta.tipoCadastro.charAt(0).toUpperCase() + conta.tipoCadastro.slice(1)}</td>
