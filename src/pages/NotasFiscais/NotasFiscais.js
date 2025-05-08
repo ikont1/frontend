@@ -27,7 +27,7 @@ const NotasFiscais = () => {
 			}
 		};
 		loadNfs();
-	}, []);
+	}, [fetchNfs, statusMonitoramento]);
 
 	const handleMonitoramentoClick = (id, acao) => {
 		setMonitoramentoId(id);

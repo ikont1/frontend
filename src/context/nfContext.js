@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import api from '../services/api';
 import Notification from '../components/Notification/Notification';
 import { ThumbsUp, AlertTriangle } from 'react-feather';
@@ -16,7 +16,7 @@ export const NfProvider = ({ children }) => {
     setNotification(null);
   };
 
-  const fetchNfs = async () => {
+  const fetchNfs = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get('/nf');
@@ -29,7 +29,7 @@ export const NfProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const criarConciliacao = async (data) => {
     setLoading(true);
@@ -135,7 +135,7 @@ export const NfProvider = ({ children }) => {
     }
   };
 
-  const statusMonitoramento = async () => {
+  const statusMonitoramento = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get('/nf/status');
@@ -148,7 +148,7 @@ export const NfProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const ativarMonitoramento = async (id) => {
     setLoading(true);
