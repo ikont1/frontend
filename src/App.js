@@ -8,6 +8,7 @@ import { WalletProvider } from "./context/WalletContext";
 import { ConciliacaoProvider } from "./context/ConciliacaoContext";
 import { AssinaturaProvider } from "./context/AssinaturaContext";
 import { UsersProvider } from "./context/UsersContext";
+import { NfProvider } from "./context/nfContext";
 
 function App() {
   return (
@@ -19,11 +20,13 @@ function App() {
               <FinanceProvider>
                 <WalletProvider>
                   <ConciliacaoProvider>
-                    <AssinaturaProvider>
+                    <NfProvider>
+                      <AssinaturaProvider>
 
-                      <RoutesApp />
+                        <RoutesApp />
 
-                    </AssinaturaProvider>
+                      </AssinaturaProvider>
+                    </NfProvider>
                   </ConciliacaoProvider>
                 </WalletProvider>
               </FinanceProvider>

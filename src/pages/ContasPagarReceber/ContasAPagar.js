@@ -359,9 +359,7 @@ const ContasAPagar = () => {
       vencimento: novaConta.vencimento,
       categoria: novaConta.categoria,
       fornecedorId: novaConta.fornecedorId,
-      estaPago: novaConta.estaPago === 'pago',
       ...(novaConta.descricao && { descricao: novaConta.descricao }),
-      ...(novaConta.tipoTransacao && { tipoTransacao: novaConta.tipoTransacao }),
     };
 
     try {
@@ -547,7 +545,7 @@ const ContasAPagar = () => {
       recargaCelular: 'Recarga de Celular',
       outro: 'Outro',
     };
-  
+
     return map[value] || value;
   };
 
@@ -590,6 +588,7 @@ const ContasAPagar = () => {
                 <th>Fornecedor</th>
                 <th>Descrição</th>
                 <th>Tipo Transação</th>
+                <th>Origem</th>
                 <th>Status</th>
                 <th>Valor</th>
                 <th>Ações</th>
@@ -601,10 +600,13 @@ const ContasAPagar = () => {
                 itensPaginados.map((conta, index) => (
                   <tr key={index}>
                     <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
-                    <td data-label="Categoria">{conta.categoria}</td>
-                    <td data-label="Fornecedor">{conta.fornecedor ? conta.fornecedor.nomeFantasia : 'Fornecedor não informado'}</td>
+                    <td data-label="Categoria">
+                      {conta.categoria} <span className="nf-badge">{`NF ${conta.nf ? conta.nf.nNF : 'N/A'}`}</span>
+                    </td>
                     <td data-label="Descrição">{conta.descricao}</td>
-                    <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>                    <td data-label="Status">
+                    <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>
+                    <td data-label="Origem">{conta.tipoCadastro.charAt(0).toUpperCase() + conta.tipoCadastro.slice(1)}</td>
+                    <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aPagar' ? 'a pagar' : conta.status}</span>
                     </td>
                     <td data-label="Valor">R${formatValue(conta.valor)}</td>

@@ -26,7 +26,7 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-pagar');
-      console.log(response.data.data.contas)
+      console.log('contas a pagar',response.data.data.contas);
       setContasAPagar(response.data.data.contas);
     } catch (error) {
       setError(error);
@@ -63,6 +63,7 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-pagar/categorias');
+
       setCategorias(response.data.data);
     } catch (error) {
       setError(error);
@@ -215,7 +216,6 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-receber');
-      console.log(response.data.data.contas);
       setContasAReceber(response.data.data.contas);
     } catch (error) {
       setError(error);

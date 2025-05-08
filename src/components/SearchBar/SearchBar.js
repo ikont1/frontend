@@ -10,14 +10,14 @@ const SearchBar = ({ onSearch, placeholder }) => {
   const handleInputChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    onSearch(query); // Chama a função de busca sempre que o valor mudar
+    onSearch(query);
   };
 
   const handleSearchClick = () => {
     setShowInput(!showInput);
     if (!showInput) {
       setSearchQuery('');
-      // onSearch(''); // Limpa a busca quando o campo é escondido
+      
     }
   };
 

@@ -630,6 +630,7 @@ const ContasReceber = () => {
                 <th>Cliente</th>
                 <th>CPF/CNPJ</th>
                 <th>Tipo transação</th>
+                <th>Origem</th>
                 <th>Status</th>
                 <th>Valor</th>
                 <th>Ações</th>
@@ -642,11 +643,13 @@ const ContasReceber = () => {
                   <tr key={index}>
                     <td data-label="Vencimento">{formatDate(conta.vencimento)}</td>
                     <td data-label="Categoria">
-                      {conta.categoria} <span className="nf-badge">{`NF ${conta.nf || 'N/A'}`}</span>
+                      {conta.categoria} <span className="nf-badge">{`NF ${conta.nf ? conta.nf.nNF : 'N/A'}`}</span>
                     </td>
                     <td data-label="Cliente">{conta.cliente ? conta.cliente.nomeFantasia : 'Cliente não encontrado'}</td>
                     <td data-label="Descrição">{conta.cliente.cpfCnpj}</td>
-                    <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>                    <td data-label="Status">
+                    <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>
+                    <td data-label="Origem">{conta.tipoCadastro.charAt(0).toUpperCase() + conta.tipoCadastro.slice(1)}</td>
+                    <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aReceber' ? 'a receber' : conta.status}</span>
                     </td>
                     <td data-label="Valor">R${formatValue(conta.valor)}</td>
