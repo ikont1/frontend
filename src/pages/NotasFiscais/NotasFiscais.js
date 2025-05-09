@@ -40,8 +40,8 @@ useEffect(() => {
 			const clientes = [
 				...new Map(
 					data.map(nf => ({
-						id: nf.destXNome || nf.emitCpfCnpj,
-						nomeFantasia: nf.destXNome,
+						id: nf.emitXNome || nf.emitCpfCnpj,
+						nomeFantasia: nf.emitXNome,
 						cpfCnpj: nf.emitCpfCnpj
 					}))
 					.map(c => [c.id, c])
@@ -148,7 +148,7 @@ useEffect(() => {
 		// Situação
 		const matchSituacao = selectedFilters.situacoes.length > 0 ? selectedFilters.situacoes.includes(nf.situacao) : true;
 		// Cliente
-		const matchCliente = selectedFilters.clienteId.length > 0 ? selectedFilters.clienteId.includes(nf.destXNome) : true;
+		const matchCliente = selectedFilters.clienteId.length > 0 ? selectedFilters.clienteId.includes(nf.emitXNome) : true;
 		// Mês
 		let matchMonth = true;
 		if (selectedFilters.month) {
@@ -218,7 +218,7 @@ useEffect(() => {
 								<tr key={index}>
 									<td>{notas.nNF}/{notas.serie}</td>
 									<td>{formatDate(notas.dhEmi)}</td>
-									<td className='td-transacao-extrato'>{notas.destXNome}</td>
+									<td className='td-transacao-extrato'>{notas.emitXNome}</td>
 									<td style={{ textTransform: 'capitalize' }}>{notas.situacao}</td>
 									<td>R${formatValue(notas.valorTotal)}</td>
 								</tr>

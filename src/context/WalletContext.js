@@ -195,7 +195,7 @@ export const WalletProvider = ({ children }) => {
   const listarExtrato = async (id) => {
     try {
       const response = await api.get(`/conta-bancaria/${id}/extrato`);
-      console.log('estrato',response.data.data.dados);
+      console.log('extrato',response.data.data.dados);
 
       return response.data.data.dados;
     } catch (error) {
