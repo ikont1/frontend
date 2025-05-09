@@ -151,7 +151,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
           status2: [],
           clienteId: [],
           fornecedorId: [],
-        tipoTransacao: [],
+          tipoTransacao: [],
           period: { start: null, end: null },
           month: null,
         }
@@ -235,7 +235,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
             <Download /> Exportar
           </button>
         )}
-        <button className="filter-button" onClick={handleClearFilters}>
+        <button className="filter-button clean-filter" onClick={handleClearFilters}>
           <XCircle /> Limpar Filtros
         </button>
       </div>
@@ -490,7 +490,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                             type="checkbox"
                             name="fornecedor"
                             onChange={(e) => {
-                              onFilterChange(e); // Chama a função de filtro
+                              onFilterChange(e);
                             }}
                             value={fornecedor.id}
                             checked={selectedFilters.fornecedorId?.includes(String(fornecedor.id))}
@@ -499,27 +499,6 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                         </label>
                       </li>
                     ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Filtro por situação da nota fiscal */}
-          {filterConfig.situacaoNF && (
-            <div className="form-group">
-              <h5>Situação</h5>
-              <button onClick={() => toggleModal('situacaoNF')}>
-                Todos <ArrowDown />
-              </button>
-              {activeModal === 'situacaoNF' && (
-                <div ref={activeModalRef} className="modal-filter">
-                  <h5>Situação</h5>
-                  <ul>
-                    <li><label><input type="checkbox" id="processamento" /> Processamento</label></li>
-                    <li><label><input type="checkbox" id="emitido" /> Emitido</label></li>
-                    <li><label><input type="checkbox" id="cancelado" /> Cancelado</label></li>
-                    <li><label><input type="checkbox" id="pendente" /> Pendente</label></li>
                   </ul>
                 </div>
               )}
@@ -587,6 +566,54 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                         </li>
                       );
                     })}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Filtro por situação da nota fiscal */}
+          {filterConfig.situacaoNF && (
+            <div className="form-group">
+              <h5>Situação NF</h5>
+              <button onClick={() => toggleModal('situacaoNF')}>
+                <div>
+                  {selectedFilters.situacoes?.length > 0 && (
+                    <span className="filter-count">{selectedFilters.situacoes.length}</span>
+                  )}
+                  {selectedFilters?.situacoes?.length > 0 ? 'Filtradas' : 'Todos'}
+                </div>
+                <ArrowDown />
+              </button>
+              {activeModal === 'situacaoNF' && (
+                <div ref={activeModalRef} className="modal-filter">
+                  <ul>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="situacaoNF"
+                          value="emitida"
+                          onChange={(e) => {
+                            onFilterChange(e);
+                          }}
+                          checked={selectedFilters?.situacoes?.includes('emitida')}
+                        /> Emitida
+                      </label>
+                    </li>
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="situacaoNF"
+                          value="cancelada"
+                          onChange={(e) => {
+                            onFilterChange(e);
+                          }}
+                          checked={selectedFilters?.situacoes?.includes('cancelada')}
+                        /> Cancelada
+                      </label>
+                    </li>
                   </ul>
                 </div>
               )}

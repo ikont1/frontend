@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import './Conciliacao.css';
 import Sidebar from '../../components/Sidebar/Sidebar';
@@ -366,7 +367,6 @@ const Conciliacao = () => {
   // Função para abrir o modal de edição da conta sugerida aPagar/aReceber
   const handleOpenEditModal = (contaSugerida, tipo) => {
     setContaAEditar(contaSugerida); // Define a conta em edição
-
     if (tipo === 'debito') {
       setNovaContaAPagar({
         valor: contaSugerida.valor.toFixed(2),
@@ -691,6 +691,12 @@ const Conciliacao = () => {
     }
   };
 
+  // Utilitário para formatar CNPJ
+const formatCNPJ = (cnpj) => {
+  if (!cnpj) return '';
+  return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+};
+
   // Renderizar transações pendentes aplicando os filtros
   const renderTransacoesPendentes = () => {
     return itensPaginados
@@ -728,8 +734,10 @@ const Conciliacao = () => {
                   <button onClick={() => handleOpenRecusarModal(transacao)}>Recusar</button>
                 </div>
                 <div className="sugestao-info">
-                  <p>{new Date(contaSugerida.vencimento).toLocaleDateString()} - R$ {contaSugerida.valor.toFixed(2)} - {contaSugerida.descricao}</p>
-                  <span>Número da nota - <b>{contaSugerida.numeroNota || 'N/A'}</b></span>
+                  <span>{new Date(contaSugerida.vencimento).toLocaleDateString()} - R$ {contaSugerida.valor.toFixed(2)} - {contaSugerida.descricao}</span>
+                  <p>Número da nota - <b>{contaSugerida.nf.nNF || 'N/A'}</b></p>
+                  <p>Cliente - <b>{contaSugerida.nf.emitXNome || 'N/A'}</b></p>
+                  <p>CNPJ - <b>{contaSugerida.nf.emitCpfCnpj ? formatCNPJ(contaSugerida.nf.emitCpfCnpj) : 'N/A'}</b></p>
                 </div>
               </div>
             )}
@@ -780,6 +788,10 @@ const Conciliacao = () => {
                     <p>{contaConciliada.categoria}</p>
                   </div>
                   <p>{contaConciliada.descricao}</p>
+                  {/* Exibir CNPJ formatado se existir */}
+                  {contaConciliada.nf && contaConciliada.nf.emitCpfCnpj && (
+                    <p>CNPJ - <b>{formatCNPJ(contaConciliada.nf.emitCpfCnpj)}</b></p>
+                  )}
                 </div>
                 <h3>{`R$ ${contaConciliada.valor.toFixed(2)}`}</h3>
               </div>

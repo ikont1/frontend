@@ -128,7 +128,6 @@ export const WalletProvider = ({ children }) => {
 
   const atualizarContaBancaria = async (id, dadosAtuais, contaPrincipal) => {
     try {
-      // Define os campos permitidos e garante que os opcionais sejam strings
       const camposPermitidos = [
         "nomeConta",
         "codigoBanco",
@@ -196,13 +195,13 @@ export const WalletProvider = ({ children }) => {
   const listarExtrato = async (id) => {
     try {
       const response = await api.get(`/conta-bancaria/${id}/extrato`);
+      console.log('estrato',response.data.data.dados);
+
       return response.data.data.dados;
     } catch (error) {
-      // Trata especificamente o erro 404
       if (error.response && error.response.status === 404) {
-        return []; // Retorna uma lista vazia caso não haja extrato
+        return [];
       } else {
-        // Loga os outros tipos de erro
         throw error;
       }
     }

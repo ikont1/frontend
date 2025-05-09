@@ -47,7 +47,7 @@ export const NfProvider = ({ children }) => {
       setNotification({
         title: 'Erro',
         message: 'Erro ao criar conciliação.',
-        secondaryMessage: 'Por favor, tente novamente.',
+        secondaryMessage: error.response?.data?.message || 'Por favor, tente novamente.',
         type: 'error',
         icon: AlertTriangle,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
@@ -112,7 +112,7 @@ export const NfProvider = ({ children }) => {
   const desfazerConciliacao = async (id) => {
     setLoading(true);
     try {
-      await api.patch('/nf/conciliacao/desfazer', { id });
+      await api.patch('/nf/conciliacao/desfazer', { nfId: id });
       setNotification({
         title: 'Sucesso!',
         message: 'Conciliação desfeita com sucesso.',
@@ -125,7 +125,7 @@ export const NfProvider = ({ children }) => {
       setNotification({
         title: 'Erro',
         message: 'Erro ao desfazer conciliação.',
-        secondaryMessage: 'Por favor, tente novamente.',
+        secondaryMessage: error.response?.data?.message || 'Por favor, tente novamente.',
         type: 'error',
         icon: AlertTriangle,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
@@ -156,8 +156,7 @@ export const NfProvider = ({ children }) => {
       await api.patch('/nf/ativar-monitoramento', { id });
       setNotification({
         title: 'Sucesso!',
-        message: 'Monitoramento ativado com sucesso.',
-        secondaryMessage: 'Em breve o monitoramento sera concluido.',
+        message: 'Você já solicitou a ativação do monitoramento, aguarde enquanto o processo é concluído.',
         type: 'success',
         icon: ThumbsUp,
         buttons: [{ label: 'Ok', onClick: handleNotificationClose }]

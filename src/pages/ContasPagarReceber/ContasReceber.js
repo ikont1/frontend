@@ -11,11 +11,14 @@ import { useClientSupplier } from '../../context/ClientSupplierContext';
 import { format, isValid, startOfMonth, endOfMonth } from 'date-fns';
 import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import SearchBar from '../../components/SearchBar/SearchBar';
+import { useNf } from '../../context/nfContext';
+import ConfirmationModal from '../../components/Modal/confirmationModal';
 
 
 const ContasReceber = () => {
   const { fetchClientes, clientes } = useClientSupplier();
   const { contasAReceber, fetchContasAReceber, addContaAReceber, updateContaAReceber, deleteContaAReceber, informRecebimento, desfazerRecebimento, categoriasAReceber, fetchCategoriasAReceber, exportarContasAReceber } = useFinance();
+  const { fetchNfs, criarConciliacao, desfazerConciliacao } = useNf();
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -59,6 +62,64 @@ const ContasReceber = () => {
     },
     month: null,
   });
+
+  // --- Conciliacao NF state ---
+  const [showConciliacaoModal, setShowConciliacaoModal] = useState(false);
+  const [showTabelaNfModal, setShowTabelaNfModal] = useState(false);
+  const [contaSelecionadaConciliacao, setContaSelecionadaConciliacao] = useState(null);
+  const [nfsDisponiveis, setNfsDisponiveis] = useState([]);
+  const [nfSelecionada, setNfSelecionada] = useState('');
+  const [showConfirmDesconciliar, setShowConfirmDesconciliar] = useState(false);
+  const [contaParaDesconciliar, setContaParaDesconciliar] = useState(null);
+  // --- Conciliacao handlers ---
+  // Novo fluxo de conciliação manual
+  const handleAbrirConciliacao = async (conta) => {
+    setContaSelecionadaConciliacao(conta);
+    setShowConciliacaoModal(true); // Apenas confirmação inicial
+    setNfSelecionada('');
+  };
+
+  // Confirmação inicial do modal
+  const handleConfirmConciliacao = async () => {
+    setShowConciliacaoModal(false);
+    // Carrega NFs e abre tabela
+    const nfs = await fetchNfs();
+    const nfsNaoConciliadas = nfs.filter(nf => nf.conciliacaoStatus === 'naoConciliado');
+    setNfsDisponiveis(nfsNaoConciliadas);
+    setShowTabelaNfModal(true);
+    setNfSelecionada('');
+  };
+
+  // Seleção de NF na tabela
+  const handleSelecionarNf = (nfId) => {
+    setNfSelecionada(nfId);
+  };
+
+  // Finalizar conciliação
+  const handleConciliar = async () => {
+    if (!nfSelecionada) return;
+    await criarConciliacao({
+      entidade: 'contaAReceber',
+      entidadeId: contaSelecionadaConciliacao.id,
+      nfId: parseInt(nfSelecionada)
+    });
+    setShowTabelaNfModal(false);
+    setShowModal(false);
+    fetchContasAReceber();
+  };
+
+  const handleDesconciliar = (conta) => {
+    setContaParaDesconciliar(conta);
+    setShowConfirmDesconciliar(true);
+  };
+
+  const confirmDesconciliar = async () => {
+    if (!contaParaDesconciliar) return;
+    await desfazerConciliacao(contaParaDesconciliar.nfId);
+    setShowConfirmDesconciliar(false);
+    setShowModal(false);
+    fetchContasAReceber();
+  };
 
   // Estados de paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -366,7 +427,6 @@ const ContasReceber = () => {
       vencimento: novaConta.vencimento,
       categoria: novaConta.categoria,
       clienteId: novaConta.clienteId,
-      recebido: novaConta.status === 'Recebido',
       ...(novaConta.descricao && { descricao: novaConta.descricao }),
     };
 
@@ -508,7 +568,7 @@ const ContasReceber = () => {
 
     // Configurar os filtros para a requisição
     const filtros = {
-      itensPorPagina: 20000000, // Exportar tudo
+      itensPorPagina: 20000000,
       pagina: 1,
       ...(filtro.length > 0 && { filtro: filtro.join(',') }),
       periodo,
@@ -627,10 +687,10 @@ const ContasReceber = () => {
               <tr>
                 <th>Vencimento</th>
                 <th>Categoria</th>
+                <th>Origem</th>
                 <th>Cliente</th>
                 <th>CPF/CNPJ</th>
                 <th>Tipo transação</th>
-                <th>Origem</th>
                 <th>Status</th>
                 <th>Valor</th>
                 <th>Ações</th>
@@ -645,10 +705,10 @@ const ContasReceber = () => {
                     <td data-label="Categoria">
                       {conta.categoria} <span className="nf-badge">{`NF ${conta.nf ? conta.nf.nNF : 'N/A'}`}</span>
                     </td>
+                    <td data-label="Origem">{conta.tipoCadastro.charAt(0).toUpperCase() + conta.tipoCadastro.slice(1)}</td>
                     <td data-label="Cliente">{conta.cliente ? conta.cliente.nomeFantasia : 'Cliente não encontrado'}</td>
                     <td data-label="Descrição">{conta.cliente.cpfCnpj}</td>
                     <td data-label="Tipo Transação">{formatTipoTransacao(conta.tipoTransacao)}</td>
-                    <td data-label="Origem">{conta.tipoCadastro.charAt(0).toUpperCase() + conta.tipoCadastro.slice(1)}</td>
                     <td data-label="Status">
                       <span className={`status ${conta.status.toLowerCase().replace(' ', '-')}`}>{conta.status === 'aReceber' ? 'a receber' : conta.status}</span>
                     </td>
@@ -813,6 +873,17 @@ const ContasReceber = () => {
           <div className="form-actions">
             <button type="button" className="cancel" onClick={() => setShowModal(false)}>Cancelar</button>
             {modalMode !== 'view' && <button type="submit" className="save">Salvar</button>}
+            {/* Botões de conciliação/desfazer conciliação no modal de edição */}
+            {modalMode === 'edit' && !novaConta.nfId && (
+              <button style={{ marginLeft: 10 }} type="button" className="flag-button" onClick={() => handleAbrirConciliacao(novaConta)}>
+                Criar conciliação com NF
+              </button>
+            )}
+            {modalMode === 'edit' && novaConta.nfId && (
+              <button style={{ marginLeft: 10 }} type="button" className="flag-button" onClick={() => handleDesconciliar(novaConta)}>
+                Desfazer conciliação com NF
+              </button>
+            )}
           </div>
         </form>
       </Modal>
@@ -957,6 +1028,92 @@ const ContasReceber = () => {
           icon={notificationData.icon}
           buttons={notificationData.buttons}
           onClose={() => setShowNotification(false)}
+        />
+      )}
+      {/* Modal de conciliação NF - confirmação inicial */}
+      <Modal
+        isOpen={showConciliacaoModal}
+        onClose={() => setShowConciliacaoModal(false)}
+        title="Confirmar conciliação com NF"
+      >
+        <div style={{ margin: '16px 0' }}>
+          <p>
+            Você está criando uma conciliação de conta a receber com uma NF que será escolhida, tem certeza que deseja realizar esta ação?
+          </p>
+        </div>
+        <div className="form-actions">
+          <button type="button" className="cancel" onClick={() => setShowConciliacaoModal(false)}>Não tenho certeza</button>
+          <button type="button" className="save" onClick={handleConfirmConciliacao}>Tenho certeza</button>
+        </div>
+      </Modal>
+
+      {/* Modal de tabela de NFs disponíveis para conciliação */}
+      <Modal
+        isOpen={showTabelaNfModal}
+        onClose={() => setShowTabelaNfModal(false)}
+        title="Escolha a NF para conciliar"
+        size="large"
+      >
+        <div style={{ maxHeight: 300, overflowY: 'auto', marginBottom: 16 }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Nº/Série</th>
+                <th>Emissão</th>
+                <th>Cliente</th>
+                <th>Situação</th>
+                <th>Valor</th>
+                <th>Selecionar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {nfsDisponiveis.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>Nenhuma NF disponível</td>
+                </tr>
+              ) : (
+                nfsDisponiveis.map(nf => (
+                  <tr key={nf.id}>
+                    <td>{nf.nNF}{nf.serie ? `/${nf.serie}` : ''}</td>
+                    <td>{nf.dhEmi ? formatDate(nf.dhEmi) : ''}</td>
+                    <td>{nf.destXNome}</td>
+                    <td>{nf.situacao || 'Emitida'}</td>
+                    <td>R${formatValue(nf.valorTotal)}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className={nfSelecionada === nf.id ? 'save' : 'flag-button'}
+                        onClick={() => handleSelecionarNf(nf.id)}
+                        style={{ minWidth: 90 }}
+                      >
+                        {nfSelecionada === nf.id ? 'Selecionado' : 'Selecionar'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="form-actions" style={{ justifyContent: 'flex-end' }}>
+          <button type="button" className="cancel" onClick={() => setShowTabelaNfModal(false)}>Cancelar</button>
+          <button
+            type="button"
+            className="save"
+            disabled={!nfSelecionada}
+            onClick={handleConciliar}
+          >
+            Conciliar
+          </button>
+        </div>
+      </Modal>
+
+      {showConfirmDesconciliar && (
+        <ConfirmationModal
+          title="Confirmar desfazer conciliação"
+          message="Você está desfazendo a conciliação com uma NF, tem certeza que deseja realizar esta ação?"
+          onConfirm={confirmDesconciliar}
+          onCancel={() => setShowConfirmDesconciliar(false)}
         />
       )}
     </div >

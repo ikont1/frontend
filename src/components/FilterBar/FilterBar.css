@@ -51,6 +51,10 @@
   padding: 10px 15px;
 }
 
+.clean-filter{
+margin-left: 6px;
+}
+
 .date-filter svg,
 .period-button svg,
 .filter-button svg {
