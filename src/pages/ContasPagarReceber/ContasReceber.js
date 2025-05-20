@@ -14,6 +14,8 @@ import SearchBar from '../../components/SearchBar/SearchBar';
 import { useNf } from '../../context/nfContext';
 import ConfirmationModal from '../../components/Modal/confirmationModal';
 
+import { QRCodeCanvas } from 'qrcode.react';
+
 
 const ContasReceber = () => {
   const { fetchClientes, clientes } = useClientSupplier();
@@ -64,6 +66,7 @@ const ContasReceber = () => {
     month: null,
   });
 
+  const [copiedLinhaDigitavel, setCopiedLinhaDigitavel] = useState(false);
   const [copiedPix, setCopiedPix] = useState(false);
 
   // --- Conciliacao NF state ---
@@ -1134,9 +1137,13 @@ const ContasReceber = () => {
         </div>
       </Modal>
 
-      {/* Modal de desfazer convgenio BB */}
+      {/* Modal de cobranca BB */}
       <Modal isOpen={showConvenioModal} onClose={() => setShowConvenioModal(false)} title="Cobrança BB">
         <div className="boleto-info">
+          <div className="form-group">
+            <label>Nosso Número</label>
+            <input type="text" value={selectedConta?.cobrancaBb?.nossoNumero || '---'} readOnly />
+          </div>
           <div className="form-group">
             <label>Linha Digitável</label>
             <input
@@ -1145,21 +1152,13 @@ const ContasReceber = () => {
               readOnly
               onClick={() => {
                 navigator.clipboard.writeText(selectedConta?.cobrancaBb?.linhaDigitavel || '');
-                setCopiedPix(true);
-                setTimeout(() => setCopiedPix(false), 1500);
+                setCopiedLinhaDigitavel(true);
+                setTimeout(() => setCopiedLinhaDigitavel(false), 1500);
               }}
               style={{ cursor: 'pointer' }}
               title="Clique para copiar"
             />
-            {copiedPix && <small style={{ color: 'green' }}>Copiado!</small>}
-          </div>
-          <div className="form-group">
-            <label>Nosso Número</label>
-            <input type="text" value={selectedConta?.cobrancaBb?.nossoNumero || '---'} readOnly />
-          </div>
-          <div className="form-group">
-            <label>Número do Boleto</label>
-            <input type="text" value={selectedConta?.cobrancaBb?.numero || '---'} readOnly />
+            {copiedLinhaDigitavel && <small style={{ color: 'green' }}>Copiado!</small>}
           </div>
           <div className="form-group">
             <label>PIX (COPIA e COLA)</label>
@@ -1177,6 +1176,22 @@ const ContasReceber = () => {
             {copiedPix && <small style={{ color: 'green' }}>Copiado!</small>}
           </div>
           <div className="form-group">
+            <label>QR Code PIX</label>
+
+            <div style={{ width: 100 }} className="form-group">
+              {selectedConta?.cobrancaBb?.pixEmv ? (
+                <QRCodeCanvas
+                  value={selectedConta.cobrancaBb.pixEmv}
+                  size={180}
+                  level="H"
+                  includeMargin={true}
+                />
+              ) : (
+                <p>QR Code não disponível</p>
+              )}
+            </div>
+          </div>
+          <div className="form-group">
             <label>Vencimento</label>
             <input type="text" value={formatDate(selectedConta?.cobrancaBb?.vencimento) || '---'} readOnly />
           </div>
@@ -1192,7 +1207,7 @@ const ContasReceber = () => {
               rel="noopener noreferrer"
               style={{ color: 'blue', textDecoration: 'underline' }}
             >
-               Abrir boleto em nova aba
+              Abrir boleto em nova aba
             </a>
           </div>
         </div>
