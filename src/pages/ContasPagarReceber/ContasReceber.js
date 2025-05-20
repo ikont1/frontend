@@ -64,6 +64,8 @@ const ContasReceber = () => {
     month: null,
   });
 
+  const [copiedPix, setCopiedPix] = useState(false);
+
   // --- Conciliacao NF state ---
   const [showConciliacaoModal, setShowConciliacaoModal] = useState(false);
   const [showTabelaNfModal, setShowTabelaNfModal] = useState(false);
@@ -1132,9 +1134,66 @@ const ContasReceber = () => {
       </Modal>
 
       {/* Modal de desfazer convgenio BB */}
-      <Modal isOpen={showConvenioModal} onClose={() => setShowConvenioModal(false)} title="Convênio BB">
-        <div className="delete-modal-content">
-          Modal de desfazer conciliação
+      <Modal isOpen={showConvenioModal} onClose={() => setShowConvenioModal(false)} title="Cobrança BB">
+        <div className="boleto-info">
+          <div className="form-group">
+            <label>Linha Digitável</label>
+            <input
+              type="text"
+              value={selectedConta?.cobrancaBb?.linhaDigitavel || '---'}
+              readOnly
+              onClick={() => {
+                navigator.clipboard.writeText(selectedConta?.cobrancaBb?.linhaDigitavel || '');
+                setCopiedPix(true);
+                setTimeout(() => setCopiedPix(false), 1500);
+              }}
+              style={{ cursor: 'pointer' }}
+              title="Clique para copiar"
+            />
+            {copiedPix && <small style={{ color: 'green' }}>Copiado!</small>}
+          </div>
+          <div className="form-group">
+            <label>Nosso Número</label>
+            <input type="text" value={selectedConta?.cobrancaBb?.nossoNumero || '---'} readOnly />
+          </div>
+          <div className="form-group">
+            <label>Número do Boleto</label>
+            <input type="text" value={selectedConta?.cobrancaBb?.numero || '---'} readOnly />
+          </div>
+          <div className="form-group">
+            <label>PIX (COPIA e COLA)</label>
+            <textarea
+              style={{ resize: 'none', width: '100%', height: '100px', cursor: 'pointer' }}
+              value={selectedConta?.cobrancaBb?.pixEmv || '---'}
+              readOnly
+              onClick={() => {
+                navigator.clipboard.writeText(selectedConta?.cobrancaBb?.pixEmv || '');
+                setCopiedPix(true);
+                setTimeout(() => setCopiedPix(false), 1500);
+              }}
+              title="Clique para copiar"
+            />
+            {copiedPix && <small style={{ color: 'green' }}>Copiado!</small>}
+          </div>
+          <div className="form-group">
+            <label>Vencimento</label>
+            <input type="text" value={formatDate(selectedConta?.cobrancaBb?.vencimento) || '---'} readOnly />
+          </div>
+          <div className="form-group">
+            <label>Status</label>
+            <input type="text" value={selectedConta?.cobrancaBb?.status || '---'} readOnly />
+          </div>
+          <div className="form-group">
+            <label>Visualizar Boleto </label>
+            <a
+              href={selectedConta?.cobrancaBb?.urlImagemBoleto}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'blue', textDecoration: 'underline' }}
+            >
+               Abrir boleto em nova aba
+            </a>
+          </div>
         </div>
       </Modal>
 
