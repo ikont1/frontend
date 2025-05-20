@@ -666,6 +666,7 @@ const ContasReceber = () => {
       compraNoDebito: 'Compra no Débito',
       pagamentoFaturaCartao: 'Pagamento de Fatura',
       recargaCelular: 'Recarga de Celular',
+      cobrancaBB: 'Cobrança BB',
       outro: 'Outro',
     };
 

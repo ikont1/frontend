@@ -528,6 +528,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                       "compraNoDebito",
                       "pagamentoFaturaCartao",
                       "recargaCelular",
+                      "cobrancaBB",
                       "outro",
                     ].map((tipo) => {
                       // Mapeamento de nomes legíveis
@@ -538,6 +539,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                         compraNoDebito: "Compra no Débito",
                         pagamentoFaturaCartao: "Pagamento de Fatura",
                         recargaCelular: "Recarga de Celular",
+                        cobrancaBB: "Cobrança BB",
                         outro: "Outro",
                       };
 
