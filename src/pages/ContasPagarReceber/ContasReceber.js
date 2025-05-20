@@ -13,8 +13,8 @@ import { FormattedInput } from '../../components/FormateValidateInput/FormatFunc
 import SearchBar from '../../components/SearchBar/SearchBar';
 import { useNf } from '../../context/nfContext';
 import ConfirmationModal from '../../components/Modal/confirmationModal';
+// import { QRCodeCanvas } from 'qrcode.react';
 
-import { QRCodeCanvas } from 'qrcode.react';
 
 
 const ContasReceber = () => {
@@ -1175,7 +1175,8 @@ const ContasReceber = () => {
             />
             {copiedPix && <small style={{ color: 'green' }}>Copiado!</small>}
           </div>
-          <div className="form-group">
+
+          {/* <div className="form-group">
             <label>QR Code PIX</label>
 
             <div style={{ width: 100 }} className="form-group">
@@ -1190,7 +1191,8 @@ const ContasReceber = () => {
                 <p>QR Code não disponível</p>
               )}
             </div>
-          </div>
+          </div> */}
+
           <div className="form-group">
             <label>Vencimento</label>
             <input type="text" value={formatDate(selectedConta?.cobrancaBb?.vencimento) || '---'} readOnly />
