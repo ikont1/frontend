@@ -120,18 +120,18 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
   const validateStep1 = () => {
     const newErrors = {};
     const cleanCnpjCpf = formData.cpfCnpj.replace(/\D/g, '');
-  
+
     if (!formData.cpfCnpj) {
       newErrors.cpfCnpj = 'CNPJ/CPF é obrigatório';
     } else if (cleanCnpjCpf.length !== 11 && cleanCnpjCpf.length !== 14) {
       newErrors.cpfCnpj = 'Digite um CNPJ ou CPF válido';
     }
-  
+
     // Se for CNPJ (14 dígitos), o Nome Fantasia se torna obrigatório
     if (cleanCnpjCpf.length === 14 && !formData.nomeFantasia.trim()) {
       newErrors.nomeFantasia = 'Nome Fantasia é obrigatório para CNPJ';
     }
-  
+
 
     if (!formData.razaoSocial) newErrors.razaoSocial = 'Nome ou Razão Social é obrigatória';
     if (!formData.telefone) newErrors.telefone = 'Telefone é obrigatório';
@@ -159,9 +159,10 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
     const validationErrors = { ...validationErrorsStep1, ...validationErrorsStep2 };
 
     if (Object.keys(validationErrors).length === 0) {
-
       const dataToSubmit = { ...formData };
-
+      if ('contaId' in dataToSubmit) {
+        delete dataToSubmit.contaId;
+      }
 
       if (!dataToSubmit.inscricalMunicipal) {
         delete dataToSubmit.inscricalMunicipal;
@@ -169,7 +170,9 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
       if (!dataToSubmit.inscricalEstadual) {
         delete dataToSubmit.inscricalEstadual;
       }
-
+      if (!dataToSubmit.nomeFantasia) {
+        delete dataToSubmit.nomeFantasia;
+      }
 
       const cleanedEndereco = { ...dataToSubmit.endereco };
       Object.keys(cleanedEndereco).forEach(key => {
@@ -284,12 +287,12 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
 
             <div className="form-group">
               <label htmlFor="inscricalMunicipal">Inscrição Municipal</label>
-              <input type="text" id="inscricalMunicipal" name="inscricalMunicipal" value={formData.inscricalMunicipal} onChange={handleChange} />
+              <input type="text" id="inscricalMunicipal" name="inscricalMunicipal" value={formData.inscricalMunicipal || ''} onChange={handleChange} />
             </div>
 
             <div className='form-group'>
               <label htmlFor="inscricalEstadual">Inscrição Estadual</label>
-              <input type="text" id="inscricalEstadual" name="inscricalEstadual" value={formData.inscricalEstadual} onChange={handleChange} />
+              <input type="text" id="inscricalEstadual" name="inscricalEstadual" value={formData.inscricalEstadual || ''} onChange={handleChange} />
             </div>
 
             <div className="form-group-modal">
@@ -356,7 +359,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className='form-group'>
               <label htmlFor="endereco">Endereço</label>
               <input type="text" id="endereco" name="endereco"
-                value={formData.endereco.endereco}
+                value={formData.endereco.endereco || ''}
                 placeholder="Campo obrigatório"
                 onChange={handleChange} required />
               {errors.endereco ? (
@@ -368,7 +371,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group">
               <label htmlFor="complemento">Complemento</label>
               <input type="text" id="complemento" name="complemento"
-                value={formData.endereco.complemento}
+                value={formData.endereco.complemento || ''}
                 placeholder="Campo obrigatório"
                 onChange={handleChange} required />
               {errors.complemento ? (
@@ -380,7 +383,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group">
               <label htmlFor="cep">CEP</label>
               <FormattedInput type="cep" id="cep" name="cep"
-                value={formData.endereco.cep}
+                value={formData.endereco.cep || ''}
                 placeholder="Campo obrigatório"
                 onChange={handleChange} required />
               {errors.cep ? (
@@ -393,7 +396,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               <div className="form-group">
                 <label htmlFor="numero">Número</label>
                 <input type="text" id="numero" name="numero"
-                  value={formData.endereco.numero}
+                  value={formData.endereco.numero || ''}
                   placeholder="Campo obrigatório"
                   onChange={handleChange} required />
                 {errors.numero ? (
@@ -405,7 +408,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               <div className="form-group">
                 <label htmlFor="bairro">Bairro</label>
                 <input type="text" id="bairro" name="bairro"
-                  value={formData.endereco.bairro}
+                  value={formData.endereco.bairro || ''}
                   placeholder="Campo obrigatório"
                   onChange={handleChange} required />
                 {errors.bairro ? (
@@ -418,7 +421,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
             <div className="form-group-modal">
               <div className="form-group">
                 <label htmlFor="uf">Estado</label>
-                <select type="text" id="uf" name="uf" value={formData.endereco.uf} onChange={handleChange} required>
+                <select type="text" id="uf" name="uf" value={formData.endereco.uf || ''} onChange={handleChange} required>
                   <option value="">Selecione um Estado</option>
                   <option value="PI">PI</option>
                   <option value="SP">SP</option>
@@ -429,7 +432,7 @@ const ClienteForm = ({ initialData = {}, onClose, fetchData }) => {
               <div className="form-group">
                 <label htmlFor="cidade">Cidade</label>
                 <input type="text" id="cidade" name="cidade"
-                  value={formData.endereco.cidade}
+                  value={formData.endereco.cidade || ''}
                   placeholder="Campo obrigatório"
                   onChange={handleChange} required />
                 {errors.cidade && <span style={{ color: 'red', fontSize: '10px' }}>{errors.cidade}</span>}

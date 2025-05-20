@@ -40,7 +40,7 @@ export const ClientSupplierProvider = ({ children }) => {
       }
     }
   }, [token]);
-  
+
   // Função para buscar fornecedores
   const fetchFornecedores = useCallback(async (params = {}) => {
     if (!token) return;
@@ -67,7 +67,7 @@ export const ClientSupplierProvider = ({ children }) => {
       }
     }
   }, [token]);
-  
+
   // Função para adicionar um cliente
   const addCliente = async (cliente) => {
     if (!token) return;
@@ -155,7 +155,7 @@ export const ClientSupplierProvider = ({ children }) => {
       const updatedCliente = response.data;
       setClientes(clientes.map(cliente => cliente.id === id ? updatedCliente : cliente));
     } catch (error) {
-      // console.error('Erro ao atualizar cliente', error);
+      console.error(error)
       throw error;
     }
   };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FileText, DollarSign, User, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle, Award, BookOpen } from 'react-feather';
 import './Sidebar.css';
@@ -6,17 +6,89 @@ import logo from '../../assets/imgs/logosvg.svg';
 import { useAuth } from '../../context/AuthContext';
 import Permissao from '../../permissions/Permissao';
 import ConfirmationModal from '../Modal/confirmationModal';
+import Modal from '../Modal/Modal';
 import { useAssinatura } from '../../context/AssinaturaContext';
+import { useFinance } from '../../context/FinanceContext';
 
 
 const Sidebar = () => {
   const { logout } = useAuth(); // Obtendo a função de logout do contexto
   const { cancelarAssinatura } = useAssinatura();
+  const { convenio, fetchConvenio, addConvenio, deleteConvenio } = useFinance();
 
   const [isConciliacaoOpen, setIsConciliacaoOpen] = useState(false);
   const [isConfiguracaoOpen, setIsConfiguracaoOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false); // Estado do modal de confirmação
+  const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
+  const [isConvenioModalOpen, setIsConvenioModalOpen] = useState(false);
+
+
+  // Estado para formulário de ativação de convênio
+  const [novoConvenio, setNovoConvenio] = useState({
+    agencia: '',
+    contaCorrente: '',
+    numeroConvenio: '',
+    numeroCarteira: '',
+    numeroVariacaoCarteira: ''
+  });
+
+  // Estado para confirmação de desativação
+  const [showConfirmDesativarConvenio, setShowConfirmDesativarConvenio] = useState(false);
+
+  // Atualiza campos do formulário de convênio
+  const handleChangeConvenio = (e) => {
+    const { name, value } = e.target;
+    setNovoConvenio({ ...novoConvenio, [name]: value });
+  };
+
+  // Ativa o convênio (envia dados)
+  const handleAtivarConvenio = async (dados) => {
+    try {
+      await addConvenio(dados);
+      fetchConvenio();
+      setIsConvenioModalOpen(false);
+    } catch (error) {
+      console.error("Erro ao ativar convênio:", error);
+    }
+  };
+
+  // Desativa o convênio
+  const handleDesativarConvenio = async () => {
+    try {
+      await deleteConvenio(convenio.id);
+      fetchConvenio();
+      setIsConvenioModalOpen(false);
+      setShowConfirmDesativarConvenio(false);
+      setNovoConvenio({
+        agencia: '',
+        contaCorrente: '',
+        numeroConvenio: '',
+        numeroCarteira: '',
+        numeroVariacaoCarteira: ''
+      });
+    } catch (error) {
+      console.error("Erro ao desativar convênio:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isConvenioModalOpen) {
+      const loadConvenio = async () => {
+        await fetchConvenio();
+      };
+      loadConvenio();
+    } else {
+      setNovoConvenio({
+        agencia: '',
+        contaCorrente: '',
+        numeroConvenio: '',
+        numeroCarteira: '',
+        numeroVariacaoCarteira: ''
+      });
+    }
+  }, [isConvenioModalOpen, fetchConvenio]);
+
+
 
   const toggleConciliacao = () => {
     setIsConciliacaoOpen(!isConciliacaoOpen);
@@ -35,11 +107,11 @@ const Sidebar = () => {
 
   const handleConfirmCancelarAssinatura = async () => {
     try {
-      await cancelarAssinatura(); // Chama a função do contexto
-      setIsConfirmCancelModalOpen(false); // Fecha o modal ao concluir
-      
+      await cancelarAssinatura();
+      setIsConfirmCancelModalOpen(false);
+
       setTimeout(async () => {
-        await logout(); // Desloga o usuário
+        await logout();
       }, 2000);
     } catch (error) {
       console.error("Erro ao cancelar assinatura:", error);
@@ -143,7 +215,15 @@ const Sidebar = () => {
                     <li>
                       <button
                         className="nav-link button-link"
-                        onClick={() => setIsConfirmCancelModalOpen(true)} // Abre o modal
+                        onClick={() => setIsConvenioModalOpen(true)}
+                      >
+                        <DollarSign className="icon" /> Cobrança BB
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="nav-link button-link"
+                        onClick={() => setIsConfirmCancelModalOpen(true)}
                       >
                         <BookOpen className="icon" /> Cancelar assinatura
                       </button>
@@ -169,6 +249,141 @@ const Sidebar = () => {
           </ul>
         </div>
       </div>
+
+
+
+      {isConvenioModalOpen && (
+        <Modal
+          isOpen={isConvenioModalOpen}
+          onClose={() => setIsConvenioModalOpen(false)}
+          title="Cobrança BB"
+        >
+          {convenio && convenio.id ? (
+            <form>
+              <p className='convAtivo'>Convênio ativo</p>
+              <div className="form-group">
+                <label htmlFor="agencia">Agência</label>
+                <input
+                  type="text"
+                  name="agencia"
+                  value={convenio.agencia}
+                  readOnly
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="contaCorrente">Conta Corrente</label>
+                <input
+                  type="text"
+                  name="contaCorrente"
+                  value={convenio.contaCorrente}
+                  readOnly
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="numeroConvenio">Número Convênio</label>
+                <input
+                  type="text"
+                  name="numeroConvenio"
+                  value={convenio.numeroConvenio}
+                  readOnly
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="numeroCarteira">Número Carteira</label>
+                <input
+                  type="text"
+                  name="numeroCarteira"
+                  value={convenio.numeroCarteira}
+                  readOnly
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="numeroVariacaoCarteira">Variação Carteira</label>
+                <input
+                  type="text"
+                  name="numeroVariacaoCarteira"
+                  value={convenio.numeroVariacaoCarteira}
+                  readOnly
+                />
+              </div>
+              <div className="form-actions" style={{ marginTop: '20px' }}>
+                <button type="button" className="cancel" onClick={() => setIsConvenioModalOpen(false)}>Fechar</button>
+                <button
+                  type="button"
+                  className="save"
+                  style={{ backgroundColor: 'red' }}
+                  onClick={() => setShowConfirmDesativarConvenio(true)}
+                >
+                  Desativar
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleAtivarConvenio(novoConvenio);
+            }}
+            >
+              <p>Preencha os dados para ativar o convênio com BB:</p>
+              <div className="form-group">
+                <label htmlFor="agencia">Agência</label>
+                <input
+                  type="text"
+                  name="agencia"
+                  value={novoConvenio.agencia}
+                  onChange={handleChangeConvenio}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="contaCorrente">Conta Corrente</label>
+                <input
+                  type="text"
+                  name="contaCorrente"
+                  value={novoConvenio.contaCorrente}
+                  onChange={handleChangeConvenio}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="numeroConvenio">Número Convênio</label>
+                <input
+                  type="text"
+                  name="numeroConvenio"
+                  value={novoConvenio.numeroConvenio}
+                  onChange={handleChangeConvenio}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="numeroCarteira">Número Carteira</label>
+                <input
+                  type="text"
+                  name="numeroCarteira"
+                  value={novoConvenio.numeroCarteira}
+                  onChange={handleChangeConvenio}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="numeroVariacaoCarteira">Variação Carteira</label>
+                <input
+                  type="text"
+                  name="numeroVariacaoCarteira"
+                  value={novoConvenio.numeroVariacaoCarteira}
+                  onChange={handleChangeConvenio}
+                  required
+                />
+              </div>
+              <div className="form-actions" style={{ marginTop: '20px' }}>
+                <button type="button" className="cancel" onClick={() => setIsConvenioModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="save">Ativar</button>
+              </div>
+            </form>
+          )}
+        </Modal>
+      )}
+
       {/* Modal de Confirmação */}
       {isConfirmCancelModalOpen && (
         <ConfirmationModal
@@ -177,6 +392,14 @@ const Sidebar = () => {
           secondaryMessage="Essa ação não pode ser desfeita e o acesso será perdido imediatamente."
           onConfirm={handleConfirmCancelarAssinatura}
           onCancel={() => setIsConfirmCancelModalOpen(false)}
+        />
+      )}
+      {showConfirmDesativarConvenio && (
+        <ConfirmationModal
+          title="Confirmar Desativação"
+          message="Tem certeza que deseja desativar o convênio BB?"
+          onConfirm={handleDesativarConvenio}
+          onCancel={() => setShowConfirmDesativarConvenio(false)}
         />
       )}
     </>

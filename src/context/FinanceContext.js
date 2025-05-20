@@ -12,6 +12,7 @@ export const FinanceProvider = ({ children }) => {
   const [categorias, setCategorias] = useState([]);
   const [contasAReceber, setContasAReceber] = useState([]);
   const [categoriasAReceber, setCategoriasAReceber] = useState([]);
+  const [convenio, setConvenio] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [notificationData, setNotificationData] = useState(null);
@@ -26,7 +27,7 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-pagar');
-      console.log('contas a pagar',response.data.data.contas);
+      console.log('contas a pagar', response.data.data.contas);
       setContasAPagar(response.data.data.contas);
     } catch (error) {
       setError(error);
@@ -216,8 +217,8 @@ export const FinanceProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get('/contas-a-receber');
-      
-      console.log('contas a receber',response.data.data.contas);
+
+      console.log('contas a receber', response.data.data.contas);
       setContasAReceber(response.data.data.contas);
     } catch (error) {
       setError(error);
@@ -402,12 +403,98 @@ export const FinanceProvider = ({ children }) => {
     }
   };
 
+  // Requisições convênios cobrança
+  const fetchConvenio = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/cobranca-bb');
+      console.log('Resposta convênio', response.data);
+      setConvenio(response.data.data);
+    } catch (error) {
+      if (
+        error.response?.status === 404 &&
+        error.response?.data?.message === 'Nenhum convênio encontrado'
+      ) {
+        setConvenio(null);
+        return;
+      }
+
+      setError(error);
+      console.error('Erro ao buscar convênios:', error);
+      showNotification({
+        title: 'Erro',
+        message: error.response?.data?.message || 'Falha ao buscar convenio.',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const addConvenio = async (novaConta) => {
+    setLoading(true);
+    try {
+      await api.post('/cobranca-bb', novaConta);
+      fetchConvenio();
+      showNotification({
+        title: 'Sucesso',
+        message: 'Convênio BB criado com sucesso.',
+        type: 'success',
+        icon: ThumbsUp,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
+    } catch (error) {
+      setError(error);
+      console.error('Erro ao criar convênios:', error);
+
+      showNotification({
+        title: 'Erro',
+        message: error.response?.data?.message || 'Falha ao criar convênio com BB.',
+        secondaryMessage: 'Verifique os dados e tente novamente',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deleteConvenio = async (id) => {
+    setLoading(true);
+    try {
+      await api.delete(`/cobranca-bb/${id}`);
+      fetchConvenio();
+      showNotification({
+        title: 'Sucesso',
+        message: 'Convênio removida com sucesso.',
+        type: 'success',
+        icon: ThumbsUp,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
+    } catch (error) {
+      setError(error);
+      console.error('Erro ao remover convênios:', error);
+      showNotification({
+        title: 'Erro',
+        message: error.response?.data?.message || 'Falha ao remover convênio.',
+        type: 'error',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setNotificationData(false) }],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <FinanceContext.Provider value={{
       contasAPagar,
       categorias,
       contasAReceber,
       categoriasAReceber,
+      convenio,
       fetchContasAPagar,
       exportarContasAPagar,
       fetchCategorias,
@@ -424,6 +511,9 @@ export const FinanceProvider = ({ children }) => {
       informRecebimento,
       desfazerRecebimento,
       deleteContaAReceber,
+      fetchConvenio,
+      addConvenio,
+      deleteConvenio,
       loading,
       error
     }}>

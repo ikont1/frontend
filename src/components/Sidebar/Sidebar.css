@@ -172,3 +172,11 @@ nav ul li a:hover,
     background-color: #f0f0f0;
   }
 }
+
+
+.convAtivo{
+  background-color: var(--secondary-sucess);
+  color: var(--primary-color);
+  padding: 0px 6px;
+  border-radius: 8px;
+}

@@ -24,6 +24,7 @@ const ContasReceber = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showUndoModal, setShowUndoModal] = useState(false);
+  const [showConvenioModal, setShowConvenioModal] = useState(false);
   const [novaConta, setNovaConta] = useState({
     valor: '',
     vencimento: '',
@@ -316,7 +317,7 @@ const ContasReceber = () => {
         .toISOString()
         .split('T')[0],
       valor: formatValue(conta.valor),
-      clienteId: conta.cliente?.id || '',
+      clienteId: conta.cliente?.id ? Number(conta.cliente.id) : '',
     });
     setShowModal(true);
   };
@@ -366,7 +367,10 @@ const ContasReceber = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNovaConta(prev => ({
-      ...prev, [name]: type === 'checkbox' ? (checked ? 'Recebido' : 'A receber') : value
+      ...prev,
+      [name]: type === 'checkbox'
+        ? (name === 'criarCobranca' ? (checked ? 'Sim' : '') : (checked ? 'Recebido' : 'A receber'))
+        : value
     }));
   };
 
@@ -418,16 +422,20 @@ const ContasReceber = () => {
 
   const { totalAReceber, totalRecebido, totalReceitas } = calcularTotais();
 
+  // Estado para loading do submit
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   // Lidar com a submissão do formulário para adicionar/editar contas
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoadingSubmit(true);
     // Extrair apenas os campos permitidos
     const contaToSave = {
       valor: parseFloat(novaConta.valor.replace(',', '.')),
       vencimento: novaConta.vencimento,
       categoria: novaConta.categoria,
-      clienteId: novaConta.clienteId,
+      clienteId: Number(novaConta.clienteId),
       ...(novaConta.descricao && { descricao: novaConta.descricao }),
+      ...(novaConta.criarCobranca === 'Sim' && { criarCobranca: true }),
     };
 
     if (novaConta.status === 'Recebido' && novaConta.tipoTransacao) {
@@ -442,6 +450,7 @@ const ContasReceber = () => {
       }
       setShowModal(false);
       fetchContasAReceber();
+      setLoadingSubmit(false);
     } catch (error) {
       setNotificationData({
         title: 'Erro',
@@ -452,6 +461,7 @@ const ContasReceber = () => {
       });
       setShowNotification(true);
       console.error('Erro ao salvar conta a receber', error);
+      setLoadingSubmit(false);
     }
   };
 
@@ -536,6 +546,14 @@ const ContasReceber = () => {
       setShowNotification(true);
       console.error('Erro ao remover conta a receber', error);
     }
+  };
+
+
+  // convenios BB
+  // Abrir modal para excluir uma conta
+  const handleConvenio = (conta) => {
+    setSelectedConta(conta);
+    setShowConvenioModal(true);
   };
 
   // função para exportar conta
@@ -721,6 +739,9 @@ const ContasReceber = () => {
                             <li onClick={() => handleEdit(conta)}>Editar</li>
                             <li onClick={() => handleView(conta)}>Visualizar</li>
                             <li onClick={() => handleDelete(conta)} className="remove">Remover</li>
+                            {conta.cobrancaBb && (
+                              <li onClick={() => handleConvenio(conta)}>Cobrança BB</li>
+                            )}
                           </ul>
                         </div>
                       )}
@@ -837,10 +858,18 @@ const ContasReceber = () => {
             <input type="text" id="descricao" name="descricao" value={novaConta.descricao} onChange={handleChange} disabled={modalMode === 'view'} />
           </div>
           {(modalMode !== 'edit' && modalMode !== 'view') && (
-            <div className="form-group">
-              <input type="checkbox" id="recebido" name="status" checked={novaConta.status === 'Recebido'} onChange={handleChange} />
-              <label htmlFor="recebido">Marcar como recebido</label>
-            </div>
+            <>
+              <div className="form-group">
+                <input type="checkbox" id="criarCobranca" name="criarCobranca" checked={novaConta.criarCobranca === 'Sim'} onChange={handleChange} />
+                <label htmlFor="criarCobranca">Criar cobrança BB</label>
+              </div>
+              {!novaConta.criarCobranca && (
+                <div className="form-group">
+                  <input type="checkbox" id="recebido" name="status" checked={novaConta.status === 'Recebido'} onChange={handleChange} />
+                  <label htmlFor="recebido">Marcar como recebido</label>
+                </div>
+              )}
+            </>
           )}
 
           {novaConta.status === 'Recebido' && (
@@ -872,7 +901,11 @@ const ContasReceber = () => {
           )}
           <div className="form-actions">
             <button type="button" className="cancel" onClick={() => setShowModal(false)}>Cancelar</button>
-            {modalMode !== 'view' && <button type="submit" className="save">Salvar</button>}
+            {modalMode !== 'view' && (
+              <button type="submit" className="save" disabled={loadingSubmit}>
+                {loadingSubmit ? 'Salvando...' : 'Salvar'}
+              </button>
+            )}
             {/* Botões de conciliação/desfazer conciliação no modal de edição */}
             {modalMode === 'edit' && !novaConta.nfId && (
               <button style={{ marginLeft: 10 }} type="button" className="flag-button" onClick={() => handleAbrirConciliacao(novaConta)}>
@@ -1020,16 +1053,6 @@ const ContasReceber = () => {
         </div>
       </Modal>
 
-      {showNotification && (
-        <Notification
-          title={notificationData.title}
-          message={notificationData.message}
-          type={notificationData.type}
-          icon={notificationData.icon}
-          buttons={notificationData.buttons}
-          onClose={() => setShowNotification(false)}
-        />
-      )}
       {/* Modal de conciliação NF - confirmação inicial */}
       <Modal
         isOpen={showConciliacaoModal}
@@ -1107,6 +1130,24 @@ const ContasReceber = () => {
           </button>
         </div>
       </Modal>
+
+      {/* Modal de desfazer convgenio BB */}
+      <Modal isOpen={showConvenioModal} onClose={() => setShowConvenioModal(false)} title="Convênio BB">
+        <div className="delete-modal-content">
+          Modal de desfazer conciliação
+        </div>
+      </Modal>
+
+      {showNotification && (
+        <Notification
+          title={notificationData.title}
+          message={notificationData.message}
+          type={notificationData.type}
+          icon={notificationData.icon}
+          buttons={notificationData.buttons}
+          onClose={() => setShowNotification(false)}
+        />
+      )}
 
       {showConfirmDesconciliar && (
         <ConfirmationModal
