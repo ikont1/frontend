@@ -1,0 +1,192 @@
+.login-container {
+  display: flex;
+  height: 100vh;
+  background-color: #fff;
+  overflow-y: auto;
+}
+
+.login-image {
+  width: 50%;
+}
+
+.login-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-form {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.login-form .logo {
+  width: 260px;
+  margin-bottom: 40px;
+}
+
+.login-form form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form .input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.login-form .input-group input {
+  width: 100%;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: #F5F5F7;
+}
+
+
+.container-reset-submit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.remember-me input {
+  margin-right: 10px;
+  margin-bottom: 5px;
+}
+
+.forgot-password {
+  color: var(--highlight-color);
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.login-button {
+  height: 40px;
+  width: 100px;
+  background-color: transparent;
+  color: var(--highlight-color);
+  border: 1px solid var(--highlight-color);
+  cursor: pointer;
+}
+
+.login-form .div-botton {
+  /* position: absolute; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 100px;
+}
+
+.div-botton .register-link {
+  text-decoration: underline;
+  color: var(--highlight-color);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.social-media {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.social-media .i-sociais {
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  background-color: #F5F5F7;
+  color: var(--highlight-color);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.social-media .i-sociais:hover {
+  background-color: var(--highlight-color);
+  color: var(--white);
+}
+
+.recuperar-form {
+  background-color: #F5F5F7;
+}
+
+.back-to-login {
+  margin-top: 20px;
+}
+
+.back-to-login a {
+  color: var(--highlight-color);
+  text-decoration: none;
+}
+
+
+.reset-link{
+  color: var(--highlight-color);
+  text-decoration: underline;
+}
+
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    padding-top: 100px;
+  }
+
+  .login-image {
+    display: none;
+  }
+
+  .login-form {
+    width: 100%;
+    height: 60%;
+    padding: 10px;
+  }
+
+  .login-form .div-botton {
+    flex-direction: column;
+    gap: 20px;
+    bottom: 20px;
+  }
+
+  .container-reset-submit {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .login-button {
+    width: 100%;
+  }
+
+  .social-media .i-sociais {
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+  }
+}
+
+
+/* Erros login */
+
+.error-label {
+  color: red;
+}
+
+.error-message {
+  color: red;
+  margin-top: -10px;
+  font-size: 12px;
+}

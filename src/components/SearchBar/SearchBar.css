@@ -1,0 +1,27 @@
+/* components/SearchBar/SearchBar.css */
+.search-bar {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-input {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+  width: 200px !important;
+}
+
+.search-icon {
+  cursor: pointer;
+  width: 30px;
+  color: var(--highlight-color);
+}
+
+.h1-search {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 95%;
+}

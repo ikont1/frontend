@@ -1,0 +1,286 @@
+.container-dashboard .content {
+  margin-top: 30px;
+}
+
+.sections-cards-dash {
+  display: flex;
+  gap: 20px;
+  height: 500px;
+}
+
+
+.cards-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 0;
+  width: 35%;
+
+  >div {
+    width: 100%;
+    background-color: #fff;
+    height: 100%;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  }
+}
+
+.cards-left h4 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -10px;
+  font-weight: 500;
+
+  >.icon {
+    font-size: 25px;
+    margin-bottom: 3px;
+    color: var(--primary-color);
+  }
+
+  >.i {
+    position: absolute;
+    right: 5px;
+    color: var(--primary-color);
+  }
+}
+
+
+.totalContas{
+  display: flex;
+  justify-content: space-between;
+  >h5{
+    color: var(--primary-color);
+  }
+  >span{
+    float: right;
+    font-weight: 600;
+  }
+}
+
+.cards-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  width: 65%;
+
+  >div {
+    width: 50%;
+    height: 100%;
+
+    >.conteudo {
+      background-color: #fff;
+      width: 100%;
+      height: 425px;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    }
+
+  }
+}
+
+.cards-right h4 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  margin-bottom: 10px;
+
+  >.icon {
+    font-size: 25px;
+    color: var(--primary-color);
+  }
+
+  >.i {
+    position: absolute;
+    right: 5px;
+    color: var(--primary-color);
+  }
+}
+
+.dias-vencido {
+  background-color: #FDF0F7;
+  color: #9B5266;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.card-apagar .conteudo,
+.card-areceber .conteudo {
+  position: relative;
+  padding: 20px !important;
+  font-size: 14px;
+
+  >.total {
+    margin-top: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    border-left: 3px solid var(--highlight-color);
+
+    >span {
+      font-size: 20px;
+      font-weight: 500;
+    }
+  }
+}
+
+.card-apagar .conteudo .conta,
+.card-areceber .conteudo .conta {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 10px 0 10px;
+  border-bottom: 1px solid #DEDEDE;
+
+  >div {
+    display: flex;
+    justify-content: space-between;
+
+    >span,
+    >p {
+      margin-top: 10px;
+    }
+  }
+}
+
+.card-apagar .conteudo .total {
+  border-left: 3px solid var(--error-color);
+}
+
+.card-conciliacao h4 {
+  font-weight: 500;
+  color: var(--error-color);
+
+  >.icon {
+    font-size: 20px;
+    margin-bottom: -3px;
+  }
+}
+
+.card-conciliacao a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #EEEEEE;
+  padding: 8px 14px;
+  border-radius: 6px;
+  width: 220px;
+  font-size: 14px;
+
+  >.icon {
+    width: 18px;
+  }
+}
+
+.grafico-conciliacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grafico {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  /* background: conic-gradient(rgb(1, 221, 1, 1) 0% 70%,
+      rgb(235, 0, 0, 0.8) 30% 100%); */
+}
+
+.legenda {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legenda-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+
+.conciliadas-dot {
+  background-color: var(--primary-color);
+}
+
+.pendentes-dot {
+  background-color: var(--error-color);
+}
+
+.container-h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+
+  >h3 {
+    font-weight: 500;
+    display: flex;
+    gap: 6px;
+
+    >.icon {
+      color: var(--primary-color);
+    }
+  }
+
+  >a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary-color);
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .cards-right {
+    flex-direction: column;
+    width: 100%;
+
+    >div {
+      width: 100%;
+    }
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .sections-cards-dash {
+    flex-direction: column;
+    height: 100%;
+    width: 100vw;
+
+    >div {
+      width: 100%;
+    }
+  }
+
+  .cards-left {
+    flex-direction: column;
+
+    >div {
+      width: 100%;
+      height: 100%;
+
+    }
+  }
+
+  .cards-right .conteudo {
+    height: 510px !important;
+  }
+}

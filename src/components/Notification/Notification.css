@@ -1,0 +1,136 @@
+.notification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.notification {
+  background-color: var(--white);
+  border-radius: 40px;
+  padding: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 1000;
+  max-width: 500px;
+  text-align: center;
+}
+
+.notification.success {
+  border: 2px solid var(--highlight-color);
+}
+
+.notification.error {
+  border: 2px solid var(--error-color);
+}
+
+.notification.success2 {
+  border: 2px solid var(--primary-color);
+}
+
+.notification-icon {
+  font-size: 30px;
+  color: var(--highlight-color);
+  margin-bottom: 20px;
+  animation-name: thumbsup-spin;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+
+@keyframes thumbsup-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-40deg);
+  }
+  60% {
+    transform: rotate(30deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.notification-icon svg {
+  font-size: 80px !important;
+  width: 50px;
+  height: 50px;
+}
+
+.notification.error .notification-icon {
+  color: var(--error-color);
+}
+.notification.success2 .notification-icon {
+  color: var(--primary-color);
+}
+
+.notification-message h2 {
+  font-size: 24px;
+  color: var(--highlight-color);
+  margin: 0;
+}
+
+.notification.error .notification-message h2 {
+  color: var(--error-color);
+}
+.notification.success2 .notification-message h2 {
+  color: var(--primary-color);
+}
+
+.notification-message p {
+  font-size: 16px;
+  color: var(--text-color);
+  margin: 10px 0;
+}
+
+.notification-message .secondary-message {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.notification-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.notification-button {
+  background-color: transparent;
+  color: var(--text-color);
+  border: 2px solid var(--text-color);
+  padding: 5px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.notification.error .notification-button {
+  background-color: transparent;
+  border: 2px solid var(--text-color);
+  color: var(--text-color);
+}
+
+.notification.error .remove {
+  background-color: var(--error-color);
+  color: var(--white);
+  border: none;
+}
+
+.notification-button.confirm {
+  background-color: transparent;
+  border: 2px solid var(--text-color);
+  color: var(--text-color);
+}

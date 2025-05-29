@@ -1,0 +1,71 @@
+.assinatura-content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  width: 600px;
+  box-shadow: 1px 1px 7px;
+  border-radius: 12px;
+}
+
+.step1 input,
+.step2 input {
+  margin-top: 10px;
+}
+
+.step1 .input-duplo,
+.step2 .input-duplo {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  >div{
+    width: 50%;
+  }
+}
+
+.cartao-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cartao {
+  width: 300px;
+  height: 180px;
+  background: linear-gradient(135deg, #007bff, #6610f2);
+  border-radius: 15px;
+  color: #fff;
+  padding: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cartao p {
+  margin: 0;
+}
+
+.error {
+  font-size: 10px;
+  color: red;
+}
+
+.container-btn-assinar{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  .btn-assinar {
+    background-color: var(--primary-color);
+    width: 200px;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .assinatura-content {
+    width: 390px;
+  }
+  
+}
