@@ -142,7 +142,7 @@ export const WalletProvider = ({ children }) => {
         "codigoSwift",
         "contaPrincipal",
       ];
-  
+
       // Filtra apenas os campos permitidos e converte opcionais para strings
       const dadosAtualizados = Object.keys(dadosAtuais)
         .filter((key) => camposPermitidos.includes(key))
@@ -151,13 +151,13 @@ export const WalletProvider = ({ children }) => {
             key === "contaPrincipal"
               ? contaPrincipal
               : key === "chavePix" || key === "codigoIban" || key === "codigoSwift"
-              ? dadosAtuais[key] || "" // Garante que seja string
-              : dadosAtuais[key];
+                ? dadosAtuais[key] || "" // Garante que seja string
+                : dadosAtuais[key];
           return obj;
         }, {});
-  
+
       const response = await api.patch(`/conta-bancaria/${id}`, dadosAtualizados);
-  
+
       showNotification({
         title: "Sucesso",
         message: contaPrincipal
@@ -167,16 +167,16 @@ export const WalletProvider = ({ children }) => {
         icon: ThumbsUp,
         buttons: [{ label: "Ok", onClick: () => setNotificationData(false) }],
       });
-  
+
       return response.data;
     } catch (error) {
       console.error("Erro ao atualizar conta bancária:", error);
-  
+
       const contaPrincipalErro = error.response?.data?.error?.contaPrincipal;
       const mensagemErro = contaPrincipalErro
         ? `Erro: ${contaPrincipalErro}`
         : error.response?.data?.message || "Falha ao atualizar a conta bancária.";
-  
+
       showNotification({
         title: "Erro",
         message: mensagemErro,
@@ -187,7 +187,7 @@ export const WalletProvider = ({ children }) => {
         icon: XCircle,
         buttons: [{ label: "Ok", onClick: () => setNotificationData(false) }],
       });
-  
+
       throw error; // Propaga o erro para tratamento adicional, se necessário
     }
   };
@@ -195,7 +195,7 @@ export const WalletProvider = ({ children }) => {
   const listarExtrato = async (id) => {
     try {
       const response = await api.get(`/conta-bancaria/${id}/extrato`);
-      console.log('extrato',response.data.data.dados);
+      console.log('extrato', response.data.data.dados);
 
       return response.data.data.dados;
     } catch (error) {
@@ -208,12 +208,9 @@ export const WalletProvider = ({ children }) => {
   };
 
   // conectar conta bb
-  const integrarConta = async (id, { clientId, clientSecret }) => {
+  const integrarConta = async (id, dados) => {
     try {
-      await api.post(`/conta-bancaria/${id}/conectar`, {
-        clientId,
-        clientSecret,
-      });
+      await api.post(`/conta-bancaria/${id}/conectar`, dados);
 
       showNotification({
         title: 'Integração Bem-Sucedida',
@@ -234,7 +231,7 @@ export const WalletProvider = ({ children }) => {
         buttons: [{ label: 'Ok', onClick: () => setNotificationData(null) }],
       });
 
-      return false; // Retorna falha
+      return false;
     }
   };
 

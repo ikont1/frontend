@@ -157,7 +157,18 @@ const DetalhesConta = () => {
 
             {conta.integrado ?
               (
-                <button className="integrada-button" onClick={handleDesconectarClick} ><BiSolidZap className='icon' /> Integrada</button>
+                <div className="tooltip-status-container">
+                  <div className="tooltip-container2">
+                    <button className="integrada-button" onClick={handleDesconectarClick}>
+                      <BiSolidZap className='icon' /> Integrada
+                    </button>
+                    <span className="tooltipStatus">
+                      {conta.integradoComCobranca
+                        ? 'Integrado com extrato e cobrança BB'
+                        : 'Integrado com extrato BB'}
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <button className="integrar-button" onClick={handleIntegrarClick}><BiSolidZap className='icon' /> Integrar</button>
               )}

@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// Varios comentarios são relacionados a parte de convenio que foi removida. 
+// posteriormente se não for usado pode ser removido.
+
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FileText, DollarSign, User, Users, Briefcase, Settings, HelpCircle, LogOut, Minimize2, Grid, BarChart2, ArrowDownLeft, ArrowUpRight, ArrowLeftCircle, ArrowRightCircle, Award, BookOpen } from 'react-feather';
 import './Sidebar.css';
@@ -6,87 +9,86 @@ import logo from '../../assets/imgs/logosvg.svg';
 import { useAuth } from '../../context/AuthContext';
 import Permissao from '../../permissions/Permissao';
 import ConfirmationModal from '../Modal/confirmationModal';
-import Modal from '../Modal/Modal';
 import { useAssinatura } from '../../context/AssinaturaContext';
-import { useFinance } from '../../context/FinanceContext';
+// import { useFinance } from '../../context/FinanceContext';
 
 
 const Sidebar = () => {
-  const { logout } = useAuth(); // Obtendo a função de logout do contexto
+  const { logout } = useAuth(); 
   const { cancelarAssinatura } = useAssinatura();
-  const { convenio, fetchConvenio, addConvenio, deleteConvenio } = useFinance();
+  // const { convenio, fetchConvenio, addConvenio, deleteConvenio } = useFinance();
 
   const [isConciliacaoOpen, setIsConciliacaoOpen] = useState(false);
   const [isConfiguracaoOpen, setIsConfiguracaoOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isConfirmCancelModalOpen, setIsConfirmCancelModalOpen] = useState(false);
-  const [isConvenioModalOpen, setIsConvenioModalOpen] = useState(false);
+  // const [isConvenioModalOpen, setIsConvenioModalOpen] = useState(false);
 
 
   // Estado para formulário de ativação de convênio
-  const [novoConvenio, setNovoConvenio] = useState({
-    agencia: '',
-    contaCorrente: '',
-    numeroConvenio: '',
-    numeroCarteira: '',
-    numeroVariacaoCarteira: ''
-  });
+  // const [novoConvenio, setNovoConvenio] = useState({
+  //   agencia: '',
+  //   contaCorrente: '',
+  //   numeroConvenio: '',
+  //   numeroCarteira: '',
+  //   numeroVariacaoCarteira: ''
+  // });
 
   // Estado para confirmação de desativação
-  const [showConfirmDesativarConvenio, setShowConfirmDesativarConvenio] = useState(false);
+  // const [showConfirmDesativarConvenio, setShowConfirmDesativarConvenio] = useState(false);
 
   // Atualiza campos do formulário de convênio
-  const handleChangeConvenio = (e) => {
-    const { name, value } = e.target;
-    setNovoConvenio({ ...novoConvenio, [name]: value });
-  };
+  // const handleChangeConvenio = (e) => {
+  //   const { name, value } = e.target;
+  //   setNovoConvenio({ ...novoConvenio, [name]: value });
+  // };
 
   // Ativa o convênio (envia dados)
-  const handleAtivarConvenio = async (dados) => {
-    try {
-      await addConvenio(dados);
-      fetchConvenio();
-      setIsConvenioModalOpen(false);
-    } catch (error) {
-      console.error("Erro ao ativar convênio:", error);
-    }
-  };
+  // const handleAtivarConvenio = async (dados) => {
+  //   try {
+  //     await addConvenio(dados);
+  //     fetchConvenio();
+  //     setIsConvenioModalOpen(false);
+  //   } catch (error) {
+  //     console.error("Erro ao ativar convênio:", error);
+  //   }
+  // };
 
   // Desativa o convênio
-  const handleDesativarConvenio = async () => {
-    try {
-      await deleteConvenio(convenio.id);
-      fetchConvenio();
-      setIsConvenioModalOpen(false);
-      setShowConfirmDesativarConvenio(false);
-      setNovoConvenio({
-        agencia: '',
-        contaCorrente: '',
-        numeroConvenio: '',
-        numeroCarteira: '',
-        numeroVariacaoCarteira: ''
-      });
-    } catch (error) {
-      console.error("Erro ao desativar convênio:", error);
-    }
-  };
+  // const handleDesativarConvenio = async () => {
+  //   try {
+  //     await deleteConvenio(convenio.id);
+  //     fetchConvenio();
+  //     setIsConvenioModalOpen(false);
+  //     setShowConfirmDesativarConvenio(false);
+  //     setNovoConvenio({
+  //       agencia: '',
+  //       contaCorrente: '',
+  //       numeroConvenio: '',
+  //       numeroCarteira: '',
+  //       numeroVariacaoCarteira: ''
+  //     });
+  //   } catch (error) {
+  //     console.error("Erro ao desativar convênio:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    if (isConvenioModalOpen) {
-      const loadConvenio = async () => {
-        await fetchConvenio();
-      };
-      loadConvenio();
-    } else {
-      setNovoConvenio({
-        agencia: '',
-        contaCorrente: '',
-        numeroConvenio: '',
-        numeroCarteira: '',
-        numeroVariacaoCarteira: ''
-      });
-    }
-  }, [isConvenioModalOpen, fetchConvenio]);
+  // useEffect(() => {
+  //   if (isConvenioModalOpen) {
+  //     const loadConvenio = async () => {
+  //       await fetchConvenio();
+  //     };
+  //     loadConvenio();
+  //   } else {
+  //     setNovoConvenio({
+  //       agencia: '',
+  //       contaCorrente: '',
+  //       numeroConvenio: '',
+  //       numeroCarteira: '',
+  //       numeroVariacaoCarteira: ''
+  //     });
+  //   }
+  // }, [isConvenioModalOpen, fetchConvenio]);
 
 
 
@@ -212,14 +214,14 @@ const Sidebar = () => {
                       </li>
                     </Permissao>
 
-                    <li>
+                    {/* <li>
                       <button
                         className="nav-link button-link"
                         onClick={() => setIsConvenioModalOpen(true)}
                       >
                         <DollarSign className="icon" /> Cobrança BB
                       </button>
-                    </li>
+                    </li> */}
                     <li>
                       <button
                         className="nav-link button-link"
@@ -252,7 +254,7 @@ const Sidebar = () => {
 
 
 
-      {isConvenioModalOpen && (
+      {/* {isConvenioModalOpen && (
         <Modal
           isOpen={isConvenioModalOpen}
           onClose={() => setIsConvenioModalOpen(false)}
@@ -382,7 +384,7 @@ const Sidebar = () => {
             </form>
           )}
         </Modal>
-      )}
+      )} */}
 
       {/* Modal de Confirmação */}
       {isConfirmCancelModalOpen && (
@@ -394,14 +396,16 @@ const Sidebar = () => {
           onCancel={() => setIsConfirmCancelModalOpen(false)}
         />
       )}
-      {showConfirmDesativarConvenio && (
+
+
+      {/* {showConfirmDesativarConvenio && (
         <ConfirmationModal
           title="Confirmar Desativação"
           message="Tem certeza que deseja desativar o convênio BB?"
           onConfirm={handleDesativarConvenio}
           onCancel={() => setShowConfirmDesativarConvenio(false)}
         />
-      )}
+      )} */}
     </>
   );
 };

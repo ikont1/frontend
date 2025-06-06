@@ -11,6 +11,10 @@ const IntegracaoModal = ({ isOpen, onClose, conta }) => {
   const [step, setStep] = useState(1);
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
+  const [comConvenioCobranca, setComConvenioCobranca] = useState(false);
+  const [numeroConvenio, setNumeroConvenio] = useState('');
+  const [numeroCarteira, setNumeroCarteira] = useState('');
+  const [numeroVariacaoCarteira, setNumeroVariacaoCarteira] = useState('');
   const [loading, setLoading] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationData, setNotificationData] = useState({
@@ -28,6 +32,10 @@ const IntegracaoModal = ({ isOpen, onClose, conta }) => {
       setStep(1);
       setClientId('');
       setClientSecret('');
+      setComConvenioCobranca(false);
+      setNumeroConvenio('');
+      setNumeroCarteira('');
+      setNumeroVariacaoCarteira('');
       // Limpar notificações
       setShowNotification(false);
       setNotificationData({
@@ -58,7 +66,22 @@ const IntegracaoModal = ({ isOpen, onClose, conta }) => {
     setLoading(true);
 
     try {
-      await integrarConta(conta.id, { clientId, clientSecret });
+      const dados = comConvenioCobranca
+        ? {
+          clientId,
+          clientSecret,
+          comConvenioCobranca: true,
+          numeroConvenio,
+          numeroCarteira,
+          numeroVariacaoCarteira,
+        }
+        : {
+          clientId,
+          clientSecret,
+          comConvenioCobranca: false,
+        };
+
+      await integrarConta(conta.id, dados);
 
       setNotificationData({
         title: 'Sucesso',
@@ -175,6 +198,43 @@ const IntegracaoModal = ({ isOpen, onClose, conta }) => {
                 onChange={(e) => setClientSecret(e.target.value)}
                 required
               />
+              <br />
+              <br />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={comConvenioCobranca}
+                  onChange={() => setComConvenioCobranca(!comConvenioCobranca)}
+                />{' '}
+                Tem convênio de cobrança com o BB?
+              </label>
+              <br />
+              {comConvenioCobranca && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Número do Convênio"
+                    value={numeroConvenio}
+                    onChange={(e) => setNumeroConvenio(e.target.value)}
+                  />
+                  <br />
+                  <br />
+                  <input
+                    type="text"
+                    placeholder="Número da Carteira"
+                    value={numeroCarteira}
+                    onChange={(e) => setNumeroCarteira(e.target.value)}
+                  />
+                  <br />
+                  <br />
+                  <input
+                    type="text"
+                    placeholder="Variação da Carteira"
+                    value={numeroVariacaoCarteira}
+                    onChange={(e) => setNumeroVariacaoCarteira(e.target.value)}
+                  />
+                </>
+              )}
               <div className="modal-integracao-footer">
                 <button className="confirm-button" onClick={handleSubmit} disabled={loading}>
                   {loading ? (
