@@ -16,6 +16,7 @@ const NotasFiscais = () => {
 	const [monitoramentoAtivo, setMonitoramentoAtivo] = useState(false);
 	const [acaoMonitoramento, setAcaoMonitoramento] = useState('');
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [statusData, setStatusData] = useState(null);
 
 	// Estados para filtro
 	const [clientesUnicos, setClientesUnicos] = useState([]);
@@ -52,6 +53,7 @@ useEffect(() => {
 		const statusData = await statusMonitoramento();
 		if (statusData && statusData.data) {
 			setMonitoramentoAtivo(statusData.data.monitoramentoAtivo);
+			setStatusData(statusData);
 		}
 		// Atualiza filtro selecionado para preencher o mês atual
 		setSelectedFilters(prev => ({
@@ -77,6 +79,7 @@ useEffect(() => {
 		const statusData = await statusMonitoramento();
 		if (statusData && statusData.data) {
 			setMonitoramentoAtivo(statusData.data.monitoramentoAtivo);
+			setStatusData(statusData);
 		}
 		setShowConfirmModal(false);
 	};
@@ -186,18 +189,27 @@ useEffect(() => {
 						<h1><FileText style={{ color: 'var(--primary-color)' }} /> Notas fiscais recentes</h1>
 						<div className="conta-principal">
 							<span>Monitoramento</span>
-							<div className="switch-container">
-								<label className="switch-label">
-									<input
-										type="checkbox"
-										checked={monitoramentoAtivo}
-										onChange={(e) => handleMonitoramentoClick(
-											null,
-											e.target.checked ? 'ativar' : 'desativar'
-										)}
-									/>
-									<span className="slider"></span>
-								</label>
+							<div className="tooltip-status-container">
+								<div className="tooltip-container2">
+									<div className="switch-container">
+										<label className="switch-label">
+											<input
+												type="checkbox"
+												checked={monitoramentoAtivo}
+												onChange={(e) => handleMonitoramentoClick(
+													null,
+													e.target.checked ? 'ativar' : 'desativar'
+												)}
+											/>
+											<span className="slider"></span>
+										</label>
+									</div>
+									{!monitoramentoAtivo && (
+										<span className="tooltipStatus">
+											{statusData?.data?.motivoDesativacao || 'Motivo não informado'}
+										</span>
+									)}
+								</div>
 							</div>
 						</div>
 					</div>
