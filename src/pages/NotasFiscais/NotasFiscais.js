@@ -206,7 +206,7 @@ useEffect(() => {
 									</div>
 									{!monitoramentoAtivo && (
 										<span className="tooltipStatus">
-											{statusData?.data?.motivoDesativacao || 'Motivo não informado'}
+											{(statusData?.data?.motivoDesativacao?.charAt(0).toUpperCase() + statusData?.data?.motivoDesativacao?.slice(1)) || 'Motivo não informado'}
 										</span>
 									)}
 								</div>
