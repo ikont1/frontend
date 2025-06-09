@@ -209,6 +209,7 @@ useEffect(() => {
 								<th>Emissão</th>
 								<th>Cliente</th>
 								<th>Situação</th>
+								<th>Tipo</th>
 								<th>Valor</th>
 							</tr>
 						</thead>
@@ -220,6 +221,7 @@ useEffect(() => {
 									<td>{formatDate(notas.dhEmi)}</td>
 									<td className='td-transacao-extrato'>{notas.emitXNome}</td>
 									<td style={{ textTransform: 'capitalize' }}>{notas.situacao}</td>
+									<td style={{ textTransform: 'capitalize' }}>{notas.tpNF}</td>
 									<td>R${formatValue(notas.valorTotal)}</td>
 								</tr>
 							))
