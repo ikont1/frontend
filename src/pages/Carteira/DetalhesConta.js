@@ -10,6 +10,14 @@ import IntegracaoModal from '../../components/Modal/integracaoModal';
 import ConfirmationModal from '../../components/Modal/confirmationModal';
 import RedirectButton from '../../components/RedirectButton';
 
+const formatarData = (data) => {
+  const d = new Date(data);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const ano = d.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+};
+
 const bancoLogos = {
   '001': require('../../assets/imgs/bbLogo.png'),
   '237': require('../../assets/imgs/bradescologo.png'),
@@ -236,7 +244,7 @@ const DetalhesConta = () => {
                         <span>{renderStatus(transacao.conciliacaoStatus)}</span>
                       </td>
                       <td></td>
-                      <td className='td-data-extrato' data-label="Emitido em"><span>{new Date(transacao.dataTransacao).toLocaleDateString()}</span></td>
+                      <td className='td-data-extrato' data-label="Emitido em"><span>{formatarData(transacao.dataTransacao)}</span></td>
                       <td
                         className={`td-valor-extrato ${transacao.conciliacaoStatus === 'naoConciliado' ? 'valor-naoConciliado' : ''
                           }`}
