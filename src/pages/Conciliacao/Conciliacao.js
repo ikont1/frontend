@@ -17,6 +17,15 @@ import Lottie from 'react-lottie';
 import animationData from '../../lottieflow-scrolling-01-1-ffffff-easey.json'; // Animação Lottie
 
 
+const formatarData = (data) => {
+  if (!data) return '';
+  const d = new Date(data);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const ano = d.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+};
+
 const Conciliacao = () => {
   const { listarContas, listarExtrato } = useWallet();
   const { desfazerConciliacao, criarConciliacao, aceitarConciliacao, recusarConciliacao } = useConciliacao();
@@ -748,7 +757,7 @@ const Conciliacao = () => {
               <div>
                 <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
                 <div>
-                  <p>{new Date(transacao.dataTransacao).toLocaleDateString()}</p>
+                  <p>{formatarData(transacao.dataTransacao)}</p>
                   <p className='descricao'>{transacao.descricao}</p>
                 </div>
               </div>
@@ -771,7 +780,7 @@ const Conciliacao = () => {
                   <button onClick={() => handleOpenRecusarModal(transacao)}>Recusar</button>
                 </div>
                 <div className="sugestao-info">
-                  <span>{new Date(contaSugerida.vencimento).toLocaleDateString()} - R$ {contaSugerida.valor.toFixed(2)} - {contaSugerida.descricao}</span>
+                  <span>{formatarData(contaSugerida.vencimento)} - R$ {contaSugerida.valor.toFixed(2)} - {contaSugerida.descricao}</span>
                   <p>Número da nota - <b>{contaSugerida.nf?.nNF || 'N/A'}</b></p>
                   <p>Cliente - <b>{contaSugerida.nf?.emitXNome || 'N/A'}</b></p>
                   <p>CNPJ - <b>{contaSugerida.nf?.emitCpfCnpj ? formatCNPJ(contaSugerida.nf?.emitCpfCnpj) : 'N/A'}</b></p>
@@ -805,7 +814,7 @@ const Conciliacao = () => {
               <div>
                 <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
                 <div>
-                  <p>{new Date(transacao.dataTransacao).toLocaleDateString()}</p>
+                  <p>{formatarData(transacao.dataTransacao)}</p>
                   <p className='descricao'>{transacao.descricao}</p>
                 </div>
               </div>
@@ -820,7 +829,7 @@ const Conciliacao = () => {
               <div className="conciliacao-card transacao-conta">
                 <div>
                   <div>
-                    <p>{new Date(contaConciliada.vencimento || contaConciliada.recebidoEm).toLocaleDateString()}</p>
+                    <p>{formatarData(contaConciliada.vencimento || contaConciliada.recebidoEm)}</p>
                     -
                     <p>{contaConciliada.categoria}</p>
                   </div>
@@ -1076,7 +1085,7 @@ const Conciliacao = () => {
                   <img src={bancoLogos[contaSelecionada.codigoBanco] || bancoLogos['default']} alt="Banco Logo" className="banco-logo-conciliacao" />
                   <div>
                     <p>{contaSelecionada.nomeBanco}</p>
-                    <p className='data'>{new Date(selectedTransacao?.dataTransacao).toLocaleDateString()}</p>
+                    <p className='data'>{formatarData(selectedTransacao?.dataTransacao)}</p>
                   </div>
                 </div>
                 <h3 style={{ color: selectedTransacao.valor < 0 ? 'red' : 'green' }}>{`R$ ${selectedTransacao?.valor.toFixed(2)}`}</h3>
@@ -1115,8 +1124,8 @@ const Conciliacao = () => {
                           .filter((conta) => conta.conciliacao.status !== 'conciliado')
                           .map((conta) => (
                             <tr key={conta.id}>
-                              <td>{new Date(conta.criadoEm).toLocaleDateString()}</td>
-                              <td>{new Date(conta.vencimento).toLocaleDateString()}</td>
+                              <td>{formatarData(conta.criadoEm)}</td>
+                              <td>{formatarData(conta.vencimento)}</td>
                               <td>{conta.descricao}</td>
                               <td>{`R$ ${conta.valor.toFixed(2)}`}</td>
                               <td>
@@ -1133,8 +1142,8 @@ const Conciliacao = () => {
                           .filter((conta) => conta.conciliacao.status !== 'conciliado')
                           .map((conta) => (
                             <tr key={conta.id}>
-                              <td>{new Date(conta.criadoEm).toLocaleDateString()}</td>
-                              <td>{new Date(conta.vencimento).toLocaleDateString()}</td>
+                              <td>{formatarData(conta.criadoEm)}</td>
+                              <td>{formatarData(conta.vencimento)}</td>
                               <td>{conta.descricao}</td>
                               <td>{`R$ ${conta.valor.toFixed(2)}`}</td>
                               <td>
@@ -1324,8 +1333,8 @@ const Conciliacao = () => {
         {showConfirmationModal && (
           <ConfirmationModal
             title="Confirmar Conciliação"
-            message={`Transação: Valor R$ ${selectedTransacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${new Date(selectedTransacao?.dataTransacao).toLocaleDateString() || 'Data não disponível'}`}
-            secondaryMessage={`Lançamento: Valor R$ ${selectedContaConciliacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${new Date(selectedContaConciliacao?.vencimento).toLocaleDateString() || 'Data não disponível'}`}
+            message={`Transação: Valor R$ ${selectedTransacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${formatarData(selectedTransacao?.dataTransacao) || 'Data não disponível'}`}
+            secondaryMessage={`Lançamento: Valor R$ ${selectedContaConciliacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${formatarData(selectedContaConciliacao?.vencimento) || 'Data não disponível'}`}
             onConfirm={handleConfirmConciliacao}
             onCancel={() => setShowConfirmationModal(false)}
           />
@@ -1335,8 +1344,8 @@ const Conciliacao = () => {
         {showAceiteModal && (
           <ConfirmationModal
             title="Aceitar Conciliação"
-            message={`Transação: Valor R$ ${confirmModalData?.transacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${new Date(confirmModalData?.transacao?.dataTransacao).toLocaleDateString() || 'Data não disponível'}`}
-            secondaryMessage={`Lançamento: Valor R$ ${confirmModalData?.conta?.valor?.toFixed(2) || '0.00'} Vencimento: ${new Date(confirmModalData?.conta?.vencimento).toLocaleDateString() || 'Data não disponível'}`}
+            message={`Transação: Valor R$ ${confirmModalData?.transacao?.valor?.toFixed(2) || '0.00'} Vencimento: ${formatarData(confirmModalData?.transacao?.dataTransacao) || 'Data não disponível'}`}
+            secondaryMessage={`Lançamento: Valor R$ ${confirmModalData?.conta?.valor?.toFixed(2) || '0.00'} Vencimento: ${formatarData(confirmModalData?.conta?.vencimento) || 'Data não disponível'}`}
             onConfirm={handleAceiteSugestao}
             onCancel={() => setShowAceiteModal(false)}
           />
@@ -1346,8 +1355,8 @@ const Conciliacao = () => {
         {showRecusarModal && recusarModalData && (
           <ConfirmationModal
             title="Recusar Sugestão"
-            message={`Transação: Valor R$ ${recusarModalData.transacao.valor.toFixed(2)} - Vencimento: ${new Date(recusarModalData.transacao.dataTransacao).toLocaleDateString()}`}
-            secondaryMessage={`Lançamento: Valor R$ ${recusarModalData.conta?.valor.toFixed(2) || '0.00'} - Vencimento: ${new Date(recusarModalData.conta?.vencimento).toLocaleDateString() || 'Data não disponível'}`}
+            message={`Transação: Valor R$ ${recusarModalData.transacao.valor.toFixed(2)} - Vencimento: ${formatarData(recusarModalData.transacao.dataTransacao)}`}
+            secondaryMessage={`Lançamento: Valor R$ ${recusarModalData.conta?.valor.toFixed(2) || '0.00'} - Vencimento: ${formatarData(recusarModalData.conta?.vencimento) || 'Data não disponível'}`}
             onConfirm={handleRecusarConciliacao}
             onCancel={() => setShowRecusarModal(false)}
           />
