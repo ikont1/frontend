@@ -26,6 +26,7 @@ const Conciliacao = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [todasContas, setTodasContas] = useState([]);
   const [transacoes, setTransacoes] = useState([]);
+  const [subTipoFiltro, setSubTipoFiltro] = useState('');
   const [contaSelecionada, setContaSelecionada] = useState(null);
   const [selectedContaConciliacao, setSelectedContaConciliacao] = useState(null);
   const [selectedTransacao, setSelectedTransacao] = useState(null);
@@ -53,7 +54,6 @@ const Conciliacao = () => {
   const [itensPorPagina, setItensPorPagina] = useState(10);
   const [todasTransacoes, setTodasTransacoes] = useState([]);
   const [itensPaginados, setItensPaginados] = useState([]);
-
 
 
   const [activeTab, setActiveTab] = useState('pendentes');
@@ -103,8 +103,8 @@ const Conciliacao = () => {
       preserveAspectRatio: 'xMidYMid slice',
     },
   };
-
   // Função para lidar com a mudança dos filtros
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
 
@@ -113,8 +113,9 @@ const Conciliacao = () => {
     if (name === 'endDate') setEndDate(value);
     if (name === 'categoria') setCategoriaSelecionada(value);
     if (name === 'descricao') setDescricaoFiltro(value);
+    if (name === 'subTipo') { setSubTipoFiltro(value) };
   };
-
+ 
   // Limpar o formulário de criar conta a receber quando o modal for fechado
   useEffect(() => {
     if (!showCriarContaReceberModal) {
@@ -160,7 +161,11 @@ const Conciliacao = () => {
         if (principal) {
           setContaSelecionada(principal); // Define a conta principal como conta selecionada
           const extratoData = await listarExtrato(principal.id);
-          setTransacoes(extratoData); // Carrega o extrato da conta principal
+          setTransacoes([...extratoData].sort((a, b) => {
+            if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+            if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+            return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+          })); // Carrega o extrato da conta principal
         }
       } catch (error) {
         console.error('Erro ao listar contas ou buscar o extrato:', error);
@@ -175,10 +180,15 @@ const Conciliacao = () => {
     if (contaSelecionada) {
       listarExtrato(contaSelecionada.id)
         .then((extratoAtualizado) => {
-          setTodasTransacoes(extratoAtualizado); // Armazena todas as transações
-          setTotalPaginas(Math.ceil(extratoAtualizado.length / itensPorPagina)); // Calcula o total de páginas
+          const ordenadas = [...extratoAtualizado].sort((a, b) => {
+            if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+            if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+            return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+          });
+          setTodasTransacoes(ordenadas); // Armazena todas as transações
+          setTotalPaginas(Math.ceil(ordenadas.length / itensPorPagina)); // Calcula o total de páginas
           setPaginaAtual(1); // Reseta para a primeira página
-          paginarItens(extratoAtualizado, 1, itensPorPagina); // Pagina a primeira página
+          paginarItens(ordenadas, 1, itensPorPagina); // Pagina a primeira página
         })
         .catch((error) => {
           if (error.response && error.response.status === 404) {
@@ -222,7 +232,11 @@ const Conciliacao = () => {
       });
 
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
-      setTransacoes(extratoAtualizado);
+      setTransacoes([...extratoAtualizado].sort((a, b) => {
+        if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+        if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+        return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+      }));
     } catch (error) {
       setNotification({
         title: 'Erro',
@@ -404,7 +418,11 @@ const Conciliacao = () => {
 
       // Atualizar a lista de transações após a edição
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
-      setTransacoes(extratoAtualizado);
+      setTransacoes([...extratoAtualizado].sort((a, b) => {
+        if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+        if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+        return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+      }));
 
       // Resetar os campos do formulário manualmente
       setNovaContaAPagar({
@@ -440,7 +458,11 @@ const Conciliacao = () => {
 
       // Atualizar a lista de transações após a edição
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
-      setTransacoes(extratoAtualizado);
+      setTransacoes([...extratoAtualizado].sort((a, b) => {
+        if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+        if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+        return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+      }));
 
       // Resetar os campos do formulário manualmente
       setNovaContaAReceber({
@@ -481,7 +503,11 @@ const Conciliacao = () => {
 
       // Atualizar a lista de transações após conciliação
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
-      setTransacoes(extratoAtualizado);
+      setTransacoes([...extratoAtualizado].sort((a, b) => {
+        if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+        if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+        return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+      }));
 
       setShowConfirmationModal(false);
       setShowBuscarModal(false);
@@ -513,7 +539,11 @@ const Conciliacao = () => {
 
       // Atualizar a lista de transações após aceitar a conciliação
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
-      setTransacoes(extratoAtualizado);
+      setTransacoes([...extratoAtualizado].sort((a, b) => {
+        if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+        if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+        return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+      }));
 
       setShowConfirmationModal(false);
       setShowAceiteModal(false);
@@ -535,7 +565,7 @@ const Conciliacao = () => {
       await recusarConciliacao(extratoId);
 
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
-      setTransacoes(extratoAtualizado);
+      setTransacoes([...extratoAtualizado].sort((a, b) => new Date(b.dataTransacao) - new Date(a.dataTransacao)));
 
       setShowRecusarModal(false);
     } catch (error) {
@@ -550,7 +580,7 @@ const Conciliacao = () => {
 
       // Atualizar a lista de transações após desfazer conciliação
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);
-      setTransacoes(extratoAtualizado);
+      setTransacoes([...extratoAtualizado].sort((a, b) => new Date(b.dataTransacao) - new Date(a.dataTransacao)));
 
       setShowDesfazerModal(false);
     } catch (error) {
@@ -616,17 +646,25 @@ const Conciliacao = () => {
       const contaConciliada = buscarContaConciliada(transacao.conciliacaoId, transacao.conciliadoCom);
       const descricaoContaValida = !descricaoFiltro || (contaConciliada && contaConciliada.descricao.toLowerCase().includes(descricaoFiltro.toLowerCase()));
 
-      return dataInicioValida && dataFimValida && categoriaValida && (descricaoTransacaoValida || descricaoContaValida);
+      // Novo filtro de subTipoFiltro
+      const subTipoValido = !subTipoFiltro || transacao.subTipo === subTipoFiltro;
+
+      return dataInicioValida && dataFimValida && categoriaValida && (descricaoTransacaoValida || descricaoContaValida) && subTipoValido;
     });
-  }, [transacoes, startDate, endDate, categoriaSelecionada, descricaoFiltro, activeTab, buscarContaConciliada]);
+  }, [transacoes, startDate, endDate, categoriaSelecionada, descricaoFiltro, subTipoFiltro, activeTab, buscarContaConciliada]);
 
   // Aplicar os filtros nas transações e atualizar a paginação
   useEffect(() => {
     const transacoesFiltradas = filtrarTransacoes();
-    setTodasTransacoes(transacoesFiltradas);
-    setTotalPaginas(Math.ceil(transacoesFiltradas.length / itensPorPagina));
+    const ordenadas = [...transacoesFiltradas].sort((a, b) => {
+      if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+      if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+      return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+    });
+    setTodasTransacoes(ordenadas);
+    setTotalPaginas(Math.ceil(ordenadas.length / itensPorPagina));
     setPaginaAtual(1); // Sempre redefinir para a primeira página ao filtrar
-    paginarItens(transacoesFiltradas, 1, itensPorPagina);
+    paginarItens(ordenadas, 1, itensPorPagina);
   }, [filtrarTransacoes, itensPorPagina, activeTab]);
 
   // Alterar a página e recarregar os itens paginados
@@ -691,10 +729,10 @@ const Conciliacao = () => {
   };
 
   // Utilitário para formatar CNPJ
-const formatCNPJ = (cnpj) => {
-  if (!cnpj) return '';
-  return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
-};
+  const formatCNPJ = (cnpj) => {
+    if (!cnpj) return '';
+    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+  };
 
   // Renderizar transações pendentes aplicando os filtros
   const renderTransacoesPendentes = () => {
@@ -850,7 +888,11 @@ const formatCNPJ = (cnpj) => {
                   if (novaConta) {
                     try {
                       const extratoAtualizado = await listarExtrato(novaConta.id); // Carrega o extrato da nova conta
-                      setTransacoes(extratoAtualizado); // Atualiza as transações exibidas
+                      setTransacoes([...extratoAtualizado].sort((a, b) => {
+                        if (a.conciliacaoSugeridaEm && !b.conciliacaoSugeridaEm) return -1;
+                        if (!a.conciliacaoSugeridaEm && b.conciliacaoSugeridaEm) return 1;
+                        return new Date(b.dataTransacao) - new Date(a.dataTransacao);
+                      })); // Atualiza as transações exibidas
                     } catch (error) {
                       console.error('Erro ao carregar o extrato da nova conta:', error);
                     }
@@ -948,6 +990,7 @@ const formatCNPJ = (cnpj) => {
             startDate={startDate}
             endDate={endDate}
             categoriaSelecionada={categoriaSelecionada}
+            subTipoFiltro={subTipoFiltro}
             descricaoFiltro={descricaoFiltro}
             onFilterChange={handleFilterChange}
             isConciliadas={activeTab === 'conciliadas'}
