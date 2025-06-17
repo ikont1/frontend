@@ -563,7 +563,7 @@ const ContasReceber = () => {
 
   // função para exportar conta
   const handleExport = async () => {
-    const { categorias, status, clienteId, period, month } = selectedFilters;
+    const { tipoTransacao, categorias, status, clienteId, period, month } = selectedFilters;
 
     // Obter o mês atual como padrão se nenhum filtro for fornecido
     const currentMonth = new Date();
@@ -587,6 +587,9 @@ const ContasReceber = () => {
     }
     if (clienteId.length > 0) {
       filtro.push(`cliente:${clienteId.join(',')}`);
+    }
+    if (tipoTransacao.length > 0) {
+      filtro.push(`tipoTransacao:${tipoTransacao.join(',')}`);
     }
 
     // Configurar os filtros para a requisição

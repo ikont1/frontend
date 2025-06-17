@@ -512,26 +512,40 @@ const ContasAPagar = () => {
 
   // Funça para exportar conta 
   const handleExport = async () => {
-    const { categorias, status2, fornecedorId, period, month } = selectedFilters;
+    // Garante que tipoTransacao é um array, mesmo que vazio
+    const tipoTransacao = selectedFilters.tipoTransacao || [];
+    const { categorias = [], status2 = [], fornecedorId = [], period, month } = selectedFilters;
 
     // Definir o período com base nos filtros ou mês atual
     const currentMonth = new Date();
     const defaultStart = startOfMonth(currentMonth);
     const defaultEnd = endOfMonth(currentMonth);
 
-    const periodo = period.start && period.end
+    const periodo = period && period.start && period.end
       ? `vencimento:${formatDate(period.start)}|${formatDate(period.end)}`
       : month
         ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
         : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`;
 
-    // Construir o filtro concatenado
+    // Concatenar múltiplos filtros no campo 'filtro'
+    let filtrosConcatenados = [];
+    if (categorias.length > 0) {
+      filtrosConcatenados.push(`categoria:${categorias.join(',')}`);
+    }
+    if (tipoTransacao.length > 0) {
+      filtrosConcatenados.push(`tipoTransacao:${tipoTransacao.join(',')}`);
+    }
+    if (status2.length > 0) {
+      filtrosConcatenados.push(`status:${status2.join(',')}`);
+    }
+    if (fornecedorId.length > 0) {
+      filtrosConcatenados.push(`fornecedor:${fornecedorId.join(',')}`);
+    }
+
     const filtros = {
       itensPorPagina: 20000000, // Exportar tudo
       pagina: 1,
-      ...(categorias.length > 0 && { filtro: `categoria:${categorias.join(',')}` }),
-      ...(status2.length > 0 && { filtro: `status:${status2.join(',')}` }),
-      ...(fornecedorId.length > 0 && { filtro: `fornecedor:${fornecedorId.join(',')}` }),
+      ...(filtrosConcatenados.length > 0 && { filtro: filtrosConcatenados.join('|') }),
       periodo, // Novo formato de período
     };
 
