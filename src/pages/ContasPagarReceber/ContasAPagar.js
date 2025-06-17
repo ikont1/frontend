@@ -543,7 +543,7 @@ const ContasAPagar = () => {
     }
 
     const filtros = {
-      itensPorPagina: 20000000, // Exportar tudo
+      itensPorPagina: 20000000,
       pagina: 1,
       ...(filtrosConcatenados.length > 0 && { filtro: filtrosConcatenados.join('|') }),
       periodo, // Novo formato de período
