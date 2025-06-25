@@ -52,6 +52,7 @@ const ContasAPagar = () => {
   });
   const [expandSection, setExpandSection] = useState(false);
   const [filteredContasAPagar, setFilteredContasAPagar] = useState([]);
+  const [quantidadeFiltrada, setQuantidadeFiltrada] = useState(0);
   const [selectedFilters, setSelectedFilters] = useState({
     categorias: [],
     status2: [],
@@ -64,16 +65,15 @@ const ContasAPagar = () => {
     month: null,
   });
 
-  // --- Conciliacao NF state ---
+
   const [showConciliacaoModal, setShowConciliacaoModal] = useState(false);
   const [showTabelaNfModal, setShowTabelaNfModal] = useState(false);
   const [contaSelecionadaConciliacao, setContaSelecionadaConciliacao] = useState(null);
   const [nfsDisponiveis, setNfsDisponiveis] = useState([]);
   const [nfSelecionada, setNfSelecionada] = useState('');
-  // --- Conciliacao NF state ---
   const [showConfirmDesconciliar, setShowConfirmDesconciliar] = useState(false);
   const [contaParaDesconciliar, setContaParaDesconciliar] = useState(null);
-  // --- Conciliacao handlers ---
+
   // Novo fluxo de conciliação manual
   const handleAbrirConciliacao = async (conta) => {
     setContaSelecionadaConciliacao(conta);
@@ -187,6 +187,7 @@ const ContasAPagar = () => {
     });
 
     setFilteredContasAPagar(sortedFiltered);
+    setQuantidadeFiltrada(sortedFiltered.length);
   }, [contasAPagar, selectedFilters]);
 
 
@@ -200,6 +201,7 @@ const ContasAPagar = () => {
   useEffect(() => {
     setTotalPaginas(Math.ceil(filteredContasAPagar.length / itensPorPagina));
     paginarItens(filteredContasAPagar, 1, itensPorPagina);
+    setQuantidadeFiltrada(filteredContasAPagar.length);
   }, [filteredContasAPagar, itensPorPagina]);
 
   const handleFilterChange = (e) => {
@@ -522,7 +524,7 @@ const ContasAPagar = () => {
     const defaultEnd = endOfMonth(currentMonth);
 
     const periodo = period && period.start && period.end
-      ? `vencimento:${formatDate(period.start)}|${formatDate(period.end)}`
+      ? `vencimento:${format(new Date(period.start), 'yyyy-MM-dd')}|${format(new Date(period.end), 'yyyy-MM-dd')}`
       : month
         ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
         : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`;
@@ -620,6 +622,7 @@ const ContasAPagar = () => {
       compraNoDebito: 'Compra no Débito',
       pagamentoFaturaCartao: 'Pagamento de Fatura',
       recargaCelular: 'Recarga de Celular',
+      cobrancaBB: 'Cobrança',
       outro: 'Outro',
     };
 
@@ -754,7 +757,13 @@ const ContasAPagar = () => {
         </div>
 
         {/* Totais */}
-        <div className="totais-section">
+        <div className="totais-section container-resumo">
+          <div className="total-item">
+            <span>Total itens:</span>
+            <span>
+              {quantidadeFiltrada}
+            </span>
+          </div>
           <div className="total-item">
             <span>A pagar:</span>
             <span>R${totalAPagar}</span>

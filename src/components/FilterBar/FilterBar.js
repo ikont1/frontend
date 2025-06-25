@@ -539,7 +539,7 @@ const FilterBar = ({ onAdd, titleButton, filterConfig, categorias, clientes, for
                         compraNoDebito: "Compra no Débito",
                         pagamentoFaturaCartao: "Pagamento de Fatura",
                         recargaCelular: "Recarga de Celular",
-                        cobrancaBB: "Cobrança BB",
+                        cobrancaBB: "Cobrança",
                         outro: "Outro",
                       };
 

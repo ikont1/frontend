@@ -54,6 +54,7 @@ const ContasReceber = () => {
   });
   const [expandSection, setExpandSection] = useState(false);
   const [filteredContasAReceber, setFilteredContasAReceber] = useState([]);
+  const [quantidadeFiltrada, setQuantidadeFiltrada] = useState(0);
   const [selectedFilters, setSelectedFilters] = useState({
     categorias: [],
     status: [],
@@ -69,7 +70,6 @@ const ContasReceber = () => {
   const [copiedLinhaDigitavel, setCopiedLinhaDigitavel] = useState(false);
   const [copiedPix, setCopiedPix] = useState(false);
 
-  // --- Conciliacao NF state ---
   const [showConciliacaoModal, setShowConciliacaoModal] = useState(false);
   const [showTabelaNfModal, setShowTabelaNfModal] = useState(false);
   const [contaSelecionadaConciliacao, setContaSelecionadaConciliacao] = useState(null);
@@ -77,7 +77,8 @@ const ContasReceber = () => {
   const [nfSelecionada, setNfSelecionada] = useState('');
   const [showConfirmDesconciliar, setShowConfirmDesconciliar] = useState(false);
   const [contaParaDesconciliar, setContaParaDesconciliar] = useState(null);
-  // --- Conciliacao handlers ---
+  
+  
   // Novo fluxo de conciliação manual
   const handleAbrirConciliacao = async (conta) => {
     setContaSelecionadaConciliacao(conta);
@@ -196,6 +197,7 @@ const ContasReceber = () => {
     });
 
     setFilteredContasAReceber(sortedFiltered);
+    setQuantidadeFiltrada(sortedFiltered.length);
   }, [contasAReceber, selectedFilters]);
 
   // Atualizar contas a receber filtradas quando contasAReceber ou filtros mudarem
@@ -209,6 +211,7 @@ const ContasReceber = () => {
   useEffect(() => {
     setTotalPaginas(Math.ceil(filteredContasAReceber.length / itensPorPagina));
     paginarItens(filteredContasAReceber, 1, itensPorPagina);
+    setQuantidadeFiltrada(filteredContasAReceber.length);
   }, [filteredContasAReceber, itensPorPagina]);
 
   const handleFilterChange = (e) => {
@@ -572,7 +575,7 @@ const ContasReceber = () => {
 
     // Preparar o período no novo formato esperado
     const periodo = period.start && period.end
-      ? `vencimento:${formatDate(period.start)}|${formatDate(period.end)}`
+      ? `vencimento:${format(new Date(period.start), 'yyyy-MM-dd')}|${format(new Date(period.end), 'yyyy-MM-dd')}`
       : month
         ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
         : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`; // Padrão para o mês atual
@@ -672,7 +675,7 @@ const ContasReceber = () => {
       compraNoDebito: 'Compra no Débito',
       pagamentoFaturaCartao: 'Pagamento de Fatura',
       recargaCelular: 'Recarga de Celular',
-      cobrancaBB: 'Cobrança BB',
+      cobrancaBB: 'Cobrança',
       outro: 'Outro',
     };
 
@@ -810,6 +813,12 @@ const ContasReceber = () => {
 
         {/* Soma totais */}
         <div className="totais-section">
+          <div className="total-item">
+            <span>Total itens:</span>
+            <span>
+              {quantidadeFiltrada}
+            </span>
+          </div>
           <div className="total-item">
             <span>A receber:</span>
             <span>R${totalAReceber}</span>
