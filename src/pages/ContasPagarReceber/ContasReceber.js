@@ -77,8 +77,8 @@ const ContasReceber = () => {
   const [nfSelecionada, setNfSelecionada] = useState('');
   const [showConfirmDesconciliar, setShowConfirmDesconciliar] = useState(false);
   const [contaParaDesconciliar, setContaParaDesconciliar] = useState(null);
-  
-  
+
+
   // Novo fluxo de conciliação manual
   const handleAbrirConciliacao = async (conta) => {
     setContaSelecionadaConciliacao(conta);
@@ -150,7 +150,7 @@ const ContasReceber = () => {
     const lastDayOfCurrentMonth = endOfMonth(currentDate);
 
     const filtered = contasAReceber.filter((conta) => {
-      const contaVencimento = new Date(conta.vencimento);
+      const contaVencimento = new Date(conta.vencimento.split('T')[0] + 'T00:00:00');
 
       // Verifica se a conta é do mês atual
       const isCurrentMonth =
@@ -165,8 +165,8 @@ const ContasReceber = () => {
 
       const matchesPeriod =
         period.start && period.end &&
-        contaVencimento >= new Date(period.start) &&
-        contaVencimento <= new Date(period.end);
+        contaVencimento >= new Date(`${period.start}T00:00:00`) &&
+        contaVencimento <= new Date(`${period.end}T23:59:59`);
 
       // Aplicar filtros por categoria, status e cliente
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
@@ -566,6 +566,20 @@ const ContasReceber = () => {
 
   // função para exportar conta
   const handleExport = async () => {
+    // Verifica se há contas filtradas para exportar
+    if (filteredContasAReceber.length === 0) {
+      // Exibe um aviso e impede a exportação se não houver lançamentos visíveis
+      setNotificationData({
+        title: 'Atenção',
+        message: 'Nenhum lançamento encontrado com os filtros selecionados.',
+        type: 'warning',
+        icon: XCircle,
+        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+      });
+      setShowNotification(true);
+      return;
+    }
+
     const { tipoTransacao, categorias, status, clienteId, period, month } = selectedFilters;
 
     // Obter o mês atual como padrão se nenhum filtro for fornecido
@@ -575,7 +589,7 @@ const ContasReceber = () => {
 
     // Preparar o período no novo formato esperado
     const periodo = period.start && period.end
-      ? `vencimento:${format(new Date(period.start), 'yyyy-MM-dd')}|${format(new Date(period.end), 'yyyy-MM-dd')}`
+      ? `vencimento:${format(new Date(`${period.start}T00:00:00`), 'yyyy-MM-dd')}|${format(new Date(`${period.end}T23:59:59`), 'yyyy-MM-dd')}`
       : month
         ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
         : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`; // Padrão para o mês atual

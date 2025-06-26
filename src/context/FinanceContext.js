@@ -38,7 +38,6 @@ export const FinanceProvider = ({ children }) => {
 
   const exportarContasAPagar = useCallback(
     async (filtros) => {
-      console.log('Chamando API com filtros:', filtros);
 
       try {
         const response = await api.get('/contas-a-pagar/exportar', {
@@ -49,7 +48,7 @@ export const FinanceProvider = ({ children }) => {
             console.log('Query string serializada:', queryString);
             return queryString;
           },
-          responseType: 'blob', // Para garantir que o Excel seja recebido corretamente
+          responseType: 'blob',
         });
 
         return response.data;

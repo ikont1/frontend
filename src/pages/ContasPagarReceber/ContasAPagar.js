@@ -146,7 +146,7 @@ const ContasAPagar = () => {
     const lastDayOfCurrentMonth = endOfMonth(currentDate);
 
     const filtered = contasAPagar.filter((conta) => {
-      const contaVencimento = new Date(conta.vencimento);
+      const contaVencimento = new Date(conta.vencimento.split('T')[0] + 'T00:00:00');
 
       const isCurrentMonth =
         contaVencimento >= firstDayOfCurrentMonth &&
@@ -159,8 +159,8 @@ const ContasAPagar = () => {
 
       const matchesPeriod =
         period.start && period.end &&
-        contaVencimento >= new Date(period.start) &&
-        contaVencimento <= new Date(period.end);
+        contaVencimento >= new Date(`${period.start}T00:00:00`) &&
+        contaVencimento <= new Date(`${period.end}T23:59:59`);
 
       const matchesCategoria = categorias.length === 0 || categorias.includes(conta.categoria);
       const matchesStatus = status2.length === 0 || status2.includes(conta.status.toLowerCase());
@@ -514,6 +514,18 @@ const ContasAPagar = () => {
 
   // Funça para exportar conta 
   const handleExport = async () => {
+    // Impede exportação se não houver dados filtrados
+    if (filteredContasAPagar.length === 0) {
+      setNotificationData({
+        title: 'Atenção',
+        message: 'Nenhum lançamento encontrado com os filtros selecionados.',
+        type: 'warning',
+        icon: AlertOctagon,
+        buttons: [{ label: 'Ok', onClick: () => setShowNotification(false) }],
+      });
+      setShowNotification(true);
+      return;
+    }
     // Garante que tipoTransacao é um array, mesmo que vazio
     const tipoTransacao = selectedFilters.tipoTransacao || [];
     const { categorias = [], status2 = [], fornecedorId = [], period, month } = selectedFilters;
@@ -524,7 +536,7 @@ const ContasAPagar = () => {
     const defaultEnd = endOfMonth(currentMonth);
 
     const periodo = period && period.start && period.end
-      ? `vencimento:${format(new Date(period.start), 'yyyy-MM-dd')}|${format(new Date(period.end), 'yyyy-MM-dd')}`
+      ? `vencimento:${format(new Date(`${period.start}T00:00:00`), 'yyyy-MM-dd')}|${format(new Date(`${period.end}T23:59:59`), 'yyyy-MM-dd')}`
       : month
         ? `vencimento:${format(startOfMonth(new Date(month)), 'yyyy-MM-dd')}|${format(endOfMonth(new Date(month)), 'yyyy-MM-dd')}`
         : `vencimento:${format(defaultStart, 'yyyy-MM-dd')}|${format(defaultEnd, 'yyyy-MM-dd')}`;
