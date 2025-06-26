@@ -158,7 +158,6 @@ export const AuthProvider = ({ children }) => {
     let timeout;
     const logoutAfterInactivity = () => {
       clearTimeout(timeout);
-      console.log('⏱️ Inatividade detectada. Contagem de 10 minutos iniciada para logout...');
       timeout = setTimeout(() => {
         logout(true);
       }, 10 * 60 * 1000);
