@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   // Decode Token
   const decodeAndStoreToken = (jwtToken) => {
     try {
-      const decoded = jwtDecode(jwtToken); 
+      const decoded = jwtDecode(jwtToken);
       setDecodedToken(decoded);
       setPermissions(decoded?.perfil?.modulos || []);
     } catch (err) {
@@ -40,8 +40,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Função centralizada para exibir notificações
-  const showNotification = (title, message, type, icon, buttons) => {
-    setNotification({ title, message, type, icon, buttons });
+  const showNotification = (title, message, secondaryMessage, thirdMessage, type, icon, buttons) => {
+    setNotification({ title, message, secondaryMessage, thirdMessage, type, icon, buttons });
   };
 
   const login = async (login, senha) => {
@@ -91,16 +91,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    setError(null);
-    setToken(null);
-    setDecodedToken(null);
-    setPermissions([]);
-    localStorage.removeItem('token');
-    delete api.defaults.headers.common['Authorization'];
-    navigate('/login');
-  };
-
   const resetPassword = async (login) => {
     setError(null);
     try {
@@ -118,18 +108,20 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       await api.post('/usuario/redefinir-senha', { token, senha, senha2 });
-  
+
       showNotification(
         'Senha redefinida com sucesso!',
         'Clique em OK para fazer login com sua nova senha.',
         'success',
         ThumbsUp,
-        [{ label: 'OK', onClick: () => {
-          setNotification(null);
-          navigate('/login');
-        }}]
+        [{
+          label: 'OK', onClick: () => {
+            setNotification(null);
+            navigate('/login');
+          }
+        }]
       );
-  
+
     } catch (error) {
       // setError(error.response?.data?.error || 'Erro ao redefinir senha');
       setError('Link expirado');
@@ -138,6 +130,53 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const logout = async (fromTimeout = false) => {
+    setError(null);
+    setToken(null);
+    setDecodedToken(null);
+    setPermissions([]);
+    localStorage.removeItem('token');
+    delete api.defaults.headers.common['Authorization'];
+    if (fromTimeout) {
+      showNotification(
+        'Sessão expirada',
+        'Sua sessão foi encerrada automaticamente por inatividade.',
+        'Você ficou mais de 10 minutos sem realizar nenhuma ação, por isso, foi deslogado por segurança.',
+        'Por favor, faça login novamente para continuar usando a plataforma.',
+        'error',
+        AlertTriangle,
+        [{ label: 'OK', onClick: () => setNotification(null) }]
+      );
+    }
+    setTimeout(() => navigate('/login'), 300);
+  };
+
+  // Logout automático após 10 minutos de inatividade
+  useEffect(() => {
+    if (!token) return;
+
+    let timeout;
+    const logoutAfterInactivity = () => {
+      clearTimeout(timeout);
+      console.log('⏱️ Inatividade detectada. Contagem de 10 minutos iniciada para logout...');
+      timeout = setTimeout(() => {
+        logout(true);
+      }, 10 * 60 * 1000);
+    };
+
+    const events = ['mousemove', 'keydown', 'mousedown', 'scroll', 'touchstart'];
+    events.forEach((event) => window.addEventListener(event, logoutAfterInactivity));
+
+    logoutAfterInactivity();
+
+    return () => {
+      clearTimeout(timeout);
+      events.forEach((event) => window.removeEventListener(event, logoutAfterInactivity));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+
   return (
     <AuthContext.Provider value={{ token, decodedToken, permissions, loading, error, login, logout, resetPassword, setPassword }}>
       {children}
@@ -145,6 +184,8 @@ export const AuthProvider = ({ children }) => {
         <Notification
           title={notification.title}
           message={notification.message}
+          secondaryMessage={notification.secondaryMessage}
+          thirdMessage={notification.thirdMessage}
           type={notification.type}
           icon={notification.icon}
           buttons={notification.buttons}
