@@ -142,10 +142,12 @@ const Dashboard = () => {
 
             <div className='cards-left'>
               <h4><BiWallet className='icon' />Conta e carteira <Link to='/carteira' className='i'><ArrowRightCircle /></Link></h4>
+             
               <div className='totalContas'>
                 <h5>Saldo total das contas</h5>
                 <span>R$ {totalSaldoInicial.toLocaleString()}</span>
               </div>
+
               <div className="card-conta">
                 {contas.length > 0 ? (
                   contas
