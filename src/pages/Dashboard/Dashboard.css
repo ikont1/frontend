@@ -356,8 +356,11 @@
 }
 
 .grafico {
-  max-width: 150px;
-  height: auto;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  flex-shrink: 0;
 }
 
 @media screen and (max-width: 1440px) {
