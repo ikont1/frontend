@@ -37,10 +37,9 @@ api.interceptors.response.use(
 
       const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
 
-
-      if ((status === 401 || status === 403) && !isPublicRoute) {
+      // Somente desloga em 401
+      if (status === 401 && !isPublicRoute) {
         localStorage.removeItem('token');
-
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }

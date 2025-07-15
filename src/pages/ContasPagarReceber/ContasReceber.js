@@ -260,19 +260,17 @@ const ContasReceber = () => {
     });
   };
 
-  // Função de busca com restauração de estado usando filteredContasAReceber
+  // Função de busca melhorada: trata vírgula e atualização dinâmica ao apagar caracteres
   const handleSearch = (searchTerm) => {
-    const normalizedSearchTerm = searchTerm.replace(/[^0-9.]/g, '');
-
-    if (!normalizedSearchTerm) {
-      // Quando o campo está vazio, use o estado filtrado atual
-      filterContas(); // Reaplica os filtros para restaurar `filteredContasAReceber`
+    if (!searchTerm) {
+      filterContas(); // Reaplica filtros quando o campo fica vazio
       return;
     }
 
-    // Filtragem normal quando há um termo de busca
-    const filtered = filteredContasAReceber.filter(conta => {
-      const valorConta = conta.valor.toString();
+    const normalizedSearchTerm = searchTerm.replace(/\./g, '').replace(',', '.');
+
+    const filtered = contasAReceber.filter(conta => {
+      const valorConta = parseFloat(conta.valor).toFixed(2);
       return valorConta.includes(normalizedSearchTerm);
     });
 

@@ -544,7 +544,7 @@ const Conciliacao = () => {
     const extratoId = confirmModalData.transacao.id;
 
     try {
-      await aceitarConciliacao({ extratoId });
+      await aceitarConciliacao( extratoId);
 
       // Atualizar a lista de transações após aceitar a conciliação
       const extratoAtualizado = await listarExtrato(contaSelecionada.id);

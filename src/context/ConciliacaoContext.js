@@ -75,32 +75,32 @@ export const ConciliacaoProvider = ({ children }) => {
 
   // Função para aceitar conciliação
   const aceitarConciliacao = async (extratoId) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.patch('/conciliacao-bancaria/aceitar', extratoId);
-      setLoading(false);
-      setNotification({
-        title: 'Sucesso!',
-        message: 'Conciliação aceita com sucesso.',
-        type: 'success',
-        icon: ThumbsUp,
-        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
-      });
-      return response.data;
-    } catch (error) {
-      setError('Erro ao aceitar conciliação. Por favor, tente novamente.');
-      setNotification({
-        title: 'Erro',
-        message: error.response.data.message,
-        secondaryMessage: error.response.data.error,
-        type: 'error',
-        icon: AlertTriangle,
-        buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
-      });
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.patch('/conciliacao-bancaria/aceitar', { extratoId }); // Enviar como objeto!
+    setLoading(false);
+    setNotification({
+      title: 'Sucesso!',
+      message: 'Conciliação aceita com sucesso.',
+      type: 'success',
+      icon: ThumbsUp,
+      buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+    });
+    return response.data;
+  } catch (error) {
+    setError('Erro ao aceitar conciliação. Por favor, tente novamente.');
+    setNotification({
+      title: 'Erro',
+      message: error?.response?.data?.message || 'Erro desconhecido.',
+      secondaryMessage: error?.response?.data?.error || '',
+      type: 'error',
+      icon: AlertTriangle,
+      buttons: [{ label: 'Ok', onClick: handleNotificationClose }]
+    });
+    setLoading(false);
+  }
+};
 
   // Função para recusar conciliação
   const recusarConciliacao = async (extratoId) => {

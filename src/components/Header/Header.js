@@ -1,12 +1,10 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import './Header.css';
-import { BarChart2, Search } from 'react-feather';
+import { BarChart2 } from 'react-feather';
 import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
   const { decodedToken } = useAuth();
-  const location = useLocation();
 
   return (
     <header className="header">
@@ -14,19 +12,7 @@ const Header = () => {
         <button>
           <BarChart2 /> Financeiro
         </button>
-        {(location.pathname === '/' ||
-          location.pathname === '/clientes-fornecedores' ||
-          location.pathname === '/minha-empresa') && (
-            <div className="search-div">
-              <Search />
-              <input
-                id="pesquisar"
-                type="text"
-                placeholder="Pesquisar"
-                className="search-input"
-              />
-            </div>
-          )}
+        
       </div>
 
       <div className="right">

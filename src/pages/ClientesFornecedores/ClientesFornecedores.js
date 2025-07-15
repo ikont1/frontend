@@ -1,4 +1,3 @@
-// pages/ClientesFornecedores/ClientesFornecedores.js
 import React, { useState, useEffect } from 'react';
 import { useClientSupplier } from '../../context/ClientSupplierContext';
 import Header from '../../components/Header/Header';
@@ -144,14 +143,14 @@ const ClientesFornecedores = () => {
   const handleSearch = (searchTerm) => {
     if (activeTab === 'clientes') {
       const filtered = clientes.filter(cliente =>
-        cliente.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cliente.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase())
+        (cliente.nomeFantasia || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (cliente.razaoSocial || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredClientes(filtered);
     } else if (activeTab === 'fornecedores') {
       const filtered = fornecedores.filter(fornecedor =>
-        fornecedor.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fornecedor.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase())
+        (fornecedor.nomeFantasia || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (fornecedor.razaoSocial || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredFornecedores(filtered);
     }

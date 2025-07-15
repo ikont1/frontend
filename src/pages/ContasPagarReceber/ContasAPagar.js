@@ -250,19 +250,17 @@ const ContasAPagar = () => {
       return updatedFilters;
     });
   };
-  // Função de busca com restauração de estado usando filteredContasAPagar
+  // Função de busca localizando pelo valor, com normalização para decimais
   const handleSearch = (searchTerm) => {
-    const normalizedSearchTerm = searchTerm.replace(/[^0-9.]/g, '');
-
-    if (!normalizedSearchTerm) {
-      // Quando o campo está vazio, use o estado filtrado atual
-      filterContas(); // Reaplica os filtros para restaurar `filteredContasAReceber`
+    if (!searchTerm) {
+      filterContas(); // Reaplica filtros quando o campo fica vazio
       return;
     }
 
-    // Filtragem normal quando há um termo de busca
-    const filtered = filteredContasAPagar.filter(conta => {
-      const valorConta = conta.valor.toString();
+    const normalizedSearchTerm = searchTerm.replace(/\./g, '').replace(',', '.');
+
+    const filtered = contasAPagar.filter(conta => {
+      const valorConta = parseFloat(conta.valor).toFixed(2);
       return valorConta.includes(normalizedSearchTerm);
     });
 
