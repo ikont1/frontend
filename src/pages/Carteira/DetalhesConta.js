@@ -56,7 +56,7 @@ const DetalhesConta = () => {
     const fetchExtrato = async () => {
       try {
         const extratoData = await listarExtrato(id);
-        setExtrato(extratoData);
+        setExtrato(extratoData.sort((a, b) => new Date(b.dataTransacao) - new Date(a.dataTransacao)));
       } catch (error) {
         console.error('Erro ao buscar extrato:', error);
       }
