@@ -19,7 +19,7 @@ const Assinatura = () => {
   // Garante que o token nunca seja null
   const token = new URLSearchParams(location.search).get('token') || '';
 
-  const [step, setStep] = useState(1); // Gerencia os passos do formulário
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     endereco: '',
     complemento: '',
@@ -35,7 +35,7 @@ const Assinatura = () => {
     ccv: '',
     ciclo: 'MONTHLY' // Valor padrão do ciclo é 'MONTHLY'
   });
-  const [isLoading, setIsLoading] = useState(false); // Estado de carregamento
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
 
@@ -43,7 +43,7 @@ const Assinatura = () => {
   const defaultOptions = {
     loop: true,
     autoplay: true,
-    animationData: animationData, // Substitua pelo caminho correto do JSON da animação
+    animationData: animationData,
     rendererSettings: {
       preserveAspectRatio: 'xMidYMid slice'
     }
@@ -59,8 +59,8 @@ const Assinatura = () => {
     if (!formData.cidade) newErrors.cidade = 'Campo obrigatório';
     if (!formData.uf) newErrors.uf = 'Campo obrigatório';
 
-    setErrors(newErrors); // Atualiza os erros
-    return Object.keys(newErrors).length === 0; // Verifica se há erros
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // Função para validar os campos do cartão de crédito (segundo passo)
@@ -72,17 +72,17 @@ const Assinatura = () => {
     if (!formData.expiryYear) newErrors.expiryYear = 'Campo obrigatório';
     if (!formData.ccv || formData.ccv.length !== 3) newErrors.ccv = 'CCV deve ter 3 dígitos';
 
-    setErrors(newErrors); // Atualiza os erros
-    return Object.keys(newErrors).length === 0; // Verifica se há erros
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // Formata o número do cartão de crédito para inserir espaços a cada 4 dígitos
   const formatCardNumber = (value) => {
     return value
-      .replace(/\D/g, '') // Remove caracteres não numéricos
-      .replace(/(.{4})/g, '$1 ') // Adiciona espaços a cada 4 dígitos
-      .trim() // Remove espaços extras
-      .slice(0, 19); // Limita a 16 dígitos + 3 espaços (19 caracteres)
+      .replace(/\D/g, '')
+      .replace(/(.{4})/g, '$1 ')
+      .trim()
+      .slice(0, 19);
   };
 
   // Atualiza o estado para o número do cartão de crédito
@@ -102,7 +102,6 @@ const Assinatura = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Valida os campos de expiração (mês e ano)
     if (name === 'expiryMonth' && value.length > 2) return;
     if (name === 'expiryYear' && value.length > 4) return;
 
@@ -131,29 +130,42 @@ const Assinatura = () => {
   // Avança para o próximo passo do formulário
   const handleNextStep = () => {
     if (step === 1 && !validateStep1()) {
-      return; // Se a validação falhar, não avança para o próximo passo
+      return;
     }
-    setStep(step + 1); // Avança para o próximo passo
+    setStep(step + 1);
   };
 
   // Volta para o Step 1 (endereço)
   const handlePreviousStep = () => {
-    setStep(step - 1); // Volta para o passo anterior
+    setStep(step - 1);
   };
 
   // Envia os dados da assinatura
   const handleSubmit = async () => {
     if (!validateStep2()) {
-      return; // Se a validação falhar, não envia o formulário
+      return;
     }
 
-    setIsLoading(true); // Inicia o estado de carregamento
+    setIsLoading(true);
 
-    // Espera por 3 segundos antes de enviar os dados
+
     setTimeout(async () => {
+      const enderecoPayload = {
+        endereco: formData.endereco,
+        bairro: formData.bairro,
+        numero: formData.numero,
+        cep: formData.cep,
+        cidade: formData.cidade,
+        uf: formData.uf
+      };
+
+      if (formData.complemento && formData.complemento.trim() !== '') {
+        enderecoPayload.complemento = formData.complemento;
+      }
+
       const payload = {
-        token: token, // Usa o token extraído da URL
-        ciclo: formData.ciclo, // Envia o ciclo selecionado (mensal ou anual)
+        token: token,
+        ciclo: formData.ciclo,
         cartaoCredito: {
           holderName: formData.holderName,
           number: formData.number.replace(/\s/g, ''),
@@ -161,25 +173,17 @@ const Assinatura = () => {
           expiryYear: formData.expiryYear,
           ccv: formData.ccv
         },
-        endereco: {
-          endereco: formData.endereco,
-          complemento: formData.complemento,
-          bairro: formData.bairro,
-          numero: formData.numero,
-          cep: formData.cep,
-          cidade: formData.cidade,
-          uf: formData.uf
-        }
+        endereco: enderecoPayload
       };
 
       try {
         await criarAssinatura(payload);
-        setIsLoading(false); // Finaliza o estado de carregamento
-        navigate('/login'); // Redireciona para a rota /login
+        setIsLoading(false);
+        navigate('/login');
       } catch (error) {
-        setIsLoading(false); // Finaliza o estado de carregamento em caso de erro
+        setIsLoading(false);
       }
-    }, 3000); // Espera 3 segundos antes de submeter os dados
+    }, 3000);
   };
 
   return (
