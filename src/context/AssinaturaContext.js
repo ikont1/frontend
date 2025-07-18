@@ -35,7 +35,7 @@ export const AssinaturaProvider = ({ children }) => {
     } catch (error) {
       showNotification({
         title: 'Erro',
-        message: error.response?.data?.message || 'Falha ao adicionar conta a pagar.',
+        message: error.response?.data?.message || 'Falha ao processar a solicitação.',
         secondaryMessage: 'Verifique os dados e tente novamente',
         type: 'error',
         icon: XCircle,

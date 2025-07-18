@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import api from '../services/api';
 import Notification from '../components/Notification/Notification';
-import { AlertTriangle, ThumbsUp } from 'react-feather';
+import { AlertTriangle } from 'react-feather';
 
 const AuthContext = createContext();
 
@@ -18,6 +18,9 @@ export const AuthProvider = ({ children }) => {
   const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
+  const clearNotification = () => {
+  setNotification(null);
+};
   // Decode Token
   const decodeAndStoreToken = (jwtToken) => {
     try {
@@ -108,23 +111,9 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       await api.post('/usuario/redefinir-senha', { token, senha, senha2 });
-
-      showNotification(
-        'Senha redefinida com sucesso!',
-        'Clique em OK para fazer login com sua nova senha.',
-        'success',
-        ThumbsUp,
-        [{
-          label: 'OK', onClick: () => {
-            setNotification(null);
-            navigate('/login');
-          }
-        }]
-      );
-
     } catch (error) {
-      // setError(error.response?.data?.error || 'Erro ao redefinir senha');
       setError('Link expirado');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -177,7 +166,7 @@ export const AuthProvider = ({ children }) => {
 
 
   return (
-    <AuthContext.Provider value={{ token, decodedToken, permissions, loading, error, login, logout, resetPassword, setPassword }}>
+    <AuthContext.Provider value={{ clearNotification, token, decodedToken, permissions, loading, error, login, logout, resetPassword, setPassword, showNotification }}>
       {children}
       {notification && (
         <Notification

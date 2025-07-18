@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { FaWhatsapp, FaInstagram, FaFacebook, FaLinkedin } from 'react-icons/fa';
+import { ThumbsUp } from 'react-feather';
+import { useAuth } from '../../context/AuthContext';
+import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 import './Login.css';
 import logo from '../../assets/imgs/logosvg.svg';
 import imgLogin from '../../assets/imgs/img-login.png';
-import { Link, useLocation } from 'react-router-dom';
-import { FaWhatsapp, FaInstagram, FaFacebook, FaLinkedin } from 'react-icons/fa';
-import { useAuth } from '../../context/AuthContext';
-import { FormattedInput } from '../../components/FormateValidateInput/FormatFunction';
 
 const RedefinirSenha = () => {
-  const { setPassword, loading, error } = useAuth();
+  const { setPassword, loading, error, showNotification, clearNotification } = useAuth();
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmeNovaSenha, setConfirmeNovaSenha] = useState('');
   const [inputError, setInputError] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
   const [showResetLink, setShowResetLink] = useState(false);
   const location = useLocation();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (error) {
@@ -43,18 +46,28 @@ const RedefinirSenha = () => {
     try {
       setErrorMessage('');
       setShowResetLink(false);
+      await setPassword(token, novaSenha, confirmeNovaSenha);
 
-      const response = await setPassword(token, novaSenha, confirmeNovaSenha);
-
-      if (response && response.success) {
-      } else {
-        setErrorMessage(response.message || 'Erro ao redefinir senha. Verifique os dados e tente novamente.');
-      }
+      // Notificação de sucesso tratada no AuthContext
+      showNotification(
+        'Senha redefinida com sucesso!',
+        'Clique em OK para fazer login com sua nova senha.',
+        null,
+        null,
+        'success',
+        ThumbsUp,
+        [{
+          label: 'OK',
+          onClick: () => {
+            clearNotification();
+            navigate('/login');
+          }
+        }]
+      );
     } catch (err) {
       setShowResetLink(true);
     }
   };
-
 
   return (
     <div className="login-container">
@@ -106,10 +119,14 @@ const RedefinirSenha = () => {
             </div>
           </div>
 
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {errorMessage && (
+            <p className="error-message">{errorMessage}</p>
+          )}
           {showResetLink && (
             <p className="error-message">
-              <Link to="/recuperar-senha" className="reset-link"> Clique aqui e solicite um novo link de criação/redefinição de senha no seu e-mail.</Link>
+              <Link to="/recuperar-senha" className="reset-link">
+                Clique aqui e solicite um novo link de criação/redefinição de senha no seu e-mail.
+              </Link>
             </p>
           )}
           <div className="container-reset-submit">
