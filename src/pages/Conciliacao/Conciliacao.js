@@ -333,16 +333,24 @@ const Conciliacao = () => {
   // Função para lidar com a submissão de uma nova conta a pagar
   const handleCriarContaPagar = async (e) => {
     e.preventDefault();
-    const contaToSave = {
-      valor: parseFloat(novaContaAPagar.valor.replace(',', '.')),
-      vencimento: novaContaAPagar.vencimento,
-      categoria: novaContaAPagar.categoria,
-      fornecedorId: novaContaAPagar.fornecedorId,
-      descricao: novaContaAPagar.descricao,
+    const valor = parseFloat(novaContaAPagar.valor.replace(',', '.'));
+    const vencimento = novaContaAPagar.vencimento;
+    const categoria = novaContaAPagar.categoria;
+    const fornecedorId = novaContaAPagar.fornecedorId;
+    const descricao = novaContaAPagar.descricao;
+
+    const payload = {
+      valor,
+      vencimento,
+      categoria,
+      fornecedorId,
     };
+    if (descricao && descricao.trim() !== '') {
+      payload.descricao = descricao;
+    }
 
     try {
-      await addContaAPagar(contaToSave);
+      await addContaAPagar(payload);
       setShowCriarContaPagarModal(false);
 
       // Resetar os campos do formulário manualmente
@@ -361,16 +369,24 @@ const Conciliacao = () => {
   // Função para lidar com a submissão de uma nova conta a receber
   const handleCriarContaReceber = async (e) => {
     e.preventDefault();
-    const contaToSave = {
-      valor: parseFloat(novaContaAReceber.valor.replace(',', '.')),
-      vencimento: novaContaAReceber.vencimento,
-      categoria: novaContaAReceber.categoria,
-      clienteId: novaContaAReceber.clienteId,
-      descricao: novaContaAReceber.descricao,
+    const valor = parseFloat(novaContaAReceber.valor.replace(',', '.'));
+    const vencimento = novaContaAReceber.vencimento;
+    const categoria = novaContaAReceber.categoria;
+    const clienteId = novaContaAReceber.clienteId;
+    const descricao = novaContaAReceber.descricao;
+
+    const payload = {
+      valor,
+      vencimento,
+      categoria,
+      clienteId,
     };
+    if (descricao && descricao.trim() !== '') {
+      payload.descricao = descricao;
+    }
 
     try {
-      await addContaAReceber(contaToSave);
+      await addContaAReceber(payload);
       setShowCriarContaReceberModal(false);
 
       // Resetar os campos do formulário manualmente
